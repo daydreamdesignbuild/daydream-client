@@ -39,7 +39,14 @@
     #dd-form-wrap .dd-field:focus-within label { color: var(--gold); }
     #dd-form-wrap .dd-field input, #dd-form-wrap .dd-field select, #dd-form-wrap .dd-field textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: 'Jost', sans-serif; font-weight: 300; font-size: 14px; padding: 2px 24px 16px; letter-spacing: 0.03em; appearance: none; -webkit-appearance: none; box-shadow: none; }
     #dd-form-wrap .dd-field input:-webkit-autofill, #dd-form-wrap .dd-field input:-webkit-autofill:hover, #dd-form-wrap .dd-field input:-webkit-autofill:focus, #dd-form-wrap .dd-field input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 60px #131310 inset !important; -webkit-text-fill-color: #f0ebe0 !important; caret-color: #f0ebe0; transition: background-color 5000s ease-in-out 0s; }
-    #dd-form-wrap .dd-field select { cursor: pointer; padding-right: 44px; }
+  #dd-form-wrap .dd-field select { cursor: pointer; padding-right: 44px; background-color: #131310 !important; color: #f0ebe0 !important; }
+#dd-form-wrap .dd-field select:-webkit-autofill,
+#dd-form-wrap .dd-field select:-webkit-autofill:hover,
+#dd-form-wrap .dd-field select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 60px #131310 inset !important;
+  -webkit-text-fill-color: #f0ebe0 !important;
+  background-color: #131310 !important;
+}
     #dd-form-wrap .dd-field select option { background: #1c1c19; color: var(--text); }
     #dd-form-wrap .dd-arrow { position: absolute; right: 20px; top: 50%; transform: translateY(4px); pointer-events: none; color: var(--muted); font-size: 9px; }
     #dd-form-wrap .dd-field textarea { resize: none; min-height: 120px; line-height: 1.75; }
