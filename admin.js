@@ -37,7 +37,7 @@
     { value: 'project_complete',                       label: 'Project Complete' }
   ];
 
-  var PIPELINE_COLORS: Record<string, string> = {
+  var PIPELINE_COLORS = {
     'client_inquiry_made': '#8a8680', 'client_qualified': '#eeb24a',
     'discovery_call_booked': '#eeb24a', 'discovery_call_completed': '#eeb24a',
     'design_proposal_drafting': '#7a9e8a', 'design_proposal_presented': '#7a9e8a',
@@ -75,11 +75,11 @@
     { value: 'project_complete',              label: 'Project Complete' }
   ];
 
-  function getPipelineColor(value: string): string {
+  function getPipelineColor(value) {
     return PIPELINE_COLORS[value] || '#8a8680';
   }
 
-  function getPipelineLabel(value: string): string {
+  function getPipelineLabel(value) {
     var s = PIPELINE_STAGES.find(function(x) { return x.value === value; });
     return s ? s.label : (value || 'New Inquiry');
   }
