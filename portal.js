@@ -3,7 +3,7 @@
   // ── CONFIG ────────────────────────────────────────────────────────
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
-  var PORTAL_URL   = 'https://daydreamdesignandbuild.com/app/';
+  var PORTAL_URL = 'https://daydreamdesignandbuild.com/auth/';
   var CONSULT_URL  = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
   var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
 
