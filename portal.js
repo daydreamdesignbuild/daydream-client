@@ -651,8 +651,12 @@
       }).join('');
       list.scrollTop = list.scrollHeight;
 
-      // Show notification dot on Messages tab if there are unread team messages
-      var unread = msgs.filter(function(m) { return m.sender === 'daydream_team' && !m.is_read; }).length;
+      // Show notification dot for unread team messages
+      var lastRead = 0;
+      try { lastRead = parseInt(sessionStorage.getItem('dd_msgs_last_read') || '0'); } catch(e) {}
+      var unread = msgs.filter(function(m) {
+        return m.sender === 'daydream_team' && new Date(m.created_at).getTime() > lastRead;
+      }).length;
       var tab = document.querySelector('[data-tab="messages"]');
       if (tab) {
         var dot = tab.querySelector('.dd-msg-dot');
@@ -707,6 +711,12 @@
       tab.classList.add('active');
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
+      // Mark messages as read when client opens the messages tab
+      if (tab.dataset.tab === 'messages') {
+        try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
+        var dot = tab.querySelector('.dd-msg-dot');
+        if (dot) dot.remove();
+      }
     });
   });
 
