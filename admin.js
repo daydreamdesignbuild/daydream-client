@@ -5,100 +5,40 @@
   var ADMIN_PASSWORD = 'Daydream2026!';
 
   var STAGES = [
-    'client_inquiry_made',
-    'client_qualified',
-    'discovery_call_booked',
-    'discovery_call_completed',
-    'design_proposal_drafting',
-    'design_proposal_presented',
-    'design_proposal_accepted',
-    'site_consultation_scheduled',
-    'site_consultation_completed',
-    'design_phase_started',
-    'base_map_complete',
-    'base_map_discussion_call',
-    'base_map_approved',
-    '3d_model_completed',
-    '3d_model_discussion_call',
-    '3d_model_approved',
-    'visualizations_started',
-    'visualizations_completed',
-    'visualizations_approved',
-    'construction_document_phase_started',
-    'construction_document_phase_complete',
-    'permit_plans_submitted',
-    'permit_plan_revisions',
-    'permit_plans_approved',
-    'construction_started',
-    'construction_finished',
-    'site_photos_to_be_made',
-    'site_photos_finished',
-    'project_complete'
+    { value: 'client_inquiry_made',                   label: 'Client Inquiry Made',                   color: '#8a8680' },
+    { value: 'client_qualified',                       label: 'Client Qualified',                       color: '#eeb24a' },
+    { value: 'discovery_call_booked',                  label: 'Discovery Call Booked',                  color: '#eeb24a' },
+    { value: 'discovery_call_completed',               label: 'Discovery Call Completed',               color: '#eeb24a' },
+    { value: 'design_proposal_drafting',               label: 'Design Proposal Drafting',               color: '#7a9e8a' },
+    { value: 'design_proposal_presented',              label: 'Design Proposal Presented',              color: '#7a9e8a' },
+    { value: 'design_proposal_accepted',               label: 'Design Proposal Accepted',               color: '#6a9e7a' },
+    { value: 'site_consultation_scheduled',            label: 'Site Consultation Scheduled',            color: '#7a9e8a' },
+    { value: 'site_consultation_completed',            label: 'Site Consultation Completed',            color: '#6a9e7a' },
+    { value: 'design_phase_started',                   label: 'Design Phase Started',                   color: '#5a8e9e' },
+    { value: 'base_map_complete',                      label: 'Base Map Complete',                      color: '#5a8e9e' },
+    { value: 'base_map_discussion_call',               label: 'Base Map Discussion Call',               color: '#5a8e9e' },
+    { value: 'base_map_approved',                      label: 'Base Map Approved',                      color: '#4a7e8e' },
+    { value: '3d_model_completed',                     label: '3D Model Completed',                     color: '#5a7e9e' },
+    { value: '3d_model_discussion_call',               label: '3D Model Discussion Call',               color: '#5a7e9e' },
+    { value: '3d_model_approved',                      label: '3D Model Approved',                      color: '#4a6e8e' },
+    { value: 'visualizations_started',                 label: 'Visualizations Started',                 color: '#7a6e9e' },
+    { value: 'visualizations_completed',               label: 'Visualizations Completed',               color: '#7a6e9e' },
+    { value: 'visualizations_approved',                label: 'Visualizations Approved',                color: '#6a5e8e' },
+    { value: 'construction_document_phase_started',    label: 'Construction Document Phase Started',    color: '#9e7a5a' },
+    { value: 'construction_document_phase_complete',   label: 'Construction Document Phase Complete',   color: '#8e6a4a' },
+    { value: 'permit_plans_submitted',                 label: 'Permit Plans Submitted',                 color: '#9e6a5a' },
+    { value: 'permit_plan_revisions',                  label: 'Permit Plan Revisions',                  color: '#c07a6a' },
+    { value: 'permit_plans_approved',                  label: 'Permit Plans Approved',                  color: '#6a9e7a' },
+    { value: 'construction_started',                   label: 'Construction Started',                   color: '#eeb24a' },
+    { value: 'construction_finished',                  label: 'Construction Finished',                  color: '#6a9e7a' },
+    { value: 'site_photos_to_be_made',                 label: 'Site Photos To Be Made',                 color: '#8a8680' },
+    { value: 'site_photos_finished',                   label: 'Site Photos Finished',                   color: '#6a9e7a' },
+    { value: 'project_complete',                       label: 'Project Complete',                       color: '#eeb24a' }
   ];
 
-  var STAGE_LABELS = {
-    'client_inquiry_made': 'Client Inquiry Made',
-    'client_qualified': 'Client Qualified',
-    'discovery_call_booked': 'Discovery Call Booked',
-    'discovery_call_completed': 'Discovery Call Completed',
-    'design_proposal_drafting': 'Design Proposal Drafting',
-    'design_proposal_presented': 'Design Proposal Presented',
-    'design_proposal_accepted': 'Design Proposal Accepted',
-    'site_consultation_scheduled': 'Site Consultation Scheduled',
-    'site_consultation_completed': 'Site Consultation Completed',
-    'design_phase_started': 'Design Phase Started',
-    'base_map_complete': 'Base Map Complete',
-    'base_map_discussion_call': 'Base Map Discussion Call',
-    'base_map_approved': 'Base Map Approved',
-    '3d_model_completed': '3D Model Completed',
-    '3d_model_discussion_call': '3D Model Discussion Call',
-    '3d_model_approved': '3D Model Approved',
-    'visualizations_started': 'Visualizations Started',
-    'visualizations_completed': 'Visualizations Completed',
-    'visualizations_approved': 'Visualizations Approved',
-    'construction_document_phase_started': 'Construction Document Phase Started',
-    'construction_document_phase_complete': 'Construction Document Phase Complete',
-    'permit_plans_submitted': 'Permit Plans Submitted',
-    'permit_plan_revisions': 'Permit Plan Revisions',
-    'permit_plans_approved': 'Permit Plans Approved',
-    'construction_started': 'Construction Started',
-    'construction_finished': 'Construction Finished',
-    'site_photos_to_be_made': 'Site Photos To Be Made',
-    'site_photos_finished': 'Site Photos Finished',
-    'project_complete': 'Project Complete'
-  };
-
-  var STAGE_COLORS = {
-    'client_inquiry_made': '#8a8680',
-    'client_qualified': '#eeb24a',
-    'discovery_call_booked': '#eeb24a',
-    'discovery_call_completed': '#eeb24a',
-    'design_proposal_drafting': '#7a9e8a',
-    'design_proposal_presented': '#7a9e8a',
-    'design_proposal_accepted': '#6a9e7a',
-    'site_consultation_scheduled': '#7a9e8a',
-    'site_consultation_completed': '#6a9e7a',
-    'design_phase_started': '#5a8e9e',
-    'base_map_complete': '#5a8e9e',
-    'base_map_discussion_call': '#5a8e9e',
-    'base_map_approved': '#4a7e8e',
-    '3d_model_completed': '#5a7e9e',
-    '3d_model_discussion_call': '#5a7e9e',
-    '3d_model_approved': '#4a6e8e',
-    'visualizations_started': '#7a6e9e',
-    'visualizations_completed': '#7a6e9e',
-    'visualizations_approved': '#6a5e8e',
-    'construction_document_phase_started': '#9e7a5a',
-    'construction_document_phase_complete': '#8e6a4a',
-    'permit_plans_submitted': '#9e6a5a',
-    'permit_plan_revisions': '#c07a6a',
-    'permit_plans_approved': '#6a9e7a',
-    'construction_started': '#eeb24a',
-    'construction_finished': '#6a9e7a',
-    'site_photos_to_be_made': '#8a8680',
-    'site_photos_finished': '#6a9e7a',
-    'project_complete': '#eeb24a'
-  };
+  function getStage(value) {
+    return STAGES.find(function(s) { return s.value === value; }) || { value: value, label: value || 'New Inquiry', color: '#8a8680' };
+  }
 
   // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
@@ -113,7 +53,7 @@
     '#dd-admin { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
 
     // Login
-    '#dd-admin .da-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }',
+    '#dd-admin .da-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; animation: daFade 0.7s ease both; }',
     '#dd-admin .da-login-card { width: 100%; max-width: 400px; border: 1px solid var(--border); background: var(--surface); }',
     '#dd-admin .da-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 28px 32px; text-align: center; }',
     '#dd-admin .da-login-logo { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 400; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }',
@@ -123,108 +63,85 @@
     '#dd-admin .da-input-wrap:focus-within { border-color: var(--gold); }',
     '#dd-admin .da-input-wrap:focus-within::after { content: ""; display: block; height: 2px; background: var(--gold); }',
     '#dd-admin .da-input-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 10px 14px 3px; display: block; }',
-    '#dd-admin .da-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 3px 14px 10px; }',
+    '#dd-admin .da-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 3px 14px 10px; }',
     '#dd-admin .da-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
     '#dd-admin .da-btn:hover { background: var(--gold); color: var(--bg); }',
-    '#dd-admin .da-error { font-size: 11px; color: var(--error); text-align: center; margin-top: 10px; display: none; }',
-    '#dd-admin .da-error.visible { display: block; }',
+    '#dd-admin .da-error-msg { font-size: 11px; color: var(--error); text-align: center; margin-top: 10px; display: none; }',
+    '#dd-admin .da-error-msg.visible { display: block; }',
 
     // Dashboard
     '#dd-admin .da-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-admin .da-dashboard.visible { display: flex; }',
 
     // Nav
-    '#dd-admin .da-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 200; }',
-    '#dd-admin .da-nav-left { display: flex; align-items: center; gap: 20px; }',
+    '#dd-admin .da-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }',
     '#dd-admin .da-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
-    '#dd-admin .da-nav-badge { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--bg); background: var(--gold); padding: 3px 8px; }',
+    '#dd-admin .da-nav-badge { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--bg); background: var(--gold); padding: 3px 8px; margin-left: 12px; }',
     '#dd-admin .da-nav-right { display: flex; align-items: center; gap: 16px; }',
-    '#dd-admin .da-nav-btn { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
-    '#dd-admin .da-nav-btn:hover { color: var(--gold); }',
-    '#dd-admin .da-nav-btn.active { color: var(--gold); }',
+    '#dd-admin .da-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
+    '#dd-admin .da-nav-logout:hover { color: var(--gold); }',
 
-    // Tabs
-    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 24px; }',
-    '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
-    '#dd-admin .da-tab:hover { color: var(--text); }',
-    '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
-
-    // Tab content
-    '#dd-admin .da-tab-content { display: none; flex: 1; }',
-    '#dd-admin .da-tab-content.active { display: block; }',
-
-    // Stats bar
+    // Stats
     '#dd-admin .da-stats { display: flex; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }',
     '#dd-admin .da-stat { background: var(--surface); padding: 16px 24px; flex: 1; }',
     '#dd-admin .da-stat-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }',
-    '#dd-admin .da-stat-value { font-family: "Cormorant Garamond", serif; font-size: 24px; color: var(--gold); font-weight: 400; }',
+    '#dd-admin .da-stat-value { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); font-weight: 400; }',
 
-    // Kanban
-    '#dd-admin .da-kanban { display: flex; gap: 0; overflow-x: auto; padding: 20px; flex: 1; align-items: flex-start; }',
-    '#dd-admin .da-kanban::-webkit-scrollbar { height: 6px; }',
-    '#dd-admin .da-kanban::-webkit-scrollbar-track { background: var(--bg); }',
-    '#dd-admin .da-kanban::-webkit-scrollbar-thumb { background: var(--border); }',
-    '#dd-admin .da-column { min-width: 220px; max-width: 220px; background: var(--surface); border: 1px solid var(--border); margin-right: 12px; flex-shrink: 0; }',
-    '#dd-admin .da-column-header { padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; }',
-    '#dd-admin .da-column-title { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text); }',
-    '#dd-admin .da-column-count { font-size: 10px; color: var(--muted); background: var(--bg); padding: 2px 7px; border-radius: 10px; }',
-    '#dd-admin .da-column-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }',
-    '#dd-admin .da-cards-list { padding: 10px; min-height: 60px; }',
-    '#dd-admin .da-card { background: var(--bg); border: 1px solid var(--border); padding: 12px; margin-bottom: 8px; cursor: grab; transition: border-color 0.2s, transform 0.1s; }',
-    '#dd-admin .da-card:hover { border-color: var(--gold); }',
-    '#dd-admin .da-card.dragging { opacity: 0.5; transform: rotate(2deg); cursor: grabbing; }',
-    '#dd-admin .da-card-name { font-size: 12px; color: var(--text); margin-bottom: 4px; font-weight: 400; }',
-    '#dd-admin .da-card-service { font-size: 9px; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 6px; }',
-    '#dd-admin .da-card-meta { display: flex; align-items: center; justify-content: space-between; }',
-    '#dd-admin .da-card-date { font-size: 9px; color: var(--muted); }',
-    '#dd-admin .da-card-investment { font-size: 9px; color: var(--gold); }',
-    '#dd-admin .da-column.drag-over { border-color: var(--gold); background: var(--gold-dim); }',
-
-    // Clients list
-    '#dd-admin .da-clients-wrap { padding: 24px; }',
-    '#dd-admin .da-clients-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }',
-    '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); }',
-    '#dd-admin .da-search { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 16px; outline: none; width: 240px; transition: border-color 0.2s; }',
+    // Toolbar
+    '#dd-admin .da-toolbar { padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }',
+    '#dd-admin .da-search { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 16px; outline: none; width: 260px; transition: border-color 0.2s; }',
     '#dd-admin .da-search:focus { border-color: var(--gold); }',
     '#dd-admin .da-search::placeholder { color: var(--muted); }',
-    '#dd-admin .da-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }',
-    '#dd-admin .da-table th { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
-    '#dd-admin .da-table td { font-size: 12px; color: var(--text); padding: 12px 16px; border-bottom: 1px solid var(--border); }',
-    '#dd-admin .da-table tr:last-child td { border-bottom: none; }',
-    '#dd-admin .da-table tr:hover td { background: var(--gold-dim); }',
-    '#dd-admin .da-status-badge { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; padding: 3px 8px; border-radius: 0; display: inline-block; }',
+    '#dd-admin .da-filter { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 16px; outline: none; cursor: pointer; appearance: none; min-width: 200px; }',
+    '#dd-admin .da-filter:focus { border-color: var(--gold); }',
+    '#dd-admin .da-count { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; }',
 
-    // Client detail modal
-    '#dd-admin .da-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }',
-    '#dd-admin .da-modal-overlay.visible { display: flex; }',
-    '#dd-admin .da-modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 600px; max-height: 80vh; overflow-y: auto; }',
-    '#dd-admin .da-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); position: sticky; top: 0; }',
-    '#dd-admin .da-modal-title { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 300; color: var(--gold); }',
-    '#dd-admin .da-modal-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; transition: color 0.2s; }',
-    '#dd-admin .da-modal-close:hover { color: var(--text); }',
-    '#dd-admin .da-modal-body { padding: 24px; }',
-    '#dd-admin .da-modal-row { display: flex; gap: 0; margin-bottom: 1px; }',
-    '#dd-admin .da-modal-label { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; background: var(--surface-2); width: 140px; flex-shrink: 0; }',
-    '#dd-admin .da-modal-value { font-size: 12px; color: var(--text); padding: 10px 14px; background: var(--bg); flex: 1; }',
-    '#dd-admin .da-modal-section { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin: 20px 0 8px; }',
-    '#dd-admin .da-stage-select { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 14px; outline: none; cursor: pointer; margin-top: 16px; appearance: none; }',
+    // Cards list
+    '#dd-admin .da-cards-wrap { padding: 24px 32px; display: flex; flex-direction: column; gap: 12px; }',
+
+    // Client card
+    '#dd-admin .da-client-card { background: var(--surface); border: 1px solid var(--border); transition: border-color 0.2s; }',
+    '#dd-admin .da-client-card:hover { border-color: var(--gold); }',
+    '#dd-admin .da-card-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; gap: 16px; cursor: pointer; }',
+    '#dd-admin .da-card-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }',
+    '#dd-admin .da-card-avatar { width: 36px; height: 36px; background: var(--gold-dim); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: "Cormorant Garamond", serif; font-size: 16px; color: var(--gold); flex-shrink: 0; }',
+    '#dd-admin .da-card-info { min-width: 0; }',
+    '#dd-admin .da-card-name { font-size: 14px; color: var(--text); font-weight: 400; margin-bottom: 2px; }',
+    '#dd-admin .da-card-sub { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; }',
+    '#dd-admin .da-card-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }',
+    '#dd-admin .da-card-investment { font-size: 13px; color: var(--gold); font-family: "Cormorant Garamond", serif; }',
+    '#dd-admin .da-card-date { font-size: 10px; color: var(--muted); }',
+    '#dd-admin .da-stage-pill { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; padding: 4px 10px; border: 1px solid; white-space: nowrap; }',
+    '#dd-admin .da-card-expand { font-size: 10px; color: var(--muted); transition: transform 0.2s; }',
+    '#dd-admin .da-card-expand.open { transform: rotate(180deg); }',
+
+    // Expanded details
+    '#dd-admin .da-card-details { display: none; border-top: 1px solid var(--border); }',
+    '#dd-admin .da-card-details.visible { display: block; }',
+    '#dd-admin .da-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }',
+    '#dd-admin .da-detail-item { background: var(--surface-2); padding: 12px 20px; }',
+    '#dd-admin .da-detail-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }',
+    '#dd-admin .da-detail-value { font-size: 12px; color: var(--text); }',
+    '#dd-admin .da-card-actions { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }',
+    '#dd-admin .da-stage-select { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 8px 12px; outline: none; cursor: pointer; appearance: none; flex: 1; min-width: 200px; transition: border-color 0.2s; }',
     '#dd-admin .da-stage-select:focus { border-color: var(--gold); }',
-    '#dd-admin .da-save-btn { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; margin-top: 12px; transition: opacity 0.2s; }',
-    '#dd-admin .da-save-btn:hover { opacity: 0.85; }',
+    '#dd-admin .da-update-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 10px 24px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }',
+    '#dd-admin .da-update-btn:hover { opacity: 0.85; }',
+    '#dd-admin .da-portal-link { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 9px 16px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
+    '#dd-admin .da-portal-link:hover { background: var(--gold); color: var(--bg); }',
 
-    // Messages
-    '#dd-admin .da-messages-wrap { padding: 24px; }',
-    '#dd-admin .da-msg-list { display: flex; flex-direction: column; gap: 12px; }',
-    '#dd-admin .da-msg-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; cursor: pointer; transition: border-color 0.2s; }',
-    '#dd-admin .da-msg-card:hover { border-color: var(--gold); }',
-    '#dd-admin .da-msg-card.unread { border-left: 3px solid var(--gold); }',
-    '#dd-admin .da-msg-client { font-size: 13px; color: var(--text); font-weight: 400; margin-bottom: 4px; }',
-    '#dd-admin .da-msg-preview { font-size: 11px; color: var(--muted); }',
-    '#dd-admin .da-msg-time { font-size: 9px; color: var(--muted); margin-top: 6px; }',
+    // Empty state
+    '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
 
-    '@keyframes daFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
-    '#dd-admin .da-login-wrap { animation: daFadeUp 0.7s ease both; }',
-    '@media (max-width: 600px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } }'
+    '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
+    '@media (max-width: 700px) {',
+    '  #dd-admin .da-stats { flex-direction: column; }',
+    '  #dd-admin .da-nav { padding: 0 16px; }',
+    '  #dd-admin .da-toolbar { padding: 16px; }',
+    '  #dd-admin .da-cards-wrap { padding: 16px; }',
+    '  #dd-admin .da-details-grid { grid-template-columns: 1fr; }',
+    '  #dd-admin .da-card-right { flex-direction: column; align-items: flex-end; gap: 6px; }',
+    '}'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -232,18 +149,23 @@
   var wrap = document.getElementById('dd-admin');
   if (!wrap) return;
 
+  var stageOptions = STAGES.map(function(s) {
+    return '<option value="' + s.value + '">' + s.label + '</option>';
+  }).join('');
+
+  var filterOptions = '<option value="">All Stages</option>' + STAGES.map(function(s) {
+    return '<option value="' + s.value + '">' + s.label + '</option>';
+  }).join('');
+
   wrap.innerHTML = [
     // LOGIN
     '<div id="daLoginWrap" class="da-login-wrap">',
     '  <div class="da-login-card">',
-    '    <div class="da-login-header">',
-    '      <div class="da-login-logo">Daydream</div>',
-    '      <div class="da-login-sub">Admin Dashboard</div>',
-    '    </div>',
+    '    <div class="da-login-header"><div class="da-login-logo">Daydream</div><div class="da-login-sub">Admin Dashboard</div></div>',
     '    <div class="da-login-body">',
     '      <div class="da-input-wrap"><label class="da-input-label">Password</label><input class="da-input" type="password" id="daPassword" placeholder="Enter admin password" /></div>',
     '      <button class="da-btn" id="daLoginBtn">Sign In</button>',
-    '      <div class="da-error" id="daLoginError">Incorrect password. Please try again.</div>',
+    '      <div class="da-error-msg" id="daLoginError">Incorrect password. Please try again.</div>',
     '    </div>',
     '  </div>',
     '</div>',
@@ -251,21 +173,15 @@
     // DASHBOARD
     '<div id="daDashboard" class="da-dashboard">',
     '  <nav class="da-nav">',
-    '    <div class="da-nav-left">',
+    '    <div style="display:flex;align-items:center">',
     '      <div class="da-nav-logo">Daydream</div>',
     '      <div class="da-nav-badge">Admin</div>',
     '    </div>',
     '    <div class="da-nav-right">',
-    '      <button class="da-nav-btn" id="daLogoutBtn">Sign Out</button>',
+    '      <button class="da-nav-logout" id="daLogoutBtn">Sign Out</button>',
     '    </div>',
     '  </nav>',
-    '  <div class="da-tabs">',
-    '    <button class="da-tab active" data-tab="pipeline">Pipeline</button>',
-    '    <button class="da-tab" data-tab="clients">Clients</button>',
-    '    <button class="da-tab" data-tab="messages">Messages</button>',
-    '  </div>',
 
-    // Stats
     '  <div class="da-stats">',
     '    <div class="da-stat"><div class="da-stat-label">Total Leads</div><div class="da-stat-value" id="daStatTotal">—</div></div>',
     '    <div class="da-stat"><div class="da-stat-label">Active Projects</div><div class="da-stat-value" id="daStatActive">—</div></div>',
@@ -273,53 +189,18 @@
     '    <div class="da-stat"><div class="da-stat-label">New This Month</div><div class="da-stat-value" id="daStatMonth">—</div></div>',
     '  </div>',
 
-    // PIPELINE TAB
-    '  <div class="da-tab-content active" id="tab-pipeline">',
-    '    <div class="da-kanban" id="daKanban"></div>',
+    '  <div class="da-toolbar">',
+    '    <input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." />',
+    '    <select class="da-filter" id="daFilter">' + filterOptions + '</select>',
+    '    <div class="da-count" id="daCount"></div>',
     '  </div>',
 
-    // CLIENTS TAB
-    '  <div class="da-tab-content" id="tab-clients">',
-    '    <div class="da-clients-wrap">',
-    '      <div class="da-clients-header">',
-    '        <div class="da-section-title">All Clients</div>',
-    '        <input class="da-search" type="text" id="daSearch" placeholder="Search clients..." />',
-    '      </div>',
-    '      <table class="da-table">',
-    '        <thead><tr>',
-    '          <th>Name</th><th>Email</th><th>Service</th><th>Investment</th><th>Status</th><th>Date</th>',
-    '        </tr></thead>',
-    '        <tbody id="daClientsTable"></tbody>',
-    '      </table>',
-    '    </div>',
-    '  </div>',
-
-    // MESSAGES TAB
-    '  <div class="da-tab-content" id="tab-messages">',
-    '    <div class="da-messages-wrap">',
-    '      <div class="da-section-title" style="margin-bottom:20px">Client Messages</div>',
-    '      <div class="da-msg-list" id="daMsgList"></div>',
-    '    </div>',
-    '  </div>',
-
-    '</div>',
-
-    // CLIENT MODAL
-    '<div class="da-modal-overlay" id="daModal">',
-    '  <div class="da-modal">',
-    '    <div class="da-modal-header">',
-    '      <div class="da-modal-title" id="daModalTitle">Client Details</div>',
-    '      <button class="da-modal-close" id="daModalClose">&times;</button>',
-    '    </div>',
-    '    <div class="da-modal-body" id="daModalBody"></div>',
-    '  </div>',
+    '  <div class="da-cards-wrap" id="daCardsWrap"></div>',
     '</div>'
   ].join('\n');
 
   // ── STATE ─────────────────────────────────────────────────────────
-  var clients = [];
-  var draggedCard = null;
-  var draggedClientId = null;
+  var allClients = [];
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function apiFetch(path, options) {
@@ -337,25 +218,26 @@
   }
 
   function serviceLabel(key) {
-    var map = { '2d_concept': '2D Concept', '3d_concept': '3D Concept', '2d_3d_concept': '2D + 3D Concept', 'permit_plan': 'Permit Plan', '2d_3d_permit': '2D + 3D + Permit' };
+    var map = { '2d_concept': '2D Concept Phase', '3d_concept': '3D Concept Phase', '2d_3d_concept': '2D + 3D Concept Phase', 'permit_plan': 'Permit Plan Phase', '2d_3d_permit': '2D + 3D + Permit Plan' };
     return map[key] || key || '—';
   }
 
-  function getStageLabel(status) {
-    return STAGE_LABELS[status] || status || 'New Inquiry';
+  function initials(name) {
+    if (!name) return '?';
+    var parts = name.trim().split(' ');
+    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
   }
 
   // ── LOGIN ─────────────────────────────────────────────────────────
   document.getElementById('daLoginBtn').addEventListener('click', function() {
     var pwd = document.getElementById('daPassword').value;
-    var err = document.getElementById('daLoginError');
     if (pwd === ADMIN_PASSWORD) {
       try { sessionStorage.setItem('dd_admin', '1'); } catch(e) {}
       document.getElementById('daLoginWrap').style.display = 'none';
       document.getElementById('daDashboard').classList.add('visible');
-      loadAll();
+      loadClients();
     } else {
-      err.classList.add('visible');
+      document.getElementById('daLoginError').classList.add('visible');
     }
   });
 
@@ -369,45 +251,33 @@
     document.getElementById('daLoginWrap').style.display = 'flex';
   });
 
-  // Auto login if session exists
   try {
     if (sessionStorage.getItem('dd_admin') === '1') {
       document.getElementById('daLoginWrap').style.display = 'none';
       document.getElementById('daDashboard').classList.add('visible');
-      loadAll();
+      loadClients();
     }
   } catch(e) {}
 
-  // ── TABS ──────────────────────────────────────────────────────────
-  document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
-    tab.addEventListener('click', function() {
-      document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
-      document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(c) { c.classList.remove('active'); });
-      tab.classList.add('active');
-      var target = document.getElementById('tab-' + tab.dataset.tab);
-      if (target) target.classList.add('active');
-    });
-  });
-
-  // ── LOAD ALL DATA ─────────────────────────────────────────────────
-  async function loadAll() {
+  // ── LOAD DATA ─────────────────────────────────────────────────────
+  async function loadClients() {
     try {
       var res = await apiFetch('/rest/v1/clients?order=created_at.desc');
-      clients = await res.json();
+      allClients = await res.json();
       updateStats();
-      renderKanban();
-      renderClientsTable(clients);
-      loadMessages();
+      renderCards(allClients);
     } catch(e) { console.error('Load error:', e); }
   }
 
   function updateStats() {
-    document.getElementById('daStatTotal').textContent = clients.length;
-    var active = clients.filter(function(c) { return c.status && c.status !== 'new_lead' && c.status !== 'project_complete'; }).length;
-    var complete = clients.filter(function(c) { return c.status === 'project_complete'; }).length;
-    var thisMonth = clients.filter(function(c) {
+    document.getElementById('daStatTotal').textContent = allClients.length;
+    var active = allClients.filter(function(c) {
+      return c.status && c.status !== 'client_inquiry_made' && c.status !== 'new_lead' && c.status !== 'project_complete';
+    }).length;
+    var complete = allClients.filter(function(c) { return c.status === 'project_complete'; }).length;
+    var now = new Date();
+    var thisMonth = allClients.filter(function(c) {
       var d = new Date(c.created_at);
-      var now = new Date();
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
     document.getElementById('daStatActive').textContent = active;
@@ -415,206 +285,128 @@
     document.getElementById('daStatMonth').textContent = thisMonth;
   }
 
-  // ── KANBAN ────────────────────────────────────────────────────────
-  function renderKanban() {
-    var board = document.getElementById('daKanban');
-    board.innerHTML = '';
+  // ── RENDER CARDS ──────────────────────────────────────────────────
+  function renderCards(clients) {
+    var wrap = document.getElementById('daCardsWrap');
+    document.getElementById('daCount').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
 
-    STAGES.forEach(function(stage) {
-      var stageClients = clients.filter(function(c) {
-        if (stage === 'client_inquiry_made') return !c.status || c.status === 'new_lead' || c.status === 'client_inquiry_made';
-        return c.status === stage;
-      });
-
-      var color = STAGE_COLORS[stage] || '#8a8680';
-      var col = document.createElement('div');
-      col.className = 'da-column';
-      col.dataset.stage = stage;
-
-      var cardsHtml = stageClients.map(function(c) {
-        return '<div class="da-card" draggable="true" data-id="' + c.id + '">'
-          + '<div class="da-card-name">' + (c.full_name || 'Unknown') + '</div>'
-          + '<div class="da-card-service">' + serviceLabel(c.project_type) + '</div>'
-          + '<div class="da-card-meta">'
-          + '<div class="da-card-date">' + formatDate(c.created_at) + '</div>'
-          + '<div class="da-card-investment">' + (c.investment ? '$' + c.investment.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '') + '</div>'
-          + '</div>'
-          + '</div>';
-      }).join('');
-
-      col.innerHTML = '<div class="da-column-header">'
-        + '<div style="display:flex;align-items:center;gap:8px"><div class="da-column-dot" style="background:' + color + '"></div><div class="da-column-title">' + STAGE_LABELS[stage] + '</div></div>'
-        + '<div class="da-column-count">' + stageClients.length + '</div>'
-        + '</div>'
-        + '<div class="da-cards-list" data-stage="' + stage + '">' + cardsHtml + '</div>';
-
-      board.appendChild(col);
-
-      // Drag events on cards
-      col.querySelectorAll('.da-card').forEach(function(card) {
-        card.addEventListener('dragstart', function(e) {
-          draggedCard = card;
-          draggedClientId = card.dataset.id;
-          card.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-        });
-        card.addEventListener('dragend', function() {
-          card.classList.remove('dragging');
-          draggedCard = null;
-        });
-        card.addEventListener('click', function() {
-          openClientModal(card.dataset.id);
-        });
-      });
-
-      // Drop events on columns
-      col.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        col.classList.add('drag-over');
-      });
-      col.addEventListener('dragleave', function() {
-        col.classList.remove('drag-over');
-      });
-      col.addEventListener('drop', async function(e) {
-        e.preventDefault();
-        col.classList.remove('drag-over');
-        if (!draggedClientId) return;
-        var newStage = stage;
-        try {
-          await apiFetch('/rest/v1/clients?id=eq.' + draggedClientId, {
-            method: 'PATCH',
-            headers: { 'Prefer': 'return=minimal' },
-            body: JSON.stringify({ status: newStage })
-          });
-          var c = clients.find(function(x) { return x.id === draggedClientId; });
-          if (c) c.status = newStage;
-          renderKanban();
-          updateStats();
-        } catch(err) { console.error('Update error:', err); }
-      });
-    });
-  }
-
-  // ── CLIENTS TABLE ─────────────────────────────────────────────────
-  function renderClientsTable(data) {
-    var tbody = document.getElementById('daClientsTable');
-    if (!data || !data.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No clients yet</td></tr>';
+    if (!clients.length) {
+      wrap.innerHTML = '<div class="da-empty">No clients found</div>';
       return;
     }
-    tbody.innerHTML = data.map(function(c) {
-      var color = STAGE_COLORS[c.status] || '#8a8680';
-      return '<tr style="cursor:pointer" onclick="document.getElementById(\'daModal\').dataset.clientId=\'' + c.id + '\'; window._openClientModal(\'' + c.id + '\')">'
-        + '<td>' + (c.full_name || '—') + '</td>'
-        + '<td>' + (c.email || '—') + '</td>'
-        + '<td>' + serviceLabel(c.project_type) + '</td>'
-        + '<td>' + (c.investment || '—') + '</td>'
-        + '<td><span class="da-status-badge" style="background:' + color + '22;color:' + color + ';border:1px solid ' + color + '">' + getStageLabel(c.status) + '</span></td>'
-        + '<td>' + formatDate(c.created_at) + '</td>'
-        + '</tr>';
+
+    wrap.innerHTML = clients.map(function(c) {
+      var stage = getStage(c.status || 'client_inquiry_made');
+      var inv = c.investment ? c.investment.replace(/[^0-9.]/g, '') : '';
+      if (inv && !isNaN(inv)) inv = '$' + Number(inv).toLocaleString();
+      else inv = c.investment || '';
+
+      var opts = STAGES.map(function(s) {
+        return '<option value="' + s.value + '"' + (stage.value === s.value ? ' selected' : '') + '>' + s.label + '</option>';
+      }).join('');
+
+      return '<div class="da-client-card" id="card-' + c.id + '">'
+        + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
+        + '  <div class="da-card-left">'
+        + '    <div class="da-card-avatar">' + initials(c.full_name) + '</div>'
+        + '    <div class="da-card-info">'
+        + '      <div class="da-card-name">' + (c.full_name || 'Unknown') + '</div>'
+        + '      <div class="da-card-sub">' + (c.email || '') + (c.phone ? ' &middot; ' + c.phone : '') + '</div>'
+        + '    </div>'
+        + '  </div>'
+        + '  <div class="da-card-right">'
+        + '    <div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + stage.label + '</div>'
+        + '    <div class="da-card-investment">' + inv + '</div>'
+        + '    <div class="da-card-date">' + formatDate(c.created_at) + '</div>'
+        + '    <div class="da-card-expand" id="expand-' + c.id + '">&#9660;</div>'
+        + '  </div>'
+        + '</div>'
+        + '<div class="da-card-details" id="details-' + c.id + '">'
+        + '  <div class="da-details-grid">'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Service</div><div class="da-detail-value">' + serviceLabel(c.project_type) + '</div></div>'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Investment</div><div class="da-detail-value">' + (inv || '—') + '</div></div>'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + [c.street, c.city, c.state, c.zip].filter(Boolean).join(', ') + '</div></div>'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Referral</div><div class="da-detail-value">' + (c.referral || '—') + '</div></div>'
+        + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + (c.notes || '—') + '</div></div>'
+        + '  </div>'
+        + '  <div class="da-card-actions">'
+        + '    <select class="da-stage-select" id="select-' + c.id + '">' + opts + '</select>'
+        + '    <button class="da-update-btn" onclick="window._updateStage(\'' + c.id + '\')">Update Stage</button>'
+        + '    <a class="da-portal-link" href="mailto:' + (c.email || '') + '">Email Client</a>'
+        + '  </div>'
+        + '</div>'
+        + '</div>';
     }).join('');
   }
 
-  window._openClientModal = function(id) { openClientModal(id); };
+  // ── TOGGLE CARD ───────────────────────────────────────────────────
+  window._toggleCard = function(id) {
+    var details = document.getElementById('details-' + id);
+    var expand = document.getElementById('expand-' + id);
+    if (details.classList.contains('visible')) {
+      details.classList.remove('visible');
+      expand.classList.remove('open');
+    } else {
+      details.classList.add('visible');
+      expand.classList.add('open');
+    }
+  };
 
-  // Search
-  document.getElementById('daSearch').addEventListener('input', function() {
-    var q = this.value.toLowerCase();
-    var filtered = clients.filter(function(c) {
-      return (c.full_name || '').toLowerCase().includes(q)
+  // ── UPDATE STAGE ──────────────────────────────────────────────────
+  window._updateStage = async function(id) {
+    var select = document.getElementById('select-' + id);
+    var newStage = select.value;
+    try {
+      await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ status: newStage })
+      });
+      var client = allClients.find(function(c) { return c.id === id; });
+      if (client) client.status = newStage;
+
+      // Update the pill color
+      var stage = getStage(newStage);
+      var card = document.getElementById('card-' + id);
+      if (card) {
+        var pill = card.querySelector('.da-stage-pill');
+        if (pill) {
+          pill.textContent = stage.label;
+          pill.style.color = stage.color;
+          pill.style.borderColor = stage.color;
+          pill.style.background = stage.color + '18';
+        }
+      }
+
+      updateStats();
+
+      var btn = card ? card.querySelector('.da-update-btn') : null;
+      if (btn) {
+        btn.textContent = 'Saved!';
+        btn.style.background = 'var(--success)';
+        setTimeout(function() {
+          if (btn) { btn.textContent = 'Update Stage'; btn.style.background = 'var(--gold)'; }
+        }, 2000);
+      }
+    } catch(e) { console.error('Update error:', e); }
+  };
+
+  // ── SEARCH & FILTER ───────────────────────────────────────────────
+  function applyFilters() {
+    var q = document.getElementById('daSearch').value.toLowerCase();
+    var stage = document.getElementById('daFilter').value;
+    var filtered = allClients.filter(function(c) {
+      var matchQ = !q
+        || (c.full_name || '').toLowerCase().includes(q)
         || (c.email || '').toLowerCase().includes(q)
         || (c.phone || '').toLowerCase().includes(q);
+      var matchStage = !stage || c.status === stage || (!c.status && stage === 'client_inquiry_made');
+      return matchQ && matchStage;
     });
-    renderClientsTable(filtered);
-  });
-
-  // ── CLIENT MODAL ──────────────────────────────────────────────────
-  function openClientModal(id) {
-    var c = clients.find(function(x) { return x.id === id; });
-    if (!c) return;
-
-    document.getElementById('daModalTitle').textContent = c.full_name || 'Client Details';
-
-    var stageOptions = STAGES.map(function(s) {
-      return '<option value="' + s + '"' + (c.status === s ? ' selected' : '') + '>' + STAGE_LABELS[s] + '</option>';
-    }).join('');
-
-    document.getElementById('daModalBody').innerHTML = [
-      '<div class="da-modal-section">Contact Information</div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Full Name</div><div class="da-modal-value">' + (c.full_name || '—') + '</div></div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Email</div><div class="da-modal-value">' + (c.email || '—') + '</div></div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Phone</div><div class="da-modal-value">' + (c.phone || '—') + '</div></div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Address</div><div class="da-modal-value">' + [c.street, c.city, c.state, c.zip].filter(Boolean).join(', ') + '</div></div>',
-      '<div class="da-modal-section">Project Details</div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Service</div><div class="da-modal-value">' + serviceLabel(c.project_type) + '</div></div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Investment</div><div class="da-modal-value">' + (c.investment || '—') + '</div></div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Referral</div><div class="da-modal-value">' + (c.referral || '—') + '</div></div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Notes</div><div class="da-modal-value">' + (c.notes || '—') + '</div></div>',
-      '<div class="da-modal-row"><div class="da-modal-label">Date</div><div class="da-modal-value">' + formatDate(c.created_at) + '</div></div>',
-      '<div class="da-modal-section">Pipeline Stage</div>',
-      '<select class="da-stage-select" id="daStageSelect">' + stageOptions + '</select>',
-      '<button class="da-save-btn" id="daSaveStage">Update Stage</button>'
-    ].join('');
-
-    document.getElementById('daSaveStage').addEventListener('click', async function() {
-      var newStage = document.getElementById('daStageSelect').value;
-      try {
-        await apiFetch('/rest/v1/clients?id=eq.' + id, {
-          method: 'PATCH',
-          headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ status: newStage })
-        });
-        var client = clients.find(function(x) { return x.id === id; });
-        if (client) client.status = newStage;
-        renderKanban();
-        renderClientsTable(clients);
-        updateStats();
-        this.textContent = 'Saved!';
-        setTimeout(function() {
-          var btn = document.getElementById('daSaveStage');
-          if (btn) btn.textContent = 'Update Stage';
-        }, 2000);
-      } catch(err) { console.error('Save error:', err); }
-    });
-
-    document.getElementById('daModal').classList.add('visible');
+    renderCards(filtered);
   }
 
-  document.getElementById('daModalClose').addEventListener('click', function() {
-    document.getElementById('daModal').classList.remove('visible');
-  });
-
-  document.getElementById('daModal').addEventListener('click', function(e) {
-    if (e.target === this) this.classList.remove('visible');
-  });
-
-  // ── MESSAGES ──────────────────────────────────────────────────────
-  async function loadMessages() {
-    try {
-      var res = await apiFetch('/rest/v1/messages?order=created_at.desc&limit=50');
-      var msgs = await res.json();
-      var list = document.getElementById('daMsgList');
-      if (!msgs || !msgs.length) {
-        list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No messages yet</div>';
-        return;
-      }
-      // Group by project
-      var grouped = {};
-      msgs.forEach(function(m) {
-        if (!grouped[m.project_id]) grouped[m.project_id] = [];
-        grouped[m.project_id].push(m);
-      });
-      list.innerHTML = Object.keys(grouped).map(function(pid) {
-        var projectMsgs = grouped[pid];
-        var latest = projectMsgs[0];
-        var unread = projectMsgs.some(function(m) { return !m.is_read; });
-        return '<div class="da-msg-card' + (unread ? ' unread' : '') + '">'
-          + '<div class="da-msg-client">' + (latest.sender || 'Client') + '</div>'
-          + '<div class="da-msg-preview">' + (latest.content || '').substring(0, 80) + '...</div>'
-          + '<div class="da-msg-time">' + formatDate(latest.created_at) + ' &middot; ' + projectMsgs.length + ' message(s)</div>'
-          + '</div>';
-      }).join('');
-    } catch(e) { console.error('Messages error:', e); }
-  }
+  document.getElementById('daSearch').addEventListener('input', applyFilters);
+  document.getElementById('daFilter').addEventListener('change', applyFilters);
 
 })();
