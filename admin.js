@@ -69,15 +69,6 @@
     { value: 'payment_complete',  label: 'Payment Complete ✓',             color: '#6a9e7a' }
   ];
 
-  var CHECKLIST_LABELS = {
-    'goals':      'Project Goals & Must-Have Features',
-    'inspo':      'Inspiration Photos or Boards',
-    'photos':     'Site Photos & Walkthrough Video',
-    'survey':     'Property Survey / Site Plat',
-    'bylaws':     'HOA Bylaws & Neighborhood Covenants',
-    'houseplans': 'Existing House Architectural Plans'
-  };
-
   var ALL_SERVICES = [
     { key: '2d_concept',            label: '2D Concept Phase' },
     { key: '3d_concept',            label: '3D Concept Phase' },
@@ -102,15 +93,26 @@
     { key: 'site_consultation',     label: 'Site Consultation' }
   ];
 
+  var CHECKLIST_LABELS = {
+    'goals':      'Project Goals & Must-Have Features',
+    'inspo':      'Inspiration Photos or Boards',
+    'photos':     'Site Photos & Walkthrough Video',
+    'survey':     'Property Survey / Site Plat',
+    'bylaws':     'HOA Bylaws & Neighborhood Covenants',
+    'houseplans': 'Existing House Architectural Plans'
+  };
+
   function getPipelineStage(value) {
     return PIPELINE_STAGES.find(function(s) { return s.value === value; }) || { value: value, label: value || 'New Inquiry', color: '#8a8680' };
   }
 
+  // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
   font.rel = 'stylesheet';
   font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400;500&display=swap';
   document.head.appendChild(font);
 
+  // ── STYLES ────────────────────────────────────────────────────────
   var style = document.createElement('style');
   style.textContent = [
     '#dd-admin * { box-sizing: border-box; margin: 0; padding: 0; }',
@@ -154,6 +156,8 @@
     '#dd-admin .da-search::placeholder { color: var(--muted); }',
     '#dd-admin .da-filter { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 16px; outline: none; cursor: pointer; appearance: none; min-width: 200px; }',
     '#dd-admin .da-count { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; white-space: nowrap; }',
+    '#dd-admin .da-add-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }',
+    '#dd-admin .da-add-btn:hover { opacity: 0.85; }',
     '#dd-admin .da-cards-wrap { padding: 24px 32px; display: flex; flex-direction: column; gap: 12px; }',
     '#dd-admin .da-client-card { background: var(--surface); border: 1px solid var(--border); transition: border-color 0.2s; }',
     '#dd-admin .da-client-card:hover { border-color: var(--gold); }',
@@ -162,6 +166,7 @@
     '#dd-admin .da-card-avatar { width: 36px; height: 36px; background: var(--gold-dim); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: "Cormorant Garamond", serif; font-size: 16px; color: var(--gold); flex-shrink: 0; }',
     '#dd-admin .da-card-name { font-size: 14px; color: var(--text); font-weight: 400; margin-bottom: 2px; }',
     '#dd-admin .da-card-sub { font-size: 10px; color: var(--muted); }',
+    '#dd-admin .da-contractor-badge { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; padding: 2px 8px; background: var(--gold-dim); border: 1px solid var(--gold); color: var(--gold); margin-left: 8px; vertical-align: middle; }',
     '#dd-admin .da-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }',
     '#dd-admin .da-card-investment { font-size: 13px; color: var(--gold); font-family: "Cormorant Garamond", serif; }',
     '#dd-admin .da-card-date { font-size: 10px; color: var(--muted); }',
@@ -187,6 +192,61 @@
     '#dd-admin .da-email-link { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 14px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-admin .da-email-link:hover { background: var(--gold); color: var(--bg); }',
     '#dd-admin .da-section-divider { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); padding: 12px 0 6px; border-top: 1px solid var(--border); margin-top: 4px; }',
+
+    // Contractor projects section
+    '#dd-admin .da-contractor-projects { border: 1px solid var(--border); margin: 12px 0 4px; }',
+    '#dd-admin .da-contractor-projects-header { padding: 10px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-admin .da-contractor-project-row { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }',
+    '#dd-admin .da-contractor-project-row:last-child { border-bottom: none; }',
+    '#dd-admin .da-contractor-project-name { font-size: 12px; color: var(--text); flex: 1; }',
+    '#dd-admin .da-contractor-project-address { font-size: 10px; color: var(--muted); }',
+
+    // Services
+    '#dd-admin .da-services-wrap { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }',
+    '#dd-admin .da-service-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--border); }',
+    '#dd-admin .da-service-name { font-size: 12px; color: var(--text); flex: 1; }',
+    '#dd-admin .da-service-actions { display: flex; align-items: center; gap: 8px; }',
+    '#dd-admin .da-service-status { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 10px; padding: 4px 8px; outline: none; cursor: pointer; appearance: none; transition: border-color 0.2s; }',
+    '#dd-admin .da-service-status:focus { border-color: var(--gold); }',
+    '#dd-admin .da-service-remove { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 10px; padding: 4px 8px; cursor: pointer; transition: color 0.2s, border-color 0.2s; }',
+    '#dd-admin .da-service-remove:hover { color: var(--error); border-color: var(--error); }',
+    '#dd-admin .da-add-service-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }',
+
+    // Admin Notes
+    '#dd-admin .da-notes-tabs { display: flex; gap: 1px; background: var(--border); margin-top: 8px; }',
+    '#dd-admin .da-note-tab { flex: 1; background: var(--surface-2); border: none; color: var(--muted); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 10px; cursor: pointer; transition: color 0.2s, background 0.2s; }',
+    '#dd-admin .da-note-tab:hover { color: var(--text); }',
+    '#dd-admin .da-note-tab.active { background: var(--gold-dim); color: var(--gold); border-bottom: 2px solid var(--gold); }',
+    '#dd-admin .da-note-panel { display: none; }',
+    '#dd-admin .da-note-panel.active { display: block; }',
+    '#dd-admin .da-note-textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-top: none; color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 12px 14px; resize: vertical; min-height: 100px; outline: none; line-height: 1.7; transition: border-color 0.2s; }',
+    '#dd-admin .da-note-textarea:focus { border-color: var(--gold); }',
+    '#dd-admin .da-note-textarea::placeholder { color: var(--muted); }',
+
+    // Add Client Modal
+    '#dd-admin .da-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }',
+    '#dd-admin .da-modal-overlay.visible { display: flex; }',
+    '#dd-admin .da-modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; }',
+    '#dd-admin .da-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); position: sticky; top: 0; }',
+    '#dd-admin .da-modal-title { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 300; color: var(--gold); }',
+    '#dd-admin .da-modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }',
+    '#dd-admin .da-modal-close:hover { color: var(--text); }',
+    '#dd-admin .da-modal-body { padding: 24px; }',
+    '#dd-admin .da-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }',
+    '#dd-admin .da-modal-field { display: flex; flex-direction: column; gap: 6px; }',
+    '#dd-admin .da-field-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-admin .da-field-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.2s; width: 100%; resize: vertical; }',
+    '#dd-admin .da-field-input:focus { border-color: var(--gold); }',
+    '#dd-admin .da-field-input::placeholder { color: var(--muted); }',
+    '#dd-admin .da-modal-check { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 12px; color: var(--text); }',
+    '#dd-admin .da-modal-check input { accent-color: var(--gold); width: 14px; height: 14px; cursor: pointer; }',
+    '#dd-admin .da-modal-check label { cursor: pointer; }',
+    '#dd-admin .da-modal-msg { font-size: 11px; min-height: 20px; margin-bottom: 12px; }',
+    '#dd-admin .da-modal-msg.success { color: var(--success); }',
+    '#dd-admin .da-modal-msg.error { color: var(--error); }',
+    '#dd-admin .da-modal-submit { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity 0.2s; }',
+    '#dd-admin .da-modal-submit:hover { opacity: 0.85; }',
+    '#dd-admin .da-modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }',
 
     // Checklist tab
     '#dd-admin .da-checklist-wrap { padding: 24px 32px; }',
@@ -228,63 +288,11 @@
     '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
-
-    // Add Client Button
-    '#dd-admin .da-add-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }',
-    '#dd-admin .da-add-btn:hover { opacity: 0.85; }',
-
-    // Add Client Modal
-    '#dd-admin .da-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }',
-    '#dd-admin .da-modal-overlay.visible { display: flex; }',
-    '#dd-admin .da-modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }',
-    '#dd-admin .da-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); position: sticky; top: 0; }',
-    '#dd-admin .da-modal-title { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 300; color: var(--gold); }',
-    '#dd-admin .da-modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }',
-    '#dd-admin .da-modal-close:hover { color: var(--text); }',
-    '#dd-admin .da-modal-body { padding: 24px; }',
-    '#dd-admin .da-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }',
-    '#dd-admin .da-modal-field { display: flex; flex-direction: column; gap: 6px; }',
-    '#dd-admin .da-field-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }',
-    '#dd-admin .da-field-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.2s; width: 100%; resize: vertical; }',
-    '#dd-admin .da-field-input:focus { border-color: var(--gold); }',
-    '#dd-admin .da-field-input::placeholder { color: var(--muted); }',
-    '#dd-admin .da-modal-check { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 12px; color: var(--text); }',
-    '#dd-admin .da-modal-check input { accent-color: var(--gold); width: 14px; height: 14px; cursor: pointer; }',
-    '#dd-admin .da-modal-check label { cursor: pointer; }',
-    '#dd-admin .da-modal-msg { font-size: 11px; min-height: 20px; margin-bottom: 12px; }',
-    '#dd-admin .da-modal-msg.success { color: var(--success); }',
-    '#dd-admin .da-modal-msg.error { color: var(--error); }',
-    '#dd-admin .da-modal-submit { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity 0.2s; }',
-    '#dd-admin .da-modal-submit:hover { opacity: 0.85; }',
-    '#dd-admin .da-modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }',
-
-    // Services
-    '#dd-admin .da-services-wrap { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }',
-    '#dd-admin .da-service-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--border); }',
-    '#dd-admin .da-service-name { font-size: 12px; color: var(--text); flex: 1; }',
-    '#dd-admin .da-service-actions { display: flex; align-items: center; gap: 8px; }',
-    '#dd-admin .da-service-status { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 10px; padding: 4px 8px; outline: none; cursor: pointer; appearance: none; transition: border-color 0.2s; }',
-    '#dd-admin .da-service-status:focus { border-color: var(--gold); }',
-    '#dd-admin .da-service-remove { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 10px; padding: 4px 8px; cursor: pointer; transition: color 0.2s, border-color 0.2s; }',
-    '#dd-admin .da-service-remove:hover { color: var(--error); border-color: var(--error); }',
-    '#dd-admin .da-add-service-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }',
-
-    // Admin Notes
-    '#dd-admin .da-notes-tabs { display: flex; gap: 1px; background: var(--border); margin-top: 8px; }',
-    '#dd-admin .da-note-tab { flex: 1; background: var(--surface-2); border: none; color: var(--muted); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 10px; cursor: pointer; transition: color 0.2s, background 0.2s; }',
-    '#dd-admin .da-note-tab:hover { color: var(--text); }',
-    '#dd-admin .da-note-tab.active { background: var(--gold-dim); color: var(--gold); border-bottom: 2px solid var(--gold); }',
-    '#dd-admin .da-note-panels { }',
-    '#dd-admin .da-note-panel { display: none; }',
-    '#dd-admin .da-note-panel.active { display: block; }',
-    '#dd-admin .da-note-textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-top: none; color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 12px 14px; resize: vertical; min-height: 100px; outline: none; line-height: 1.7; transition: border-color 0.2s; }',
-    '#dd-admin .da-note-textarea:focus { border-color: var(--gold); }',
-    '#dd-admin .da-note-textarea::placeholder { color: var(--muted); }',
-
     '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 16px; } #dd-admin .da-modal-grid { grid-template-columns: 1fr; } }'
   ].join('\n');
   document.head.appendChild(style);
 
+  // ── HTML ──────────────────────────────────────────────────────────
   var wrap = document.getElementById('dd-admin');
   if (!wrap) return;
 
@@ -317,27 +325,49 @@
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div>',
     '  <div class="da-tab-content active" id="tab-clients">',
-    '    <div class="da-toolbar"><input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." /><select class="da-filter" id="daFilter">' + filterOptions + '</select><div class="da-count" id="daCount"></div></div>',
+    '    <div class="da-toolbar"><input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." /><select class="da-filter" id="daFilter">' + filterOptions + '</select><div class="da-count" id="daCount"></div><button class="da-add-btn" id="daAddClientBtn">+ Add Client</button></div>',
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
     '  </div>',
     '  <div class="da-tab-content" id="tab-checklist">',
-    '    <div class="da-checklist-wrap">',
-    '      <div class="da-section-title">Client Onboarding</div>',
-    '      <input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." />',
-    '      <div id="daChecklistWrap"></div>',
-    '    </div>',
+    '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
     '  </div>',
     '  <div class="da-tab-content" id="tab-messages">',
     '    <div class="da-messages-wrap"><div class="da-section-title">Client Messages</div><div id="daMsgList"></div></div>',
     '  </div>',
+    '</div>',
+
+    // Add Client Modal
+    '<div class="da-modal-overlay" id="daAddClientModal">',
+    '  <div class="da-modal">',
+    '    <div class="da-modal-header"><div class="da-modal-title">Add New Client</div><button class="da-modal-close" id="daAddClientClose">&times;</button></div>',
+    '    <div class="da-modal-body">',
+    '      <div class="da-modal-grid">',
+    '        <div class="da-modal-field"><label class="da-field-label">Full Name *</label><input class="da-field-input" type="text" id="acName" placeholder="Jesse House" /></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">Email *</label><input class="da-field-input" type="email" id="acEmail" placeholder="client@email.com" /></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">Phone</label><input class="da-field-input" type="text" id="acPhone" placeholder="404-555-0123" /></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">Service</label><select class="da-field-input" id="acService"><option value="">Select service...</option>' + ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('') + '</select></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">Referral</label><input class="da-field-input" type="text" id="acReferral" placeholder="How did they hear about you?" /></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
+    '        <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
+    '      </div>',
+    '      <div class="da-modal-check"><input type="checkbox" id="acContractor" /><label for="acContractor">This is a contractor (will have multiple projects)</label></div>',
+    '      <div class="da-modal-check"><input type="checkbox" id="acSendEmail" checked /><label for="acSendEmail">Send welcome email with portal access link</label></div>',
+    '      <div class="da-modal-msg" id="acMsg"></div>',
+    '      <button class="da-modal-submit" id="acSubmit">Add Client</button>',
+    '    </div>',
+    '  </div>',
     '</div>'
   ].join('\n');
 
+  // ── STATE ─────────────────────────────────────────────────────────
   var allClients = [];
   var allMessages = [];
   var allChecklists = {};
   var allNotes = {};
 
+  // ── HELPERS ───────────────────────────────────────────────────────
   function apiFetch(path, options) {
     var opts = options || {};
     opts.headers = opts.headers || {};
@@ -348,12 +378,13 @@
   }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
   function serviceLabel(key) {
-    var map = { '2d_concept': '2D Concept Phase', '3d_concept': '3D Concept Phase', '2d_3d_concept': '2D + 3D Concept Phase', 'permit_plan': 'Permit Plan Phase', '2d_3d_permit': '2D + 3D + Permit Plan' };
-    return map[key] || key || '—';
+    var found = ALL_SERVICES.find(function(s) { return s.key === key; });
+    return found ? found.label : (key || '—');
   }
   function initials(name) { if (!name) return '?'; var p = name.trim().split(' '); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase(); }
   function formatInvestment(inv) { if (!inv) return ''; var n = (inv || '').replace(/[^0-9.]/g, ''); return n && !isNaN(n) ? '$' + Number(n).toLocaleString() : inv; }
 
+  // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
       document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -363,12 +394,7 @@
       if (target) target.classList.add('active');
       if (tab.dataset.tab === 'messages') {
         loadMessages();
-        // Mark all client messages as read
-        apiFetch('/rest/v1/messages?sender=neq.daydream_team&is_read=eq.false', {
-          method: 'PATCH',
-          headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ is_read: true })
-        }).catch(function() {});
+        apiFetch('/rest/v1/messages?sender=neq.daydream_team&is_read=eq.false', { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_read: true }) }).catch(function() {});
         var dot = tab.querySelector('.da-msg-dot');
         if (dot) dot.remove();
       }
@@ -376,6 +402,7 @@
     });
   });
 
+  // ── LOGIN ─────────────────────────────────────────────────────────
   document.getElementById('daLoginBtn').addEventListener('click', function() {
     if (document.getElementById('daPassword').value === ADMIN_PASSWORD) {
       try { sessionStorage.setItem('dd_admin', '1'); } catch(e) {}
@@ -392,13 +419,13 @@
   });
   try { if (sessionStorage.getItem('dd_admin') === '1') { document.getElementById('daLoginWrap').style.display = 'none'; document.getElementById('daDashboard').classList.add('visible'); loadClients(); } } catch(e) {}
 
+  // ── LOAD CLIENTS ──────────────────────────────────────────────────
   async function loadClients() {
     try {
       var res = await apiFetch('/rest/v1/clients?order=created_at.desc');
       allClients = await res.json();
       updateStats();
       renderCards(allClients);
-      // Silently check for unread messages to show dot
       checkUnreadMessages();
     } catch(e) {}
   }
@@ -428,29 +455,51 @@
     document.getElementById('daStatMonth').textContent = month;
   }
 
+  // ── RENDER CARDS ──────────────────────────────────────────────────
   function renderCards(clients) {
     var container = document.getElementById('daCardsWrap');
     document.getElementById('daCount').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
     if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients found</div>'; return; }
 
-    container.innerHTML = clients.map(function(c) {
+    // Group contractors (same email = same contractor)
+    var seen = {};
+    var grouped = [];
+    clients.forEach(function(c) {
+      if (c.is_contractor) {
+        if (!seen[c.email]) { seen[c.email] = { lead: c, projects: [] }; grouped.push(seen[c.email]); }
+        seen[c.email].projects.push(c);
+      } else {
+        grouped.push({ lead: c, projects: [] });
+      }
+    });
+
+    container.innerHTML = grouped.map(function(g) {
+      var c = g.lead;
+      var isContractor = c.is_contractor && g.projects.length > 0;
       var stage = getPipelineStage(c.status || 'client_inquiry_made');
       var inv = formatInvestment(c.investment || '');
+
       var pOpts = PIPELINE_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
       var cOpts = CLIENT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.client_stage === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
       var contractOpts = CONTRACT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.contract_status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
       var paymentOpts = PAYMENT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.payment_status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
 
+      // Contractor projects list
+      var contractorProjectsHtml = '';
+      if (isContractor && g.projects.length > 1) {
+        contractorProjectsHtml = '<div class="da-contractor-projects"><div class="da-contractor-projects-header">All Projects (' + g.projects.length + ')</div>'
+          + g.projects.map(function(p) {
+            var addr = [p.street, p.city, p.state].filter(Boolean).join(', ');
+            return '<div class="da-contractor-project-row"><div><div class="da-contractor-project-name">' + (p.full_name || 'Project') + '</div><div class="da-contractor-project-address">' + (addr || '—') + '</div></div><div class="da-stage-pill" style="color:' + getPipelineStage(p.status).color + ';border-color:' + getPipelineStage(p.status).color + ';background:' + getPipelineStage(p.status).color + '18;font-size:7px">' + getPipelineStage(p.status).label + '</div></div>';
+          }).join('')
+          + '</div>';
+      }
+
       return '<div class="da-client-card" id="card-' + c.id + '">'
         + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
         + '  <div class="da-card-left"><div class="da-card-avatar">' + initials(c.full_name) + '</div>'
-        + '  <div><div class="da-card-name">' + (c.full_name || 'Unknown') + '</div><div class="da-card-sub">' + (c.email || '') + (c.phone ? ' &middot; ' + c.phone : '') + '</div></div></div>'
-        + '  <div class="da-card-right">'
-        + '    <div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + stage.label + '</div>'
-        + '    <div class="da-card-investment">' + inv + '</div>'
-        + '    <div class="da-card-date">' + formatDate(c.created_at) + '</div>'
-        + '    <div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div>'
-        + '  </div>'
+        + '  <div><div class="da-card-name">' + (c.company_name || c.full_name || 'Unknown') + (isContractor ? '<span class="da-contractor-badge">Contractor</span>' : '') + '</div><div class="da-card-sub">' + (c.email || '') + (c.phone ? ' &middot; ' + c.phone : '') + '</div></div></div>'
+        + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + stage.label + '</div><div class="da-card-investment">' + inv + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
         + '</div>'
         + '<div class="da-card-details" id="det-' + c.id + '">'
         + '  <div class="da-details-grid">'
@@ -460,6 +509,7 @@
         + '    <div class="da-detail-item"><div class="da-detail-label">Referral</div><div class="da-detail-value">' + (c.referral || '—') + '</div></div>'
         + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + (c.notes || '—') + '</div></div>'
         + '  </div>'
+        + contractorProjectsHtml
         + '  <div class="da-card-actions">'
         + '    <div class="da-section-divider">Internal Pipeline</div>'
         + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'status\', \'psel-' + c.id + '\')">Update</button></div>'
@@ -473,24 +523,20 @@
         + '    <div class="da-action-row"><div class="da-action-label">Permit Folder</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_permit_link || '') + '" /></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
         + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
-        + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
         + '    <div class="da-section-divider">Project Services</div>'
         + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
         + '    <div class="da-section-divider">Admin Notes</div>'
         + '    <div class="da-notes-tabs"><button class="da-note-tab active" data-note="general" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">General</button><button class="da-note-tab" data-note="discussion" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Discussion</button><button class="da-note-tab" data-note="design" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Design</button><button class="da-note-tab" data-note="construction" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Construction</button></div>'
-        + '    <div class="da-note-panels">'
-        + '      <div class="da-note-panel active" id="note-panel-general-' + c.id + '"><textarea class="da-note-textarea" id="note-general-' + c.id + '" placeholder="General notes about this client...">' + (c.admin_notes_general || '') + '</textarea></div>'
-        + '      <div class="da-note-panel" id="note-panel-discussion-' + c.id + '"><textarea class="da-note-textarea" id="note-discussion-' + c.id + '" placeholder="Discussion and call notes...">' + (c.admin_notes_discussion || '') + '</textarea></div>'
-        + '      <div class="da-note-panel" id="note-panel-design-' + c.id + '"><textarea class="da-note-textarea" id="note-design-' + c.id + '" placeholder="Design phase notes...">' + (c.admin_notes_design || '') + '</textarea></div>'
-        + '      <div class="da-note-panel" id="note-panel-construction-' + c.id + '"><textarea class="da-note-textarea" id="note-construction-' + c.id + '" placeholder="Construction phase notes...">' + (c.admin_notes_construction || '') + '</textarea></div>'
-        + '    </div>'
-        + '    <button class="da-update-btn" style="margin-top:8px" onclick="window._saveAdminNotes('' + c.id + '')">Save Notes</button>'
+        + '    <div class="da-note-panels"><div class="da-note-panel active" id="note-panel-general-' + c.id + '"><textarea class="da-note-textarea" id="note-general-' + c.id + '" placeholder="General notes...">' + (c.admin_notes_general || '') + '</textarea></div><div class="da-note-panel" id="note-panel-discussion-' + c.id + '"><textarea class="da-note-textarea" id="note-discussion-' + c.id + '" placeholder="Discussion and call notes...">' + (c.admin_notes_discussion || '') + '</textarea></div><div class="da-note-panel" id="note-panel-design-' + c.id + '"><textarea class="da-note-textarea" id="note-design-' + c.id + '" placeholder="Design phase notes...">' + (c.admin_notes_design || '') + '</textarea></div><div class="da-note-panel" id="note-panel-construction-' + c.id + '"><textarea class="da-note-textarea" id="note-construction-' + c.id + '" placeholder="Construction phase notes...">' + (c.admin_notes_construction || '') + '</textarea></div></div>'
+        + '    <button class="da-update-btn" style="margin-top:8px" onclick="window._saveAdminNotes(\'' + c.id + '\')">Save Notes</button>'
+        + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
         + '  </div>'
         + '</div>'
         + '</div>';
     }).join('');
   }
 
+  // ── TOGGLE ────────────────────────────────────────────────────────
   window._toggleCard = function(id) {
     var det = document.getElementById('det-' + id);
     var exp = document.getElementById('exp-' + id);
@@ -498,109 +544,7 @@
     else { det.classList.add('visible'); exp.classList.add('open'); loadClientServices(id); }
   };
 
-  async function loadClientServices(clientId) {
-    var wrap = document.getElementById('services-' + clientId);
-    if (!wrap) return;
-    try {
-      var res = await apiFetch('/rest/v1/client_services?client_id=eq.' + clientId + '&order=created_at.asc');
-      var services = await res.json();
-      renderClientServices(clientId, services || []);
-    } catch(e) { console.error('Services error:', e); }
-  }
-
-  function renderClientServices(clientId, services) {
-    var wrap = document.getElementById('services-' + clientId);
-    if (!wrap) return;
-
-    var serviceOpts = ALL_SERVICES.map(function(s) {
-      return '<option value="' + s.key + '">' + s.label + '</option>';
-    }).join('');
-
-    var existingHtml = services.length ? services.map(function(s) {
-      return '<div class="da-service-item" id="svc-' + s.id + '">'
-        + '<div class="da-service-name">' + s.service_name + '</div>'
-        + '<div class="da-service-actions">'
-        + '<select class="da-service-status" onchange="window._updateServiceStatus('' + s.id + '', this.value)">'
-        + '<option value="pending"' + (s.status === 'pending' ? ' selected' : '') + '>Pending</option>'
-        + '<option value="in_progress"' + (s.status === 'in_progress' ? ' selected' : '') + '>In Progress</option>'
-        + '<option value="complete"' + (s.status === 'complete' ? ' selected' : '') + '>Complete</option>'
-        + '</select>'
-        + '<button class="da-service-remove" onclick="window._removeService('' + s.id + '', '' + clientId + '')">&#10005;</button>'
-        + '</div>'
-        + '</div>';
-    }).join('') : '<div style="font-size:11px;color:var(--muted);padding:4px 0 8px">No services added yet</div>';
-
-    wrap.innerHTML = existingHtml
-      + '<div class="da-add-service-row">'
-      + '<select class="da-select" id="svc-select-' + clientId + '">'
-      + '<option value="">Select service to add...</option>'
-      + serviceOpts
-      + '<option value="__custom__">+ Add Custom Service</option>'
-      + '</select>'
-      + '<button class="da-update-btn" onclick="window._addService('' + clientId + '')">Add</button>'
-      + '</div>'
-      + '<div id="svc-custom-' + clientId + '" style="display:none;margin-top:8px">'
-      + '<input class="da-text-input" id="svc-custom-input-' + clientId + '" type="text" placeholder="Enter custom service name..." />'
-      + '</div>';
-
-    // Show/hide custom input
-    var sel = document.getElementById('svc-select-' + clientId);
-    if (sel) {
-      sel.addEventListener('change', function() {
-        var customDiv = document.getElementById('svc-custom-' + clientId);
-        if (customDiv) customDiv.style.display = this.value === '__custom__' ? 'block' : 'none';
-      });
-    }
-  }
-
-  window._addService = async function(clientId) {
-    var sel = document.getElementById('svc-select-' + clientId);
-    var customInput = document.getElementById('svc-custom-input-' + clientId);
-    if (!sel) return;
-
-    var serviceKey = sel.value;
-    var serviceName = '';
-
-    if (serviceKey === '__custom__') {
-      serviceName = customInput ? customInput.value.trim() : '';
-      serviceKey = null;
-      if (!serviceName) return;
-    } else if (serviceKey) {
-      var found = ALL_SERVICES.find(function(s) { return s.key === serviceKey; });
-      serviceName = found ? found.label : serviceKey;
-    } else { return; }
-
-    try {
-      await apiFetch('/rest/v1/client_services', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ client_id: clientId, service_name: serviceName, service_key: serviceKey, status: 'pending' })
-      });
-      if (customInput) customInput.value = '';
-      sel.value = '';
-      var customDiv = document.getElementById('svc-custom-' + clientId);
-      if (customDiv) customDiv.style.display = 'none';
-      await loadClientServices(clientId);
-    } catch(e) {}
-  };
-
-  window._updateServiceStatus = async function(serviceId, status) {
-    try {
-      await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ status: status })
-      });
-    } catch(e) {}
-  };
-
-  window._removeService = async function(serviceId, clientId) {
-    try {
-      await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' });
-      await loadClientServices(clientId);
-    } catch(e) {}
-  };
-
+  // ── UPDATE FIELDS ─────────────────────────────────────────────────
   window._updateField = async function(id, field, selectId) {
     var val = document.getElementById(selectId).value;
     try {
@@ -641,11 +585,95 @@
     setTimeout(function() { if (btn) { btn.textContent = orig; btn.style.background = 'var(--gold)'; } }, 2000);
   }
 
+  // ── SERVICES ─────────────────────────────────────────────────────
+  async function loadClientServices(clientId) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+    try {
+      var res = await apiFetch('/rest/v1/client_services?client_id=eq.' + clientId + '&order=created_at.asc');
+      var services = await res.json();
+      renderClientServices(clientId, services || []);
+    } catch(e) {}
+  }
+
+  function renderClientServices(clientId, services) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+    var serviceOpts = ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('');
+    var existingHtml = services.length ? services.map(function(s) {
+      return '<div class="da-service-item" id="svc-' + s.id + '"><div class="da-service-name">' + s.service_name + '</div><div class="da-service-actions"><select class="da-service-status" onchange="window._updateServiceStatus(\'' + s.id + '\', this.value)"><option value="pending"' + (s.status === 'pending' ? ' selected' : '') + '>Pending</option><option value="in_progress"' + (s.status === 'in_progress' ? ' selected' : '') + '>In Progress</option><option value="complete"' + (s.status === 'complete' ? ' selected' : '') + '>Complete</option></select><button class="da-service-remove" onclick="window._removeService(\'' + s.id + '\', \'' + clientId + '\')">&#10005;</button></div></div>';
+    }).join('') : '<div style="font-size:11px;color:var(--muted);padding:4px 0 8px">No services added yet</div>';
+
+    wrap.innerHTML = existingHtml
+      + '<div class="da-add-service-row"><select class="da-select" id="svc-select-' + clientId + '"><option value="">Select service to add...</option>' + serviceOpts + '<option value="__custom__">+ Add Custom Service</option></select><button class="da-update-btn" onclick="window._addService(\'' + clientId + '\')">Add</button></div>'
+      + '<div id="svc-custom-' + clientId + '" style="display:none;margin-top:8px"><input class="da-text-input" id="svc-custom-input-' + clientId + '" type="text" placeholder="Enter custom service name..." /></div>';
+
+    var sel = document.getElementById('svc-select-' + clientId);
+    if (sel) {
+      sel.addEventListener('change', function() {
+        var d = document.getElementById('svc-custom-' + clientId);
+        if (d) d.style.display = this.value === '__custom__' ? 'block' : 'none';
+      });
+    }
+  }
+
+  window._addService = async function(clientId) {
+    var sel = document.getElementById('svc-select-' + clientId);
+    var customInput = document.getElementById('svc-custom-input-' + clientId);
+    if (!sel) return;
+    var serviceKey = sel.value;
+    var serviceName = '';
+    if (serviceKey === '__custom__') { serviceName = customInput ? customInput.value.trim() : ''; serviceKey = null; if (!serviceName) return; }
+    else if (serviceKey) { var found = ALL_SERVICES.find(function(s) { return s.key === serviceKey; }); serviceName = found ? found.label : serviceKey; }
+    else { return; }
+    try {
+      await apiFetch('/rest/v1/client_services', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, service_name: serviceName, service_key: serviceKey, status: 'pending' }) });
+      if (customInput) customInput.value = '';
+      sel.value = '';
+      var d = document.getElementById('svc-custom-' + clientId);
+      if (d) d.style.display = 'none';
+      await loadClientServices(clientId);
+    } catch(e) {}
+  };
+
+  window._updateServiceStatus = async function(serviceId, status) {
+    try { await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) }); } catch(e) {}
+  };
+
+  window._removeService = async function(serviceId, clientId) {
+    try { await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' }); await loadClientServices(clientId); } catch(e) {}
+  };
+
+  // ── ADMIN NOTES ───────────────────────────────────────────────────
+  window._switchNoteTab = function(btn) {
+    var id = btn.dataset.id;
+    var note = btn.dataset.note;
+    btn.closest('.da-notes-tabs').querySelectorAll('.da-note-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    ['general','discussion','design','construction'].forEach(function(n) {
+      var panel = document.getElementById('note-panel-' + n + '-' + id);
+      if (panel) panel.classList.toggle('active', n === note);
+    });
+  };
+
+  window._saveAdminNotes = async function(id) {
+    var g = document.getElementById('note-general-' + id);
+    var d = document.getElementById('note-discussion-' + id);
+    var ds = document.getElementById('note-design-' + id);
+    var c = document.getElementById('note-construction-' + id);
+    try {
+      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ admin_notes_general: g ? g.value : null, admin_notes_discussion: d ? d.value : null, admin_notes_design: ds ? ds.value : null, admin_notes_construction: c ? c.value : null }) });
+      var card = document.getElementById('card-' + id);
+      if (card) { var btn = card.querySelector('[onclick*="_saveAdminNotes"]'); if (btn) { btn.textContent = 'Notes Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Save Notes'; btn.style.background = 'var(--gold)'; }, 2000); } }
+    } catch(e) {}
+  };
+
+  // ── SEARCH & FILTER ───────────────────────────────────────────────
   function applyFilters() {
     var q = document.getElementById('daSearch').value.toLowerCase();
     var stage = document.getElementById('daFilter').value;
     renderCards(allClients.filter(function(c) {
-      var mq = !q || (c.full_name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q) || (c.phone || '').toLowerCase().includes(q);
+      var mq = !q || (c.full_name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q) || (c.phone || '').toLowerCase().includes(q) || (c.company_name || '').toLowerCase().includes(q);
       var ms = !stage || c.status === stage || (!c.status && stage === 'client_inquiry_made');
       return mq && ms;
     }));
@@ -653,25 +681,49 @@
   document.getElementById('daSearch').addEventListener('input', applyFilters);
   document.getElementById('daFilter').addEventListener('change', applyFilters);
 
+  // ── ADD CLIENT MODAL ──────────────────────────────────────────────
+  document.getElementById('daAddClientBtn').addEventListener('click', function() { document.getElementById('daAddClientModal').classList.add('visible'); });
+  document.getElementById('daAddClientClose').addEventListener('click', function() { document.getElementById('daAddClientModal').classList.remove('visible'); });
+  document.getElementById('daAddClientModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('visible'); });
+
+  document.getElementById('acSubmit').addEventListener('click', async function() {
+    var name = document.getElementById('acName').value.trim();
+    var email = document.getElementById('acEmail').value.trim();
+    var phone = document.getElementById('acPhone').value.trim();
+    var company = document.getElementById('acCompany').value.trim();
+    var service = document.getElementById('acService').value;
+    var investment = document.getElementById('acInvestment').value.trim();
+    var referral = document.getElementById('acReferral').value.trim();
+    var street = document.getElementById('acStreet').value.trim();
+    var notes = document.getElementById('acNotes').value.trim();
+    var isContractor = document.getElementById('acContractor').checked;
+    var msg = document.getElementById('acMsg');
+    if (!name || !email) { msg.textContent = 'Name and email are required.'; msg.className = 'da-modal-msg error'; return; }
+    this.disabled = true; this.textContent = 'Adding...'; msg.textContent = '';
+    try {
+      var res = await apiFetch('/rest/v1/clients', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ full_name: name, email: email, phone: phone || null, company_name: company || null, project_type: service || null, investment: investment || null, referral: referral || null, street: street || null, notes: notes || null, status: 'client_inquiry_made', client_stage: 'inquiry_submitted', is_contractor: isContractor }) });
+      if (res.ok) {
+        msg.textContent = 'Client added successfully!';
+        msg.className = 'da-modal-msg success';
+        ['acName','acEmail','acPhone','acCompany','acInvestment','acReferral','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('acService').value = '';
+        document.getElementById('acContractor').checked = false;
+        await loadClients();
+        setTimeout(function() { document.getElementById('daAddClientModal').classList.remove('visible'); msg.textContent = ''; }, 2000);
+      } else { msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error'; }
+    } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
+    this.disabled = false; this.textContent = 'Add Client';
+  });
+
   // ── CHECKLIST TAB ─────────────────────────────────────────────────
   async function loadAllChecklists() {
     try {
-      var [checkRes, noteRes] = await Promise.all([
-        apiFetch('/rest/v1/checklist_items?select=*'),
-        apiFetch('/rest/v1/client_notes?select=*')
-      ]);
+      var [checkRes, noteRes] = await Promise.all([ apiFetch('/rest/v1/checklist_items?select=*'), apiFetch('/rest/v1/client_notes?select=*') ]);
       var checks = await checkRes.json();
       var notes = await noteRes.json();
-      allChecklists = {};
-      allNotes = {};
-      if (checks) checks.forEach(function(c) {
-        if (!allChecklists[c.client_id]) allChecklists[c.client_id] = {};
-        allChecklists[c.client_id][c.item_key] = c.completed;
-      });
-      if (notes) notes.forEach(function(n) {
-        if (!allNotes[n.client_id]) allNotes[n.client_id] = {};
-        allNotes[n.client_id][n.note_key] = n.content;
-      });
+      allChecklists = {}; allNotes = {};
+      if (checks) checks.forEach(function(c) { if (!allChecklists[c.client_id]) allChecklists[c.client_id] = {}; allChecklists[c.client_id][c.item_key] = c.completed; });
+      if (notes) notes.forEach(function(n) { if (!allNotes[n.client_id]) allNotes[n.client_id] = {}; allNotes[n.client_id][n.note_key] = n.content; });
       renderChecklistTab(allClients);
     } catch(e) {}
   }
@@ -679,45 +731,24 @@
   function renderChecklistTab(clients) {
     var container = document.getElementById('daChecklistWrap');
     if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients yet</div>'; return; }
-
-    var CHECKLIST_KEYS = ['goals', 'inspo', 'photos', 'survey', 'bylaws', 'houseplans'];
-
+    var KEYS = ['goals','inspo','photos','survey','bylaws','houseplans'];
     container.innerHTML = clients.map(function(c) {
-      var clientChecks = allChecklists[c.id] || {};
-      var clientNotes = allNotes[c.id] || {};
-      var doneCount = CHECKLIST_KEYS.filter(function(k) { return clientChecks[k]; }).length;
-
-      var items = CHECKLIST_KEYS.map(function(key) {
-        var done = clientChecks[key] === true;
-        var note = clientNotes[key] || '';
-        return '<div class="da-check-row">'
-          + '<div class="da-check-dot' + (done ? ' done' : '') + '"></div>'
-          + '<div style="flex:1">'
-          + '  <div class="da-check-row-label">' + (CHECKLIST_LABELS[key] || key) + (done ? ' <span style="color:var(--success);font-size:10px">✓</span>' : '') + '</div>'
-          + (note ? '<div class="da-check-row-note">' + note + '</div>' : '')
-          + '</div>'
-          + '</div>';
+      var cc = allChecklists[c.id] || {};
+      var cn = allNotes[c.id] || {};
+      var done = KEYS.filter(function(k) { return cc[k]; }).length;
+      var items = KEYS.map(function(key) {
+        var isDone = cc[key] === true;
+        var note = cn[key] || '';
+        return '<div class="da-check-row"><div class="da-check-dot' + (isDone ? ' done' : '') + '"></div><div style="flex:1"><div class="da-check-row-label">' + (CHECKLIST_LABELS[key] || key) + (isDone ? ' <span style="color:var(--success);font-size:10px">✓</span>' : '') + '</div>' + (note ? '<div class="da-check-row-note">' + note + '</div>' : '') + '</div></div>';
       }).join('');
-
-      return '<div class="da-client-checklist">'
-        + '<div class="da-client-checklist-header" onclick="window._toggleClientChecklist(\'' + c.id + '\')">'
-        + '  <div class="da-client-checklist-name">' + (c.full_name || 'Unknown') + ' <span style="font-size:10px;color:var(--muted);">' + (c.email || '') + '</span></div>'
-        + '  <div class="da-client-checklist-progress"><span>' + doneCount + '</span> / ' + CHECKLIST_KEYS.length + ' complete</div>'
-        + '</div>'
-        + '<div class="da-client-checklist-body" id="client-checklist-' + c.id + '">' + items + '</div>'
-        + '</div>';
+      return '<div class="da-client-checklist"><div class="da-client-checklist-header" onclick="window._toggleClientChecklist(\'' + c.id + '\')"><div class="da-client-checklist-name">' + (c.full_name || 'Unknown') + ' <span style="font-size:10px;color:var(--muted)">' + (c.email || '') + '</span></div><div class="da-client-checklist-progress"><span>' + done + '</span> / ' + KEYS.length + '</div></div><div class="da-client-checklist-body" id="client-checklist-' + c.id + '">' + items + '</div></div>';
     }).join('');
   }
 
-  window._toggleClientChecklist = function(id) {
-    var body = document.getElementById('client-checklist-' + id);
-    if (body) body.classList.toggle('visible');
-  };
-
+  window._toggleClientChecklist = function(id) { var b = document.getElementById('client-checklist-' + id); if (b) b.classList.toggle('visible'); };
   document.getElementById('daCheckSearch').addEventListener('input', function() {
     var q = this.value.toLowerCase();
-    var filtered = allClients.filter(function(c) { return (c.full_name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q); });
-    renderChecklistTab(filtered);
+    renderChecklistTab(allClients.filter(function(c) { return (c.full_name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q); }));
   });
 
   // ── MESSAGES ─────────────────────────────────────────────────────
@@ -731,30 +762,16 @@
 
   function renderMessages() {
     var container = document.getElementById('daMsgList');
-    if (!allMessages || !allMessages.length) {
-      container.innerHTML = '<div class="da-empty">No messages yet</div>';
-      // Clear dot
-      var tab = document.querySelector('#dd-admin [data-tab="messages"]');
-      if (tab) { var dot = tab.querySelector('.da-msg-dot'); if (dot) dot.remove(); }
-      return;
-    }
-    var groups = {};
-    allMessages.forEach(function(m) {
-      var key = m.client_id || m.sender || 'unknown';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(m);
-    });
-    // Update notification dot for unread client messages
-    var unreadCount = allMessages.filter(function(m) { return !m.is_read && m.sender !== 'daydream_team'; }).length;
+    if (!allMessages || !allMessages.length) { container.innerHTML = '<div class="da-empty">No messages yet</div>'; return; }
+    var unreadCount = allMessages.filter(function(m) { return m.sender !== 'daydream_team' && !m.is_read; }).length;
     var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
     if (msgTab) {
       var existingDot = msgTab.querySelector('.da-msg-dot');
-      if (unreadCount > 0) {
-        if (!existingDot) { existingDot = document.createElement('span'); existingDot.className = 'da-msg-dot'; msgTab.appendChild(existingDot); }
-        existingDot.textContent = unreadCount;
-      } else if (existingDot) { existingDot.remove(); }
+      if (unreadCount > 0) { if (!existingDot) { existingDot = document.createElement('span'); existingDot.className = 'da-msg-dot'; msgTab.appendChild(existingDot); } existingDot.textContent = unreadCount; }
+      else if (existingDot) { existingDot.remove(); }
     }
-
+    var groups = {};
+    allMessages.forEach(function(m) { var key = m.client_id || m.sender || 'unknown'; if (!groups[key]) groups[key] = []; groups[key].push(m); });
     container.innerHTML = Object.keys(groups).map(function(key) {
       var msgs = groups[key];
       var latest = msgs[msgs.length - 1];
@@ -771,151 +788,11 @@
   }
 
   window._toggleThread = function(id) { var t = document.getElementById('thread-' + id); if (t) t.classList.toggle('visible'); };
-
   window._sendReply = async function(clientId, projectId) {
     var textarea = document.getElementById('reply-' + clientId);
     var content = textarea ? textarea.value.trim() : '';
     if (!content) return;
-    try {
-      await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: projectId || null, client_id: clientId || null, sender: 'daydream_team', content: content, is_read: true }) });
-      textarea.value = '';
-      await loadMessages();
-    } catch(e) {}
-  };
-
-  // ── ADD CLIENT MODAL ──────────────────────────────────────────────
-  document.getElementById('daAddClientBtn').addEventListener('click', function() {
-    document.getElementById('daAddClientModal').classList.add('visible');
-  });
-
-  document.getElementById('daAddClientClose').addEventListener('click', function() {
-    document.getElementById('daAddClientModal').classList.remove('visible');
-  });
-
-  document.getElementById('daAddClientModal').addEventListener('click', function(e) {
-    if (e.target === this) this.classList.remove('visible');
-  });
-
-  document.getElementById('acSubmit').addEventListener('click', async function() {
-    var name = document.getElementById('acName').value.trim();
-    var email = document.getElementById('acEmail').value.trim();
-    var phone = document.getElementById('acPhone').value.trim();
-    var service = document.getElementById('acService').value;
-    var investment = document.getElementById('acInvestment').value.trim();
-    var referral = document.getElementById('acReferral').value.trim();
-    var street = document.getElementById('acStreet').value.trim();
-    var city = document.getElementById('acCity').value.trim();
-    var state = document.getElementById('acState').value.trim();
-    var notes = document.getElementById('acNotes').value.trim();
-    var sendEmail = document.getElementById('acSendEmail').checked;
-    var msg = document.getElementById('acMsg');
-
-    if (!name || !email) {
-      msg.textContent = 'Name and email are required.';
-      msg.className = 'da-modal-msg error';
-      return;
-    }
-
-    this.disabled = true;
-    this.textContent = 'Adding Client...';
-    msg.textContent = '';
-
-    try {
-      var res = await apiFetch('/rest/v1/clients', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify({
-          full_name: name, email: email, phone: phone || null,
-          project_type: service || null, investment: investment || null,
-          referral: referral || null, street: street || null,
-          city: city || null, state: state || null, notes: notes || null,
-          status: 'client_inquiry_made', client_stage: 'inquiry_submitted'
-        })
-      });
-
-      if (res.ok) {
-        msg.textContent = sendEmail
-          ? 'Client added! Welcome email will be sent automatically via your webhook.'
-          : 'Client added successfully!';
-        msg.className = 'da-modal-msg success';
-
-        // Clear form
-        ['acName','acEmail','acPhone','acInvestment','acReferral','acStreet','acCity','acState','acNotes'].forEach(function(id) {
-          var el = document.getElementById(id); if (el) el.value = '';
-        });
-        document.getElementById('acService').value = '';
-
-        // Reload clients
-        await loadClients();
-
-        setTimeout(function() {
-          document.getElementById('daAddClientModal').classList.remove('visible');
-          msg.textContent = '';
-        }, 2000);
-      } else {
-        var err = await res.json();
-        msg.textContent = 'Error: ' + (err.message || 'Something went wrong');
-        msg.className = 'da-modal-msg error';
-      }
-    } catch(e) {
-      msg.textContent = 'Something went wrong. Please try again.';
-      msg.className = 'da-modal-msg error';
-    }
-
-    this.disabled = false;
-    this.textContent = 'Add Client';
-  });
-
-  // ── ADMIN NOTES ───────────────────────────────────────────────────
-  window._switchNoteTab = function(btn) {
-    var id = btn.dataset.id;
-    var note = btn.dataset.note;
-    // Update tab buttons
-    var allTabs = btn.closest('.da-notes-tabs').querySelectorAll('.da-note-tab');
-    allTabs.forEach(function(t) { t.classList.remove('active'); });
-    btn.classList.add('active');
-    // Update panels
-    ['general','discussion','design','construction'].forEach(function(n) {
-      var panel = document.getElementById('note-panel-' + n + '-' + id);
-      if (panel) panel.classList.toggle('active', n === note);
-    });
-  };
-
-  window._saveAdminNotes = async function(id) {
-    var general = document.getElementById('note-general-' + id);
-    var discussion = document.getElementById('note-discussion-' + id);
-    var design = document.getElementById('note-design-' + id);
-    var construction = document.getElementById('note-construction-' + id);
-
-    try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({
-          admin_notes_general: general ? general.value : null,
-          admin_notes_discussion: discussion ? discussion.value : null,
-          admin_notes_design: design ? design.value : null,
-          admin_notes_construction: construction ? construction.value : null
-        })
-      });
-      var c = allClients.find(function(x) { return x.id === id; });
-      if (c) {
-        if (general) c.admin_notes_general = general.value;
-        if (discussion) c.admin_notes_discussion = discussion.value;
-        if (design) c.admin_notes_design = design.value;
-        if (construction) c.admin_notes_construction = construction.value;
-      }
-      // Flash saved
-      var card = document.getElementById('card-' + id);
-      if (card) {
-        var btn = card.querySelector('[onclick*="_saveAdminNotes"]');
-        if (btn) {
-          btn.textContent = 'Notes Saved!';
-          btn.style.background = 'var(--success)';
-          setTimeout(function() { btn.textContent = 'Save Notes'; btn.style.background = 'var(--gold)'; }, 2000);
-        }
-      }
-    } catch(e) { console.error('Notes save error:', e); }
+    try { await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: projectId || null, client_id: clientId || null, sender: 'daydream_team', content: content, is_read: true }) }); textarea.value = ''; await loadMessages(); } catch(e) {}
   };
 
 })();
