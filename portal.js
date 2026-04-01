@@ -3,32 +3,20 @@
   // ── CONFIG ────────────────────────────────────────────────────────
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
-  var PORTAL_URL = 'https://daydreamdesignandbuild.com/app/';
+  var PORTAL_URL   = 'https://daydreamdesignandbuild.com/app/';
   var CONSULT_URL  = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
   var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
 
-  // ── PARSE TOKEN FROM URL HASH ─────────────────────────────────────
-  // Handles both direct landing and redirects from other pages
-  function getTokenFromUrl() {
-    var hash = window.location.hash || window.location.search;
-    if (!hash) return null;
-    var str = hash.replace(/^[#?]/, '');
-    var params = new URLSearchParams(str);
-    var token = params.get('access_token');
-    var refresh = params.get('refresh_token');
-    var error = params.get('error');
-    if (error) {
-      console.warn('Auth error in URL:', params.get('error_description'));
-      return null;
-    }
-    if (token) {
-      sessionStorage.setItem('dd_token', token);
-      if (refresh) sessionStorage.setItem('dd_refresh', refresh);
-      // Clean the URL
-      history.replaceState(null, '', window.location.pathname);
-      return token;
-    }
-    return null;
+  // ── LOAD SUPABASE JS CLIENT ───────────────────────────────────────
+  function loadSupabase(callback) {
+    if (window._supabaseClient) { callback(window._supabaseClient); return; }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+    s.onload = function() {
+      window._supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      callback(window._supabaseClient);
+    };
+    document.head.appendChild(s);
   }
 
   // ── FONTS ─────────────────────────────────────────────────────────
@@ -49,15 +37,8 @@
     '  font-family: Jost, sans-serif; font-weight: 300;',
     '  background: var(--bg); color: var(--text); min-height: 100vh; width: 100%;',
     '}',
-    '#dd-portal .dd-loading {',
-    '  min-height: 100vh; display: flex; align-items: center; justify-content: center;',
-    '  font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);',
-    '}',
-    '#dd-portal .dd-login-wrap {',
-    '  min-height: 100vh; display: none; flex-direction: column;',
-    '  align-items: center; justify-content: center; padding: 40px 20px;',
-    '  animation: ddFadeUp 0.8s ease both;',
-    '}',
+    '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
+    '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; animation: ddFadeUp 0.8s ease both; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; }',
     '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
     '#dd-portal .dd-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 36px 40px; text-align: center; }',
@@ -135,7 +116,7 @@
     '#dd-portal .dd-message { display: flex; flex-direction: column; gap: 4px; max-width: 75%; }',
     '#dd-portal .dd-message.mine { align-self: flex-end; }',
     '#dd-portal .dd-message.theirs { align-self: flex-start; }',
-    '#dd-portal .dd-message-bubble { padding: 12px 16px; font-size: 13px; line-height: 1.7; letter-spacing: 0.02em; }',
+    '#dd-portal .dd-message-bubble { padding: 12px 16px; font-size: 13px; line-height: 1.7; }',
     '#dd-portal .dd-message.mine .dd-message-bubble { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); }',
     '#dd-portal .dd-message.theirs .dd-message-bubble { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
     '#dd-portal .dd-message-meta { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }',
@@ -147,7 +128,7 @@
     '#dd-portal .dd-send-btn:hover { opacity: 0.85; }',
     '#dd-portal .dd-drive-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }',
     '#dd-portal .dd-drive-item { background: var(--surface); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }',
-    '#dd-portal .dd-drive-item-name { font-size: 13px; color: var(--text); letter-spacing: 0.03em; }',
+    '#dd-portal .dd-drive-item-name { font-size: 13px; color: var(--text); }',
     '#dd-portal .dd-drive-item-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }',
     '#dd-portal .dd-drive-link { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 16px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-portal .dd-drive-link:hover { background: var(--gold); color: var(--bg); }',
@@ -171,7 +152,6 @@
 
   wrap.innerHTML = [
     '<div id="ddLoading" class="dd-loading">Loading your portal...</div>',
-
     '<div id="ddLoginWrap" class="dd-login-wrap">',
     '  <div class="dd-login-card">',
     '    <div class="dd-login-header">',
@@ -180,7 +160,7 @@
     '    </div>',
     '    <div class="dd-login-body">',
     '      <div class="dd-login-title">Access Your Portal</div>',
-    '      <div class="dd-login-desc">Enter your email address and we will send you a secure one-click link to access your project portal.</div>',
+    '      <div class="dd-login-desc">Enter your email address and we will send you a secure one-click link to sign in to your project portal.</div>',
     '      <div class="dd-input-wrap">',
     '        <label class="dd-input-label">Email Address</label>',
     '        <input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" />',
@@ -190,7 +170,6 @@
     '    </div>',
     '  </div>',
     '</div>',
-
     '<div id="ddDashboard" class="dd-dashboard">',
     '  <nav class="dd-nav">',
     '    <div class="dd-nav-logo">Daydream</div>',
@@ -207,7 +186,6 @@
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '  </div>',
     '  <div class="dd-content">',
-
     '    <div class="dd-tab-content active" id="tab-overview">',
     '      <div class="dd-section-title">Your Project</div>',
     '      <div class="dd-section-sub">Welcome to your Daydream client portal</div>',
@@ -233,7 +211,6 @@
     '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Final Deliverables</div></div>',
     '      </div>',
     '    </div>',
-
     '    <div class="dd-tab-content" id="tab-uploads">',
     '      <div class="dd-section-title">Document Uploads</div>',
     '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised into your project folder.</div>',
@@ -246,7 +223,6 @@
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Plans</div><div class="dd-upload-card-desc">Existing site plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-siteplans"></div></div></div>',
     '      </div>',
     '    </div>',
-
     '    <div class="dd-tab-content" id="tab-messages">',
     '      <div class="dd-section-title">Messages</div>',
     '      <div class="dd-section-sub">Communicate directly with the Daydream team</div>',
@@ -259,7 +235,6 @@
     '        </div>',
     '      </div>',
     '    </div>',
-
     '    <div class="dd-tab-content" id="tab-schedule">',
     '      <div class="dd-section-title">Schedule a Meeting</div>',
     '      <div class="dd-section-sub">Book time with the Daydream team</div>',
@@ -268,13 +243,11 @@
     '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review designs and discuss feedback and changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
     '      </div>',
     '    </div>',
-
     '    <div class="dd-tab-content" id="tab-drive">',
     '      <div class="dd-section-title">Project Files</div>',
     '      <div class="dd-section-sub">Access your shared Google Drive project folder</div>',
     '      <div class="dd-drive-list" id="ddDriveList"><div class="dd-empty">Your project folder will appear here once your project is active.</div></div>',
     '    </div>',
-
     '  </div>',
     '</div>'
   ].join('\n');
@@ -283,15 +256,24 @@
   var currentUser = null;
   var currentClient = null;
   var currentProject = null;
+  var sb = null;
 
   // ── HELPERS ───────────────────────────────────────────────────────
-  function supabaseFetch(path, options) {
-    var opts = options || {};
-    opts.headers = opts.headers || {};
-    opts.headers['apikey'] = SUPABASE_KEY;
-    opts.headers['Authorization'] = 'Bearer ' + (currentUser ? currentUser.access_token : SUPABASE_KEY);
-    opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json';
-    return fetch(SUPABASE_URL + path, opts);
+  function hideLoading() {
+    var el = document.getElementById('ddLoading');
+    if (el) el.style.display = 'none';
+  }
+
+  function showLogin() {
+    hideLoading();
+    document.getElementById('ddLoginWrap').classList.add('visible');
+  }
+
+  function showDashboard() {
+    hideLoading();
+    document.getElementById('ddLoginWrap').classList.remove('visible');
+    document.getElementById('ddDashboard').classList.add('visible');
+    if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
   }
 
   function showMsg(el, text, type) {
@@ -309,53 +291,50 @@
     return map[key] || key || '—';
   }
 
-  function hideLoading() {
-    var el = document.getElementById('ddLoading');
-    if (el) el.style.display = 'none';
+  function supabaseFetch(path, options) {
+    var opts = options || {};
+    opts.headers = opts.headers || {};
+    opts.headers['apikey'] = SUPABASE_KEY;
+    opts.headers['Authorization'] = 'Bearer ' + (currentUser ? currentUser.access_token : SUPABASE_KEY);
+    opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json';
+    return fetch(SUPABASE_URL + path, opts);
   }
 
-  // ── SESSION ───────────────────────────────────────────────────────
-  async function init() {
-    // First check URL for token (from magic link click)
-    var urlToken = getTokenFromUrl();
-    if (urlToken) {
-      await loadSession(urlToken);
-      return;
-    }
-    // Then check sessionStorage
-    var saved = sessionStorage.getItem('dd_token');
-    if (saved) {
-      await loadSession(saved);
-      return;
-    }
-    // No session — show login
-    hideLoading();
-    document.getElementById('ddLoginWrap').classList.add('visible');
-  }
+  // ── INIT ──────────────────────────────────────────────────────────
+  loadSupabase(async function(client) {
+    sb = client;
 
-  async function loadSession(token) {
-    try {
-      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
-      });
-      var user = await res.json();
-      if (user && user.email) {
-        currentUser = { access_token: token, email: user.email, id: user.id };
+    // Listen for auth state changes — this catches the magic link token automatically
+    sb.auth.onAuthStateChange(async function(event, session) {
+      if (event === 'SIGNED_IN' && session) {
+        currentUser = { access_token: session.access_token, email: session.user.email, id: session.user.id };
         await loadClientData();
-        hideLoading();
         showDashboard();
-      } else {
-        sessionStorage.removeItem('dd_token');
-        hideLoading();
-        document.getElementById('ddLoginWrap').classList.add('visible');
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        currentClient = null;
+        currentProject = null;
+        document.getElementById('ddDashboard').classList.remove('visible');
+        showLogin();
       }
-    } catch (e) {
-      console.error('Session error:', e);
-      hideLoading();
-      document.getElementById('ddLoginWrap').classList.add('visible');
-    }
-  }
+    });
 
+    // Check for existing session
+    var sessionResult = await sb.auth.getSession();
+    if (sessionResult.data && sessionResult.data.session) {
+      currentUser = {
+        access_token: sessionResult.data.session.access_token,
+        email: sessionResult.data.session.user.email,
+        id: sessionResult.data.session.user.id
+      };
+      await loadClientData();
+      showDashboard();
+    } else {
+      showLogin();
+    }
+  });
+
+  // ── LOAD CLIENT DATA ──────────────────────────────────────────────
   async function loadClientData() {
     try {
       var res = await supabaseFetch('/rest/v1/clients?email=eq.' + encodeURIComponent(currentUser.email) + '&limit=1');
@@ -373,9 +352,7 @@
         if (currentProject.drive_link) loadDriveLinks(currentProject.drive_link);
       }
       loadMessages();
-    } catch (e) {
-      console.error('Client data error:', e);
-    }
+    } catch (e) { console.error('Client data error:', e); }
   }
 
   function loadDriveLinks(driveLink) {
@@ -409,12 +386,6 @@
     list.scrollTop = list.scrollHeight;
   }
 
-  function showDashboard() {
-    document.getElementById('ddLoginWrap').classList.remove('visible');
-    document.getElementById('ddDashboard').classList.add('visible');
-    if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
-  }
-
   // ── LOGIN ─────────────────────────────────────────────────────────
   document.getElementById('ddLoginBtn').addEventListener('click', async function() {
     var email = document.getElementById('ddLoginEmail').value.trim();
@@ -423,12 +394,11 @@
     this.disabled = true;
     this.textContent = 'Sending...';
     try {
-      var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink', {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, redirect_to: PORTAL_URL })
+      var result = await sb.auth.signInWithOtp({
+        email: email,
+        options: { emailRedirectTo: PORTAL_URL }
       });
-      if (res.ok) {
+      if (!result.error) {
         showMsg(msg, 'Login link sent! Check your inbox and click the link to access your portal.', 'success');
       } else {
         showMsg(msg, 'Something went wrong. Please try again.', 'error');
@@ -445,12 +415,8 @@
   });
 
   // ── LOGOUT ────────────────────────────────────────────────────────
-  document.getElementById('ddLogoutBtn').addEventListener('click', function() {
-    sessionStorage.removeItem('dd_token');
-    sessionStorage.removeItem('dd_refresh');
-    currentUser = null; currentClient = null; currentProject = null;
-    document.getElementById('ddDashboard').classList.remove('visible');
-    document.getElementById('ddLoginWrap').classList.add('visible');
+  document.getElementById('ddLogoutBtn').addEventListener('click', async function() {
+    if (sb) await sb.auth.signOut();
   });
 
   // ── TABS ──────────────────────────────────────────────────────────
@@ -520,8 +486,5 @@
   document.getElementById('ddMessageInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); }
   });
-
-  // ── START ─────────────────────────────────────────────────────────
-  init();
 
 })();
