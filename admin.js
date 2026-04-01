@@ -70,8 +70,6 @@
   style.textContent = [
     '#dd-admin * { box-sizing: border-box; margin: 0; padding: 0; }',
     '#dd-admin { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
-
-    // Login
     '#dd-admin .da-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; animation: daFade 0.7s ease both; }',
     '#dd-admin .da-login-card { width: 100%; max-width: 400px; border: 1px solid var(--border); background: var(--surface); }',
     '#dd-admin .da-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 28px 32px; text-align: center; }',
@@ -87,8 +85,6 @@
     '#dd-admin .da-btn:hover { background: var(--gold); color: var(--bg); }',
     '#dd-admin .da-error-msg { font-size: 11px; color: var(--error); text-align: center; margin-top: 10px; display: none; }',
     '#dd-admin .da-error-msg.visible { display: block; }',
-
-    // Dashboard
     '#dd-admin .da-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-admin .da-dashboard.visible { display: flex; }',
     '#dd-admin .da-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }',
@@ -96,22 +92,16 @@
     '#dd-admin .da-nav-badge { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--bg); background: var(--gold); padding: 3px 8px; margin-left: 12px; }',
     '#dd-admin .da-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
     '#dd-admin .da-nav-logout:hover { color: var(--gold); }',
-
-    // Stats
     '#dd-admin .da-stats { display: flex; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }',
     '#dd-admin .da-stat { background: var(--surface); padding: 16px 24px; flex: 1; }',
     '#dd-admin .da-stat-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }',
     '#dd-admin .da-stat-value { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); font-weight: 400; }',
-
-    // Tabs
     '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 32px; }',
     '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
     '#dd-admin .da-tab:hover { color: var(--text); }',
     '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
     '#dd-admin .da-tab-content { display: none; flex: 1; }',
     '#dd-admin .da-tab-content.active { display: block; }',
-
-    // Toolbar
     '#dd-admin .da-toolbar { padding: 20px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }',
     '#dd-admin .da-search { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 16px; outline: none; flex: 1; min-width: 200px; transition: border-color 0.2s; }',
     '#dd-admin .da-search:focus { border-color: var(--gold); }',
@@ -119,8 +109,6 @@
     '#dd-admin .da-filter { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 16px; outline: none; cursor: pointer; appearance: none; min-width: 200px; }',
     '#dd-admin .da-filter:focus { border-color: var(--gold); }',
     '#dd-admin .da-count { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; white-space: nowrap; }',
-
-    // Client cards
     '#dd-admin .da-cards-wrap { padding: 24px 32px; display: flex; flex-direction: column; gap: 12px; }',
     '#dd-admin .da-client-card { background: var(--surface); border: 1px solid var(--border); transition: border-color 0.2s; }',
     '#dd-admin .da-client-card:hover { border-color: var(--gold); }',
@@ -146,12 +134,14 @@
     '#dd-admin .da-action-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); width: 130px; flex-shrink: 0; }',
     '#dd-admin .da-select { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 8px 12px; outline: none; cursor: pointer; appearance: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }',
     '#dd-admin .da-select:focus { border-color: var(--gold); }',
+    '#dd-admin .da-text-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 8px 12px; outline: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }',
+    '#dd-admin .da-text-input:focus { border-color: var(--gold); }',
+    '#dd-admin .da-text-input::placeholder { color: var(--muted); }',
     '#dd-admin .da-update-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 9px 20px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }',
     '#dd-admin .da-update-btn:hover { opacity: 0.85; }',
     '#dd-admin .da-email-link { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 14px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-admin .da-email-link:hover { background: var(--gold); color: var(--bg); }',
-
-    // Messages
+    '#dd-admin .da-section-divider { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); padding: 12px 0 6px; border-top: 1px solid var(--border); margin-top: 4px; }',
     '#dd-admin .da-messages-wrap { padding: 24px 32px; }',
     '#dd-admin .da-msg-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 12px; transition: border-color 0.2s; }',
     '#dd-admin .da-msg-card:hover { border-color: var(--gold); }',
@@ -170,7 +160,6 @@
     '#dd-admin .da-msg-reply textarea::placeholder { color: var(--muted); }',
     '#dd-admin .da-reply-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 20px; cursor: pointer; transition: opacity 0.2s; }',
     '#dd-admin .da-reply-btn:hover { opacity: 0.85; }',
-
     '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
@@ -187,7 +176,6 @@
   }).join('');
 
   wrap.innerHTML = [
-    // LOGIN
     '<div id="daLoginWrap" class="da-login-wrap">',
     '  <div class="da-login-card">',
     '    <div class="da-login-header"><div class="da-login-logo">Daydream</div><div class="da-login-sub">Admin Dashboard</div></div>',
@@ -198,27 +186,21 @@
     '    </div>',
     '  </div>',
     '</div>',
-
-    // DASHBOARD
     '<div id="daDashboard" class="da-dashboard">',
     '  <nav class="da-nav">',
     '    <div style="display:flex;align-items:center"><div class="da-nav-logo">Daydream</div><div class="da-nav-badge">Admin</div></div>',
     '    <button class="da-nav-logout" id="daLogoutBtn">Sign Out</button>',
     '  </nav>',
-
     '  <div class="da-stats">',
     '    <div class="da-stat"><div class="da-stat-label">Total Leads</div><div class="da-stat-value" id="daStatTotal">—</div></div>',
     '    <div class="da-stat"><div class="da-stat-label">Active Projects</div><div class="da-stat-value" id="daStatActive">—</div></div>',
     '    <div class="da-stat"><div class="da-stat-label">Completed</div><div class="da-stat-value" id="daStatComplete">—</div></div>',
     '    <div class="da-stat"><div class="da-stat-label">New This Month</div><div class="da-stat-value" id="daStatMonth">—</div></div>',
     '  </div>',
-
     '  <div class="da-tabs">',
     '    <button class="da-tab active" data-tab="clients">Clients</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div>',
-
-    // CLIENTS TAB
     '  <div class="da-tab-content active" id="tab-clients">',
     '    <div class="da-toolbar">',
     '      <input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." />',
@@ -227,15 +209,12 @@
     '    </div>',
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
     '  </div>',
-
-    // MESSAGES TAB
     '  <div class="da-tab-content" id="tab-messages">',
     '    <div class="da-messages-wrap">',
     '      <div class="da-section-title">Client Messages</div>',
     '      <div id="daMsgList"></div>',
     '    </div>',
     '  </div>',
-
     '</div>'
   ].join('\n');
 
@@ -258,7 +237,7 @@
     return map[key] || key || '—';
   }
   function initials(name) { if (!name) return '?'; var p = name.trim().split(' '); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase(); }
-  function formatInvestment(inv) { if (!inv) return ''; var n = inv.replace(/[^0-9.]/g, ''); return n && !isNaN(n) ? '$' + Number(n).toLocaleString() : inv; }
+  function formatInvestment(inv) { if (!inv) return ''; var n = (inv || '').replace(/[^0-9.]/g, ''); return n && !isNaN(n) ? '$' + Number(n).toLocaleString() : inv; }
 
   // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
@@ -312,7 +291,7 @@
     document.getElementById('daStatMonth').textContent = month;
   }
 
-  // ── RENDER CLIENT CARDS ───────────────────────────────────────────
+  // ── RENDER CARDS ──────────────────────────────────────────────────
   function renderCards(clients) {
     var container = document.getElementById('daCardsWrap');
     document.getElementById('daCount').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
@@ -352,15 +331,31 @@
         + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + (c.notes || '—') + '</div></div>'
         + '  </div>'
         + '  <div class="da-card-actions">'
-        + '    <div class="da-action-row"><div class="da-action-label">Internal Pipeline</div><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updatePipeline(\'' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Client Timeline</div><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateClientStage(\'' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-action-row"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
+
+        // Pipeline stage
+        + '    <div class="da-section-divider">Internal Pipeline</div>'
+        + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updatePipeline(\'' + c.id + '\')">Update</button></div>'
+
+        // Client timeline
+        + '    <div class="da-section-divider">Client Timeline</div>'
+        + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateClientStage(\'' + c.id + '\')">Update</button></div>'
+
+        // Drive links
+        + '    <div class="da-section-divider">Client Drive Links</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Design Folder</div><input class="da-text-input" id="dlink-design-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_design_link || '') + '" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Permit Folder</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_permit_link || '') + '" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Construction Folder</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
+        + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
+
+        // Email
+        + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
         + '  </div>'
         + '</div>'
         + '</div>';
     }).join('');
   }
 
+  // ── TOGGLE ────────────────────────────────────────────────────────
   window._toggleCard = function(id) {
     var det = document.getElementById('det-' + id);
     var exp = document.getElementById('exp-' + id);
@@ -368,6 +363,7 @@
     else { det.classList.add('visible'); exp.classList.add('open'); }
   };
 
+  // ── UPDATE PIPELINE ───────────────────────────────────────────────
   window._updatePipeline = async function(id) {
     var val = document.getElementById('psel-' + id).value;
     try {
@@ -382,6 +378,7 @@
     } catch(e) {}
   };
 
+  // ── UPDATE CLIENT STAGE ───────────────────────────────────────────
   window._updateClientStage = async function(id) {
     var val = document.getElementById('csel-' + id).value;
     try {
@@ -390,6 +387,31 @@
       if (c) c.client_stage = val;
       flashSaved('csel-' + id);
     } catch(e) {}
+  };
+
+  // ── UPDATE DRIVE LINKS ────────────────────────────────────────────
+  window._updateDriveLinks = async function(id) {
+    var design = document.getElementById('dlink-design-' + id).value.trim();
+    var permit = document.getElementById('dlink-permit-' + id).value.trim();
+    var construction = document.getElementById('dlink-construction-' + id).value.trim();
+    try {
+      await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          drive_design_link: design || null,
+          drive_permit_link: permit || null,
+          drive_construction_link: construction || null
+        })
+      });
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) { c.drive_design_link = design; c.drive_permit_link = permit; c.drive_construction_link = construction; }
+      var card = document.getElementById('card-' + id);
+      if (card) {
+        var btn = card.querySelector('[onclick*="_updateDriveLinks"]');
+        if (btn) { btn.textContent = 'Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Save Drive Links'; btn.style.background = 'var(--gold)'; }, 2000); }
+      }
+    } catch(e) { console.error('Drive links error:', e); }
   };
 
   function flashSaved(selectId) {
@@ -416,7 +438,7 @@
   document.getElementById('daSearch').addEventListener('input', applyFilters);
   document.getElementById('daFilter').addEventListener('change', applyFilters);
 
-  // ── LOAD MESSAGES ─────────────────────────────────────────────────
+  // ── MESSAGES ─────────────────────────────────────────────────────
   async function loadMessages() {
     try {
       var res = await apiFetch('/rest/v1/messages?order=created_at.asc&limit=200');
@@ -427,19 +449,13 @@
 
   function renderMessages() {
     var container = document.getElementById('daMsgList');
-    if (!allMessages || !allMessages.length) {
-      container.innerHTML = '<div class="da-empty">No messages yet</div>';
-      return;
-    }
-
-    // Group by client_id or sender
+    if (!allMessages || !allMessages.length) { container.innerHTML = '<div class="da-empty">No messages yet</div>'; return; }
     var groups = {};
     allMessages.forEach(function(m) {
       var key = m.client_id || m.sender || 'unknown';
       if (!groups[key]) groups[key] = [];
       groups[key].push(m);
     });
-
     container.innerHTML = Object.keys(groups).map(function(key) {
       var msgs = groups[key];
       var latest = msgs[msgs.length - 1];
@@ -447,15 +463,13 @@
       var name = client ? client.full_name : (msgs[0].sender || 'Unknown');
       var clientId = client ? client.id : key;
       var hasUnread = msgs.some(function(m) { return !m.is_read && m.sender !== 'daydream_team'; });
-
       var threadHtml = msgs.map(function(m) {
         var isTeam = m.sender === 'daydream_team';
         return '<div style="display:flex;flex-direction:column;margin-bottom:8px;align-items:' + (isTeam ? 'flex-end' : 'flex-start') + '">'
           + '<div class="da-msg-bubble ' + (isTeam ? 'team' : 'client') + '">' + m.content + '</div>'
-          + '<div style="font-size:9px;color:var(--muted);margin-top:2px;' + (isTeam ? 'text-align:right' : '') + '">' + (isTeam ? 'Daydream Team' : name) + ' &middot; ' + formatDate(m.created_at) + '</div>'
+          + '<div style="font-size:9px;color:var(--muted);margin-top:2px' + (isTeam ? ';text-align:right' : '') + '">' + (isTeam ? 'Daydream Team' : name) + ' &middot; ' + formatDate(m.created_at) + '</div>'
           + '</div>';
       }).join('');
-
       return '<div class="da-msg-card' + (hasUnread ? ' unread' : '') + '">'
         + '<div style="cursor:pointer" onclick="window._toggleThread(\'' + clientId + '\')">'
         + '  <div class="da-msg-client">' + name + '</div>'
@@ -464,10 +478,7 @@
         + '</div>'
         + '<div class="da-msg-thread" id="thread-' + clientId + '">'
         + '  <div style="max-height:300px;overflow-y:auto;padding:8px 0">' + threadHtml + '</div>'
-        + '  <div class="da-msg-reply">'
-        + '    <textarea id="reply-' + clientId + '" placeholder="Type your reply..."></textarea>'
-        + '    <button class="da-reply-btn" onclick="window._sendReply(\'' + clientId + '\', \'' + (msgs[0].project_id || '') + '\')">Send</button>'
-        + '  </div>'
+        + '  <div class="da-msg-reply"><textarea id="reply-' + clientId + '" placeholder="Type your reply..."></textarea><button class="da-reply-btn" onclick="window._sendReply(\'' + clientId + '\', \'' + (msgs[0].project_id || '') + '\')">Send</button></div>'
         + '</div>'
         + '</div>';
     }).join('');
@@ -486,13 +497,7 @@
       await apiFetch('/rest/v1/messages', {
         method: 'POST',
         headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({
-          project_id: projectId || null,
-          client_id: clientId || null,
-          sender: 'daydream_team',
-          content: content,
-          is_read: true
-        })
+        body: JSON.stringify({ project_id: projectId || null, client_id: clientId || null, sender: 'daydream_team', content: content, is_read: true })
       });
       textarea.value = '';
       await loadMessages();
