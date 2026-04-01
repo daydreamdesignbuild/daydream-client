@@ -121,6 +121,8 @@
     '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
     '#dd-admin .da-tab:hover { color: var(--text); }',
     '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-admin .da-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
+    '#dd-admin .da-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
     '#dd-admin .da-tab-content { display: none; flex: 1; }',
     '#dd-admin .da-tab-content.active { display: block; }',
     '#dd-admin .da-toolbar { padding: 20px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }',
@@ -283,7 +285,12 @@
       tab.classList.add('active');
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
-      if (tab.dataset.tab === 'messages') loadMessages();
+      if (tab.dataset.tab === 'messages') {
+        loadMessages();
+        try { sessionStorage.setItem('da_msgs_last_read', Date.now().toString()); } catch(e) {}
+        var dot = tab.querySelector('.da-msg-dot');
+        if (dot) dot.remove();
+      }
       if (tab.dataset.tab === 'checklist') loadAllChecklists();
     });
   });
@@ -513,13 +520,45 @@
 
   function renderMessages() {
     var container = document.getElementById('daMsgList');
-    if (!allMessages || !allMessages.length) { container.innerHTML = '<div class="da-empty">No messages yet</div>'; return; }
+    if (!allMessages || !allMessages.length) {
+      container.innerHTML = '<div class="da-empty">No messages yet</div>';
+      // Clear dot
+      var tab = document.querySelector('#dd-admin [data-tab="messages"]');
+      if (tab) { var dot = tab.querySelector('.da-msg-dot'); if (dot) dot.remove(); }
+      return;
+    }
     var groups = {};
     allMessages.forEach(function(m) {
       var key = m.client_id || m.sender || 'unknown';
       if (!groups[key]) groups[key] = [];
       groups[key].push(m);
     });
+    // Update notification dot for unread client messages
+    var unreadCount = allMessages.filter(function(m) { return !m.is_read && m.sender !== 'daydream_team'; }).length;
+    var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
+    if (msgTab) {
+      var existingDot = msgTab.querySelector('.da-msg-dot');
+      if (unreadCount > 0) {
+        if (!existingDot) { existingDot = document.createElement('span'); existingDot.className = 'da-msg-dot'; msgTab.appendChild(existingDot); }
+        existingDot.textContent = unreadCount;
+      } else if (existingDot) { existingDot.remove(); }
+    }
+
+    // Show dot on Messages tab for unread client messages
+    var lastRead = 0;
+    try { lastRead = parseInt(sessionStorage.getItem('da_msgs_last_read') || '0'); } catch(e) {}
+    var unreadCount = allMessages.filter(function(m) {
+      return m.sender !== 'daydream_team' && new Date(m.created_at).getTime() > lastRead;
+    }).length;
+    var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
+    if (msgTab) {
+      var existingDot = msgTab.querySelector('.da-msg-dot');
+      if (unreadCount > 0) {
+        if (!existingDot) { existingDot = document.createElement('span'); existingDot.className = 'da-msg-dot'; msgTab.appendChild(existingDot); }
+        existingDot.textContent = unreadCount;
+      } else if (existingDot) { existingDot.remove(); }
+    }
+
     container.innerHTML = Object.keys(groups).map(function(key) {
       var msgs = groups[key];
       var latest = msgs[msgs.length - 1];
