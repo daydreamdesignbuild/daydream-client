@@ -62,24 +62,31 @@
   ];
 
   var PAYMENT_STAGES = [
-    { value: 'not_sent',          label: 'Invoice Not Yet Sent',          color: '#8a8680' },
+    { value: 'not_sent',          label: 'Invoice Not Yet Sent',           color: '#8a8680' },
     { value: 'invoice_sent',      label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
-    { value: 'deposit_paid',      label: 'Deposit Paid — Balance Due',    color: '#5a8e9e' },
-    { value: 'partially_paid',    label: 'Partially Paid',                color: '#7a9e8a' },
-    { value: 'payment_complete',  label: 'Payment Complete ✓',            color: '#6a9e7a' }
+    { value: 'deposit_paid',      label: 'Deposit Paid — Balance Due',     color: '#5a8e9e' },
+    { value: 'partially_paid',    label: 'Partially Paid',                 color: '#7a9e8a' },
+    { value: 'payment_complete',  label: 'Payment Complete ✓',             color: '#6a9e7a' }
   ];
+
+  var CHECKLIST_LABELS = {
+    'goals':      'Project Goals & Must-Have Features',
+    'inspo':      'Inspiration Photos or Boards',
+    'photos':     'Site Photos & Walkthrough Video',
+    'survey':     'Property Survey / Site Plat',
+    'bylaws':     'HOA Bylaws & Neighborhood Covenants',
+    'houseplans': 'Existing House Architectural Plans'
+  };
 
   function getPipelineStage(value) {
     return PIPELINE_STAGES.find(function(s) { return s.value === value; }) || { value: value, label: value || 'New Inquiry', color: '#8a8680' };
   }
 
-  // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
   font.rel = 'stylesheet';
   font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400;500&display=swap';
   document.head.appendChild(font);
 
-  // ── STYLES ────────────────────────────────────────────────────────
   var style = document.createElement('style');
   style.textContent = [
     '#dd-admin * { box-sizing: border-box; margin: 0; padding: 0; }',
@@ -110,7 +117,7 @@
     '#dd-admin .da-stat { background: var(--surface); padding: 16px 24px; flex: 1; }',
     '#dd-admin .da-stat-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }',
     '#dd-admin .da-stat-value { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); font-weight: 400; }',
-    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 32px; }',
+    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 32px; overflow-x: auto; }',
     '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
     '#dd-admin .da-tab:hover { color: var(--text); }',
     '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
@@ -121,7 +128,6 @@
     '#dd-admin .da-search:focus { border-color: var(--gold); }',
     '#dd-admin .da-search::placeholder { color: var(--muted); }',
     '#dd-admin .da-filter { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 16px; outline: none; cursor: pointer; appearance: none; min-width: 200px; }',
-    '#dd-admin .da-filter:focus { border-color: var(--gold); }',
     '#dd-admin .da-count { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; white-space: nowrap; }',
     '#dd-admin .da-cards-wrap { padding: 24px 32px; display: flex; flex-direction: column; gap: 12px; }',
     '#dd-admin .da-client-card { background: var(--surface); border: 1px solid var(--border); transition: border-color 0.2s; }',
@@ -156,32 +162,51 @@
     '#dd-admin .da-email-link { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 14px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-admin .da-email-link:hover { background: var(--gold); color: var(--bg); }',
     '#dd-admin .da-section-divider { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); padding: 12px 0 6px; border-top: 1px solid var(--border); margin-top: 4px; }',
+
+    // Checklist tab
+    '#dd-admin .da-checklist-wrap { padding: 24px 32px; }',
+    '#dd-admin .da-checklist-search { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 16px; outline: none; width: 300px; margin-bottom: 20px; transition: border-color 0.2s; }',
+    '#dd-admin .da-checklist-search:focus { border-color: var(--gold); }',
+    '#dd-admin .da-checklist-search::placeholder { color: var(--muted); }',
+    '#dd-admin .da-client-checklist { background: var(--surface); border: 1px solid var(--border); margin-bottom: 16px; }',
+    '#dd-admin .da-client-checklist-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }',
+    '#dd-admin .da-client-checklist-name { font-size: 13px; color: var(--text); font-weight: 400; }',
+    '#dd-admin .da-client-checklist-progress { font-size: 11px; color: var(--muted); }',
+    '#dd-admin .da-client-checklist-progress span { color: var(--gold); }',
+    '#dd-admin .da-client-checklist-body { display: none; }',
+    '#dd-admin .da-client-checklist-body.visible { display: block; }',
+    '#dd-admin .da-check-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); }',
+    '#dd-admin .da-check-row:last-child { border-bottom: none; }',
+    '#dd-admin .da-check-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; margin-top: 4px; }',
+    '#dd-admin .da-check-dot.done { background: var(--success); }',
+    '#dd-admin .da-check-row-label { font-size: 12px; color: var(--text); margin-bottom: 3px; }',
+    '#dd-admin .da-check-row-note { font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; background: var(--surface-2); padding: 8px 12px; border-left: 2px solid var(--gold); }',
+
+    // Messages
     '#dd-admin .da-messages-wrap { padding: 24px 32px; }',
     '#dd-admin .da-msg-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 12px; transition: border-color 0.2s; }',
     '#dd-admin .da-msg-card:hover { border-color: var(--gold); }',
     '#dd-admin .da-msg-card.unread { border-left: 3px solid var(--gold); }',
     '#dd-admin .da-msg-client { font-size: 13px; color: var(--text); font-weight: 400; margin-bottom: 4px; }',
-    '#dd-admin .da-msg-preview { font-size: 11px; color: var(--muted); margin-bottom: 6px; line-height: 1.6; }',
-    '#dd-admin .da-msg-meta { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }',
+    '#dd-admin .da-msg-preview { font-size: 11px; color: var(--muted); margin-bottom: 6px; }',
+    '#dd-admin .da-msg-meta { font-size: 9px; color: var(--muted); }',
     '#dd-admin .da-msg-thread { display: none; border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; }',
     '#dd-admin .da-msg-thread.visible { display: block; }',
     '#dd-admin .da-msg-bubble { padding: 10px 14px; margin-bottom: 8px; font-size: 12px; line-height: 1.7; max-width: 80%; }',
     '#dd-admin .da-msg-bubble.client { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
     '#dd-admin .da-msg-bubble.team { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); margin-left: auto; }',
-    '#dd-admin .da-msg-reply { display: flex; gap: 0; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }',
+    '#dd-admin .da-msg-reply { display: flex; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }',
     '#dd-admin .da-msg-reply textarea { flex: 1; background: var(--surface-2); border: 1px solid var(--border); outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 14px; resize: none; height: 48px; transition: border-color 0.2s; }',
     '#dd-admin .da-msg-reply textarea:focus { border-color: var(--gold); }',
     '#dd-admin .da-msg-reply textarea::placeholder { color: var(--muted); }',
-    '#dd-admin .da-reply-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 20px; cursor: pointer; transition: opacity 0.2s; }',
-    '#dd-admin .da-reply-btn:hover { opacity: 0.85; }',
+    '#dd-admin .da-reply-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 20px; cursor: pointer; }',
     '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
-    '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap { padding: 16px; } }'
+    '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 16px; } }'
   ].join('\n');
   document.head.appendChild(style);
 
-  // ── HTML ──────────────────────────────────────────────────────────
   var wrap = document.getElementById('dd-admin');
   if (!wrap) return;
 
@@ -201,10 +226,7 @@
     '  </div>',
     '</div>',
     '<div id="daDashboard" class="da-dashboard">',
-    '  <nav class="da-nav">',
-    '    <div style="display:flex;align-items:center"><div class="da-nav-logo">Daydream</div><div class="da-nav-badge">Admin</div></div>',
-    '    <button class="da-nav-logout" id="daLogoutBtn">Sign Out</button>',
-    '  </nav>',
+    '  <nav class="da-nav"><div style="display:flex;align-items:center"><div class="da-nav-logo">Daydream</div><div class="da-nav-badge">Admin</div></div><button class="da-nav-logout" id="daLogoutBtn">Sign Out</button></nav>',
     '  <div class="da-stats">',
     '    <div class="da-stat"><div class="da-stat-label">Total Leads</div><div class="da-stat-value" id="daStatTotal">—</div></div>',
     '    <div class="da-stat"><div class="da-stat-label">Active Projects</div><div class="da-stat-value" id="daStatActive">—</div></div>',
@@ -213,30 +235,31 @@
     '  </div>',
     '  <div class="da-tabs">',
     '    <button class="da-tab active" data-tab="clients">Clients</button>',
+    '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div>',
     '  <div class="da-tab-content active" id="tab-clients">',
-    '    <div class="da-toolbar">',
-    '      <input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." />',
-    '      <select class="da-filter" id="daFilter">' + filterOptions + '</select>',
-    '      <div class="da-count" id="daCount"></div>',
-    '    </div>',
+    '    <div class="da-toolbar"><input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." /><select class="da-filter" id="daFilter">' + filterOptions + '</select><div class="da-count" id="daCount"></div></div>',
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
     '  </div>',
-    '  <div class="da-tab-content" id="tab-messages">',
-    '    <div class="da-messages-wrap">',
-    '      <div class="da-section-title">Client Messages</div>',
-    '      <div id="daMsgList"></div>',
+    '  <div class="da-tab-content" id="tab-checklist">',
+    '    <div class="da-checklist-wrap">',
+    '      <div class="da-section-title">Client Onboarding</div>',
+    '      <input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." />',
+    '      <div id="daChecklistWrap"></div>',
     '    </div>',
+    '  </div>',
+    '  <div class="da-tab-content" id="tab-messages">',
+    '    <div class="da-messages-wrap"><div class="da-section-title">Client Messages</div><div id="daMsgList"></div></div>',
     '  </div>',
     '</div>'
   ].join('\n');
 
-  // ── STATE ─────────────────────────────────────────────────────────
   var allClients = [];
   var allMessages = [];
+  var allChecklists = {};
+  var allNotes = {};
 
-  // ── HELPERS ───────────────────────────────────────────────────────
   function apiFetch(path, options) {
     var opts = options || {};
     opts.headers = opts.headers || {};
@@ -253,7 +276,6 @@
   function initials(name) { if (!name) return '?'; var p = name.trim().split(' '); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase(); }
   function formatInvestment(inv) { if (!inv) return ''; var n = (inv || '').replace(/[^0-9.]/g, ''); return n && !isNaN(n) ? '$' + Number(n).toLocaleString() : inv; }
 
-  // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
       document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -262,19 +284,17 @@
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
       if (tab.dataset.tab === 'messages') loadMessages();
+      if (tab.dataset.tab === 'checklist') loadAllChecklists();
     });
   });
 
-  // ── LOGIN ─────────────────────────────────────────────────────────
   document.getElementById('daLoginBtn').addEventListener('click', function() {
     if (document.getElementById('daPassword').value === ADMIN_PASSWORD) {
       try { sessionStorage.setItem('dd_admin', '1'); } catch(e) {}
       document.getElementById('daLoginWrap').style.display = 'none';
       document.getElementById('daDashboard').classList.add('visible');
       loadClients();
-    } else {
-      document.getElementById('daLoginError').classList.add('visible');
-    }
+    } else { document.getElementById('daLoginError').classList.add('visible'); }
   });
   document.getElementById('daPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('daLoginBtn').click(); });
   document.getElementById('daLogoutBtn').addEventListener('click', function() {
@@ -284,14 +304,13 @@
   });
   try { if (sessionStorage.getItem('dd_admin') === '1') { document.getElementById('daLoginWrap').style.display = 'none'; document.getElementById('daDashboard').classList.add('visible'); loadClients(); } } catch(e) {}
 
-  // ── LOAD CLIENTS ──────────────────────────────────────────────────
   async function loadClients() {
     try {
       var res = await apiFetch('/rest/v1/clients?order=created_at.desc');
       allClients = await res.json();
       updateStats();
       renderCards(allClients);
-    } catch(e) { console.error('Load error:', e); }
+    } catch(e) {}
   }
 
   function updateStats() {
@@ -305,7 +324,6 @@
     document.getElementById('daStatMonth').textContent = month;
   }
 
-  // ── RENDER CARDS ──────────────────────────────────────────────────
   function renderCards(clients) {
     var container = document.getElementById('daCardsWrap');
     document.getElementById('daCount').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
@@ -314,7 +332,6 @@
     container.innerHTML = clients.map(function(c) {
       var stage = getPipelineStage(c.status || 'client_inquiry_made');
       var inv = formatInvestment(c.investment || '');
-
       var pOpts = PIPELINE_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
       var cOpts = CLIENT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.client_stage === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
       var contractOpts = CONTRACT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.contract_status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
@@ -323,8 +340,7 @@
       return '<div class="da-client-card" id="card-' + c.id + '">'
         + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
         + '  <div class="da-card-left"><div class="da-card-avatar">' + initials(c.full_name) + '</div>'
-        + '    <div><div class="da-card-name">' + (c.full_name || 'Unknown') + '</div><div class="da-card-sub">' + (c.email || '') + (c.phone ? ' &middot; ' + c.phone : '') + '</div></div>'
-        + '  </div>'
+        + '  <div><div class="da-card-name">' + (c.full_name || 'Unknown') + '</div><div class="da-card-sub">' + (c.email || '') + (c.phone ? ' &middot; ' + c.phone : '') + '</div></div></div>'
         + '  <div class="da-card-right">'
         + '    <div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + stage.label + '</div>'
         + '    <div class="da-card-investment">' + inv + '</div>'
@@ -342,16 +358,16 @@
         + '  </div>'
         + '  <div class="da-card-actions">'
         + '    <div class="da-section-divider">Internal Pipeline</div>'
-        + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updatePipeline(\'' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'status\', \'psel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Client Timeline</div>'
-        + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateClientStage(\'' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Contract &amp; Payment</div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Contract Status</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateContract(\'' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Payment Status</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updatePayment(\'' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'contract_status\', \'contractsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'payment_status\', \'paymentsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Client Drive Links</div>'
         + '    <div class="da-action-row"><div class="da-action-label">Design Folder</div><input class="da-text-input" id="dlink-design-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_design_link || '') + '" /></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Permit Folder</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_permit_link || '') + '" /></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Construction Folder</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
         + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
         + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
         + '  </div>'
@@ -360,7 +376,6 @@
     }).join('');
   }
 
-  // ── TOGGLE ────────────────────────────────────────────────────────
   window._toggleCard = function(id) {
     var det = document.getElementById('det-' + id);
     var exp = document.getElementById('exp-' + id);
@@ -368,29 +383,22 @@
     else { det.classList.add('visible'); exp.classList.add('open'); }
   };
 
-  // ── UPDATE FUNCTIONS ──────────────────────────────────────────────
-  async function updateField(id, field, selectId) {
-    var val = document.getElementById(selectId + id).value;
+  window._updateField = async function(id, field, selectId) {
+    var val = document.getElementById(selectId).value;
     try {
-      var body = {};
-      body[field] = val;
+      var body = {}; body[field] = val;
       await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
       var c = allClients.find(function(x) { return x.id === id; });
       if (c) c[field] = val;
-      flashSaved(selectId + id);
       if (field === 'status') {
         var stage = getPipelineStage(val);
         var card = document.getElementById('card-' + id);
         if (card) { var pill = card.querySelector('.da-stage-pill'); if (pill) { pill.textContent = stage.label; pill.style.color = stage.color; pill.style.borderColor = stage.color; pill.style.background = stage.color + '18'; } }
         updateStats();
       }
+      flashSaved(selectId);
     } catch(e) {}
-  }
-
-  window._updatePipeline = function(id) { updateField(id, 'status', 'psel-'); };
-  window._updateClientStage = function(id) { updateField(id, 'client_stage', 'csel-'); };
-  window._updateContract = function(id) { updateField(id, 'contract_status', 'contractsel-'); };
-  window._updatePayment = function(id) { updateField(id, 'payment_status', 'paymentsel-'); };
+  };
 
   window._updateDriveLinks = async function(id) {
     var design = document.getElementById('dlink-design-' + id).value.trim();
@@ -411,12 +419,10 @@
     var btn = sel.nextElementSibling;
     if (!btn || btn.tagName !== 'BUTTON') return;
     var orig = btn.textContent;
-    btn.textContent = 'Saved!';
-    btn.style.background = 'var(--success)';
+    btn.textContent = 'Saved!'; btn.style.background = 'var(--success)';
     setTimeout(function() { if (btn) { btn.textContent = orig; btn.style.background = 'var(--gold)'; } }, 2000);
   }
 
-  // ── SEARCH & FILTER ───────────────────────────────────────────────
   function applyFilters() {
     var q = document.getElementById('daSearch').value.toLowerCase();
     var stage = document.getElementById('daFilter').value;
@@ -428,6 +434,73 @@
   }
   document.getElementById('daSearch').addEventListener('input', applyFilters);
   document.getElementById('daFilter').addEventListener('change', applyFilters);
+
+  // ── CHECKLIST TAB ─────────────────────────────────────────────────
+  async function loadAllChecklists() {
+    try {
+      var [checkRes, noteRes] = await Promise.all([
+        apiFetch('/rest/v1/checklist_items?select=*'),
+        apiFetch('/rest/v1/client_notes?select=*')
+      ]);
+      var checks = await checkRes.json();
+      var notes = await noteRes.json();
+      allChecklists = {};
+      allNotes = {};
+      if (checks) checks.forEach(function(c) {
+        if (!allChecklists[c.client_id]) allChecklists[c.client_id] = {};
+        allChecklists[c.client_id][c.item_key] = c.completed;
+      });
+      if (notes) notes.forEach(function(n) {
+        if (!allNotes[n.client_id]) allNotes[n.client_id] = {};
+        allNotes[n.client_id][n.note_key] = n.content;
+      });
+      renderChecklistTab(allClients);
+    } catch(e) {}
+  }
+
+  function renderChecklistTab(clients) {
+    var container = document.getElementById('daChecklistWrap');
+    if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients yet</div>'; return; }
+
+    var CHECKLIST_KEYS = ['goals', 'inspo', 'photos', 'survey', 'bylaws', 'houseplans'];
+
+    container.innerHTML = clients.map(function(c) {
+      var clientChecks = allChecklists[c.id] || {};
+      var clientNotes = allNotes[c.id] || {};
+      var doneCount = CHECKLIST_KEYS.filter(function(k) { return clientChecks[k]; }).length;
+
+      var items = CHECKLIST_KEYS.map(function(key) {
+        var done = clientChecks[key] === true;
+        var note = clientNotes[key] || '';
+        return '<div class="da-check-row">'
+          + '<div class="da-check-dot' + (done ? ' done' : '') + '"></div>'
+          + '<div style="flex:1">'
+          + '  <div class="da-check-row-label">' + (CHECKLIST_LABELS[key] || key) + (done ? ' <span style="color:var(--success);font-size:10px">✓</span>' : '') + '</div>'
+          + (note ? '<div class="da-check-row-note">' + note + '</div>' : '')
+          + '</div>'
+          + '</div>';
+      }).join('');
+
+      return '<div class="da-client-checklist">'
+        + '<div class="da-client-checklist-header" onclick="window._toggleClientChecklist(\'' + c.id + '\')">'
+        + '  <div class="da-client-checklist-name">' + (c.full_name || 'Unknown') + ' <span style="font-size:10px;color:var(--muted);">' + (c.email || '') + '</span></div>'
+        + '  <div class="da-client-checklist-progress"><span>' + doneCount + '</span> / ' + CHECKLIST_KEYS.length + ' complete</div>'
+        + '</div>'
+        + '<div class="da-client-checklist-body" id="client-checklist-' + c.id + '">' + items + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  window._toggleClientChecklist = function(id) {
+    var body = document.getElementById('client-checklist-' + id);
+    if (body) body.classList.toggle('visible');
+  };
+
+  document.getElementById('daCheckSearch').addEventListener('input', function() {
+    var q = this.value.toLowerCase();
+    var filtered = allClients.filter(function(c) { return (c.full_name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q); });
+    renderChecklistTab(filtered);
+  });
 
   // ── MESSAGES ─────────────────────────────────────────────────────
   async function loadMessages() {
@@ -462,7 +535,7 @@
     }).join('');
   }
 
-  window._toggleThread = function(clientId) { var t = document.getElementById('thread-' + clientId); if (t) t.classList.toggle('visible'); };
+  window._toggleThread = function(id) { var t = document.getElementById('thread-' + id); if (t) t.classList.toggle('visible'); };
 
   window._sendReply = async function(clientId, projectId) {
     var textarea = document.getElementById('reply-' + clientId);
