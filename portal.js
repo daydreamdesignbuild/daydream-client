@@ -25,9 +25,32 @@
     { value: 'project_complete',             label: 'Project Complete' }
   ];
 
+  var CONTRACT_LABELS = {
+    'not_sent':          { label: 'Not Yet Sent',              color: '#8a8680' },
+    'sent':              { label: 'Sent — Awaiting Signature', color: '#eeb24a' },
+    'signed':            { label: 'Signed ✓',                  color: '#6a9e7a' }
+  };
+
+  var PAYMENT_LABELS = {
+    'not_sent':          { label: 'Invoice Not Yet Sent',      color: '#8a8680' },
+    'invoice_sent':      { label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
+    'deposit_paid':      { label: 'Deposit Paid — Balance Due', color: '#5a8e9e' },
+    'partially_paid':    { label: 'Partially Paid',            color: '#7a9e8a' },
+    'payment_complete':  { label: 'Payment Complete ✓',        color: '#6a9e7a' }
+  };
+
   function getStageIndex(value) {
     var idx = TIMELINE.findIndex(function(s) { return s.value === value; });
     return idx === -1 ? 0 : idx;
+  }
+
+  // ── PWA: Register Service Worker ──────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.log('SW registration failed:', err);
+      });
+    });
   }
 
   // ── FONTS ─────────────────────────────────────────────────────────
@@ -35,6 +58,41 @@
   font.rel = 'stylesheet';
   font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap';
   document.head.appendChild(font);
+
+  // ── PWA MANIFEST LINK ─────────────────────────────────────────────
+  var manifestLink = document.createElement('link');
+  manifestLink.rel = 'manifest';
+  manifestLink.href = 'https://daydreamdesignbuild.github.io/daydream-client/manifest.json';
+  document.head.appendChild(manifestLink);
+
+  // ── META TAGS FOR PWA ─────────────────────────────────────────────
+  var metaTheme = document.createElement('meta');
+  metaTheme.name = 'theme-color';
+  metaTheme.content = '#eeb24a';
+  document.head.appendChild(metaTheme);
+
+  var metaApple = document.createElement('meta');
+  metaApple.name = 'apple-mobile-web-app-capable';
+  metaApple.content = 'yes';
+  document.head.appendChild(metaApple);
+
+  var metaAppleStatus = document.createElement('meta');
+  metaAppleStatus.name = 'apple-mobile-web-app-status-bar-style';
+  metaAppleStatus.content = 'black-translucent';
+  document.head.appendChild(metaAppleStatus);
+
+  var metaAppleTitle = document.createElement('meta');
+  metaAppleTitle.name = 'apple-mobile-web-app-title';
+  metaAppleTitle.content = 'Daydream';
+  document.head.appendChild(metaAppleTitle);
+
+  var metaViewport = document.querySelector('meta[name="viewport"]');
+  if (!metaViewport) {
+    metaViewport = document.createElement('meta');
+    metaViewport.name = 'viewport';
+    metaViewport.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+    document.head.appendChild(metaViewport);
+  }
 
   // ── STYLES ────────────────────────────────────────────────────────
   var style = document.createElement('style');
@@ -57,7 +115,7 @@
     '#dd-portal .dd-input-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 4px; display: block; }',
     '#dd-portal .dd-input-wrap:focus-within .dd-input-label { color: var(--gold); }',
     '#dd-portal .dd-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 14px; font-weight: 300; padding: 4px 16px 12px; }',
-    '#dd-portal .dd-input:-webkit-autofill, #dd-portal .dd-input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0 60px #131310 inset !important; -webkit-text-fill-color: #f0ebe0 !important; }',
+    '#dd-portal .dd-input:-webkit-autofill { -webkit-box-shadow: 0 0 0 60px #131310 inset !important; -webkit-text-fill-color: #f0ebe0 !important; }',
     '#dd-portal .dd-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
     '#dd-portal .dd-btn:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
@@ -65,6 +123,15 @@
     '#dd-portal .dd-msg.visible { display: block; }',
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
+
+    // PWA install banner
+    '#dd-portal .dd-install-banner { background: var(--surface); border-bottom: 1px solid var(--gold); padding: 12px 24px; display: none; align-items: center; justify-content: space-between; gap: 16px; }',
+    '#dd-portal .dd-install-banner.visible { display: flex; }',
+    '#dd-portal .dd-install-text { font-size: 11px; color: var(--text); letter-spacing: 0.05em; }',
+    '#dd-portal .dd-install-text span { color: var(--gold); }',
+    '#dd-portal .dd-install-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 8px 16px; cursor: pointer; white-space: nowrap; }',
+    '#dd-portal .dd-install-dismiss { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0 4px; }',
+
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }',
@@ -91,7 +158,13 @@
     '#dd-portal .dd-card { background: var(--surface); padding: 24px; }',
     '#dd-portal .dd-card-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
     '#dd-portal .dd-card-value { font-family: "Cormorant Garamond", serif; font-size: 20px; color: var(--gold); font-weight: 400; }',
-    '#dd-portal .dd-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }',
+
+    // Status badges
+    '#dd-portal .dd-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 32px; }',
+    '#dd-portal .dd-status-card { background: var(--surface); padding: 20px 24px; }',
+    '#dd-portal .dd-status-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
+    '#dd-portal .dd-status-badge { font-size: 11px; letter-spacing: 0.08em; padding: 6px 12px; display: inline-block; border: 1px solid; font-weight: 400; }',
+
     '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
     '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
     '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); }',
@@ -130,8 +203,6 @@
     '#dd-portal .dd-messages-input textarea::placeholder { color: var(--muted); }',
     '#dd-portal .dd-send-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 24px; cursor: pointer; transition: opacity 0.2s; }',
     '#dd-portal .dd-send-btn:hover { opacity: 0.85; }',
-
-    // Drive links
     '#dd-portal .dd-drive-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }',
     '#dd-portal .dd-drive-item { background: var(--surface); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }',
     '#dd-portal .dd-drive-item-info { flex: 1; }',
@@ -140,12 +211,19 @@
     '#dd-portal .dd-drive-link { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 10px 20px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-portal .dd-drive-link:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-drive-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; border: 1px solid var(--border); background: var(--surface); }',
-
     '#dd-portal .dd-tab-content { display: none; }',
     '#dd-portal .dd-tab-content.active { display: block; }',
     '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
-    '@media (max-width: 600px) { #dd-portal .dd-upload-grid { grid-template-columns: 1fr; } #dd-portal .dd-nav { padding: 0 16px; } #dd-portal .dd-tabs { padding: 0 16px; } #dd-portal .dd-content { padding: 24px 16px; } #dd-portal .dd-welcome-card { flex-direction: column; } #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; } }'
+    '@media (max-width: 600px) {',
+    '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
+    '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
+    '  #dd-portal .dd-tabs { padding: 0 16px; }',
+    '  #dd-portal .dd-content { padding: 24px 16px; }',
+    '  #dd-portal .dd-welcome-card { flex-direction: column; }',
+    '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
+    '  #dd-portal .dd-status-grid { grid-template-columns: 1fr; }',
+    '}'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -168,6 +246,11 @@
     '  </div>',
     '</div>',
     '<div id="ddDashboard" class="dd-dashboard">',
+    '  <div class="dd-install-banner" id="ddInstallBanner">',
+    '    <div class="dd-install-text">Add <span>Daydream Portal</span> to your home screen for quick access</div>',
+    '    <button class="dd-install-btn" id="ddInstallBtn">Install App</button>',
+    '    <button class="dd-install-dismiss" id="ddInstallDismiss">&times;</button>',
+    '  </div>',
     '  <nav class="dd-nav"><div class="dd-nav-logo">Daydream</div><div class="dd-nav-right"><span class="dd-nav-user" id="ddNavUser"></span><button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button></div></nav>',
     '  <div class="dd-tabs">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
@@ -188,6 +271,19 @@
     '        <div class="dd-card"><div class="dd-card-label">Service</div><div class="dd-card-value" id="ddService" style="font-size:14px">—</div></div>',
     '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
     '      </div>',
+
+    // Contract & Payment Status
+    '      <div class="dd-status-grid">',
+    '        <div class="dd-status-card">',
+    '          <div class="dd-status-label">Contract Status</div>',
+    '          <div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div>',
+    '        </div>',
+    '        <div class="dd-status-card">',
+    '          <div class="dd-status-label">Payment Status</div>',
+    '          <div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div>',
+    '        </div>',
+    '      </div>',
+
     '      <div class="dd-timeline"><div class="dd-timeline-header">Project Timeline</div><div id="ddTimeline"></div></div>',
     '    </div>',
 
@@ -226,7 +322,7 @@
     '      </div>',
     '    </div>',
 
-    // PROJECT FILES
+    // DRIVE
     '    <div class="dd-tab-content" id="tab-drive">',
     '      <div class="dd-section-title">Project Files</div>',
     '      <div class="dd-section-sub">Access your shared project folders below</div>',
@@ -241,6 +337,29 @@
   var currentUser = null;
   var currentClient = null;
   var currentProject = null;
+  var deferredInstallPrompt = null;
+
+  // ── PWA INSTALL PROMPT ────────────────────────────────────────────
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    var banner = document.getElementById('ddInstallBanner');
+    if (banner && currentUser) banner.classList.add('visible');
+  });
+
+  document.getElementById('ddInstallBtn').addEventListener('click', function() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(function() {
+        deferredInstallPrompt = null;
+        document.getElementById('ddInstallBanner').classList.remove('visible');
+      });
+    }
+  });
+
+  document.getElementById('ddInstallDismiss').addEventListener('click', function() {
+    document.getElementById('ddInstallBanner').classList.remove('visible');
+  });
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
@@ -250,6 +369,7 @@
     document.getElementById('ddLoginWrap').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
     if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
+    if (deferredInstallPrompt) document.getElementById('ddInstallBanner').classList.add('visible');
   }
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
@@ -279,6 +399,20 @@
     }).join('');
   }
 
+  // ── RENDER STATUS BADGES ──────────────────────────────────────────
+  function renderStatusBadges(client) {
+    var contractKey = (client && client.contract_status) || 'not_sent';
+    var paymentKey = (client && client.payment_status) || 'not_sent';
+    var contract = CONTRACT_LABELS[contractKey] || CONTRACT_LABELS['not_sent'];
+    var payment = PAYMENT_LABELS[paymentKey] || PAYMENT_LABELS['not_sent'];
+
+    document.getElementById('ddContractStatus').innerHTML =
+      '<span class="dd-status-badge" style="color:' + contract.color + ';border-color:' + contract.color + ';background:' + contract.color + '18">' + contract.label + '</span>';
+
+    document.getElementById('ddPaymentStatus').innerHTML =
+      '<span class="dd-status-badge" style="color:' + payment.color + ';border-color:' + payment.color + ';background:' + payment.color + '18">' + payment.label + '</span>';
+  }
+
   // ── RENDER DRIVE LINKS ────────────────────────────────────────────
   function renderDriveLinks(client) {
     var container = document.getElementById('ddDriveList');
@@ -294,10 +428,7 @@
     }
 
     container.innerHTML = '<div class="dd-drive-list">' + links.map(function(l) {
-      return '<div class="dd-drive-item">'
-        + '<div class="dd-drive-item-info"><div class="dd-drive-item-name">' + l.label + '</div><div class="dd-drive-item-sub">' + l.sub + '</div></div>'
-        + '<a href="' + client[l.key] + '" target="_blank" class="dd-drive-link">Open Folder</a>'
-        + '</div>';
+      return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + l.label + '</div><div class="dd-drive-item-sub">' + l.sub + '</div></div><a href="' + client[l.key] + '" target="_blank" class="dd-drive-link">Open Folder</a></div>';
     }).join('') + '</div>';
   }
 
@@ -365,9 +496,11 @@
         document.getElementById('ddService').textContent = serviceLabel(currentClient.project_type);
         document.getElementById('ddSince').textContent = formatDate(currentClient.created_at);
         renderTimeline(currentClient.client_stage || 'inquiry_submitted');
+        renderStatusBadges(currentClient);
         renderDriveLinks(currentClient);
       } else {
         renderTimeline('inquiry_submitted');
+        renderStatusBadges(null);
         renderDriveLinks(null);
       }
       var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + (currentClient ? currentClient.id : 'none') + '&limit=1');
