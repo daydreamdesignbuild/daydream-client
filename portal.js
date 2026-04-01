@@ -26,73 +26,64 @@
   ];
 
   var CONTRACT_LABELS = {
-    'not_sent':          { label: 'Not Yet Sent',              color: '#8a8680' },
-    'sent':              { label: 'Sent — Awaiting Signature', color: '#eeb24a' },
-    'signed':            { label: 'Signed ✓',                  color: '#6a9e7a' }
+    'not_sent':   { label: 'Not Yet Sent',              color: '#8a8680' },
+    'sent':       { label: 'Sent — Awaiting Signature', color: '#eeb24a' },
+    'signed':     { label: 'Signed ✓',                  color: '#6a9e7a' }
   };
 
   var PAYMENT_LABELS = {
-    'not_sent':          { label: 'Invoice Not Yet Sent',      color: '#8a8680' },
-    'invoice_sent':      { label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
-    'deposit_paid':      { label: 'Deposit Paid — Balance Due', color: '#5a8e9e' },
-    'partially_paid':    { label: 'Partially Paid',            color: '#7a9e8a' },
-    'payment_complete':  { label: 'Payment Complete ✓',        color: '#6a9e7a' }
+    'not_sent':         { label: 'Invoice Not Yet Sent',           color: '#8a8680' },
+    'invoice_sent':     { label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
+    'deposit_paid':     { label: 'Deposit Paid — Balance Due',     color: '#5a8e9e' },
+    'partially_paid':   { label: 'Partially Paid',                 color: '#7a9e8a' },
+    'payment_complete': { label: 'Payment Complete ✓',             color: '#6a9e7a' }
   };
+
+  // Checklist items — key maps to upload category or note
+  var CHECKLIST_ITEMS = [
+    { key: 'goals',       label: 'Project Goals & Must-Have Features',        desc: 'Tell us the main purpose of the space and any non-negotiable features.',        type: 'note',   noteKey: 'goals' },
+    { key: 'inspo',       label: 'Inspiration Photos or Boards',              desc: 'Upload your Pinterest boards, AI images, Google saves or any reference images. Upload in the Documents tab.',   type: 'upload', category: 'inspo' },
+    { key: 'photos',      label: 'Detailed Site Photos & Walkthrough Video',  desc: 'Show the entire project area with straight-on shots of the house. Upload in the Documents tab.',             type: 'upload', category: 'photos' },
+    { key: 'survey',      label: 'Property Survey / Site Plat',               desc: 'Crucial for accuracy. Should show topography, property lines and trees. Upload in the Documents tab.',        type: 'upload', category: 'survey' },
+    { key: 'bylaws',      label: 'HOA Bylaws & Neighborhood Covenants',       desc: 'All construction rules and regulations. You can upload these under House Plans or Survey in the Documents tab.', type: 'upload', category: 'houseplans' },
+    { key: 'houseplans',  label: 'Existing House Architectural Plans',        desc: 'If available. Upload in the Documents tab under House Plans.',                  type: 'upload', category: 'houseplans' }
+  ];
 
   function getStageIndex(value) {
     var idx = TIMELINE.findIndex(function(s) { return s.value === value; });
     return idx === -1 ? 0 : idx;
   }
 
-  // ── PWA: Register Service Worker ──────────────────────────────────
+  // ── PWA ───────────────────────────────────────────────────────────
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').catch(function(err) {
-        console.log('SW registration failed:', err);
-      });
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
     });
   }
 
-  // ── FONTS ─────────────────────────────────────────────────────────
+  // ── FONTS & META ──────────────────────────────────────────────────
   var font = document.createElement('link');
   font.rel = 'stylesheet';
   font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap';
   document.head.appendChild(font);
 
-  // ── PWA MANIFEST LINK ─────────────────────────────────────────────
-  var manifestLink = document.createElement('link');
-  manifestLink.rel = 'manifest';
-  manifestLink.href = 'https://daydreamdesignbuild.github.io/daydream-client/manifest.json';
-  document.head.appendChild(manifestLink);
+  ['manifest', 'apple-touch-icon'].forEach(function(rel) {
+    var link = document.createElement('link');
+    link.rel = rel;
+    if (rel === 'manifest') link.href = 'https://daydreamdesignbuild.github.io/daydream-client/manifest.json';
+    document.head.appendChild(link);
+  });
 
-  // ── META TAGS FOR PWA ─────────────────────────────────────────────
-  var metaTheme = document.createElement('meta');
-  metaTheme.name = 'theme-color';
-  metaTheme.content = '#eeb24a';
-  document.head.appendChild(metaTheme);
-
-  var metaApple = document.createElement('meta');
-  metaApple.name = 'apple-mobile-web-app-capable';
-  metaApple.content = 'yes';
-  document.head.appendChild(metaApple);
-
-  var metaAppleStatus = document.createElement('meta');
-  metaAppleStatus.name = 'apple-mobile-web-app-status-bar-style';
-  metaAppleStatus.content = 'black-translucent';
-  document.head.appendChild(metaAppleStatus);
-
-  var metaAppleTitle = document.createElement('meta');
-  metaAppleTitle.name = 'apple-mobile-web-app-title';
-  metaAppleTitle.content = 'Daydream';
-  document.head.appendChild(metaAppleTitle);
-
-  var metaViewport = document.querySelector('meta[name="viewport"]');
-  if (!metaViewport) {
-    metaViewport = document.createElement('meta');
-    metaViewport.name = 'viewport';
-    metaViewport.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
-    document.head.appendChild(metaViewport);
-  }
+  [
+    ['theme-color', '#eeb24a'],
+    ['apple-mobile-web-app-capable', 'yes'],
+    ['apple-mobile-web-app-status-bar-style', 'black-translucent'],
+    ['apple-mobile-web-app-title', 'Daydream']
+  ].forEach(function(m) {
+    var meta = document.createElement('meta');
+    meta.name = m[0]; meta.content = m[1];
+    document.head.appendChild(meta);
+  });
 
   // ── STYLES ────────────────────────────────────────────────────────
   var style = document.createElement('style');
@@ -124,13 +115,16 @@
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
 
-    // PWA install banner
-    '#dd-portal .dd-install-banner { background: var(--surface); border-bottom: 1px solid var(--gold); padding: 12px 24px; display: none; align-items: center; justify-content: space-between; gap: 16px; }',
-    '#dd-portal .dd-install-banner.visible { display: flex; }',
-    '#dd-portal .dd-install-text { font-size: 11px; color: var(--text); letter-spacing: 0.05em; }',
-    '#dd-portal .dd-install-text span { color: var(--gold); }',
-    '#dd-portal .dd-install-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 8px 16px; cursor: pointer; white-space: nowrap; }',
-    '#dd-portal .dd-install-dismiss { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0 4px; }',
+    // PWA Banner
+    '#dd-portal .dd-pwa-banner { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 14px 24px; display: none; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }',
+    '#dd-portal .dd-pwa-banner.visible { display: flex; }',
+    '#dd-portal .dd-pwa-icon { font-size: 20px; flex-shrink: 0; }',
+    '#dd-portal .dd-pwa-text { flex: 1; }',
+    '#dd-portal .dd-pwa-title { font-size: 12px; color: var(--text); margin-bottom: 2px; }',
+    '#dd-portal .dd-pwa-sub { font-size: 10px; color: var(--muted); }',
+    '#dd-portal .dd-pwa-btns { display: flex; gap: 8px; align-items: center; }',
+    '#dd-portal .dd-pwa-install { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 9px 18px; cursor: pointer; white-space: nowrap; }',
+    '#dd-portal .dd-pwa-dismiss { background: none; border: 1px solid var(--border); color: var(--muted); font-family: Jost, sans-serif; font-size: 9px; padding: 8px 12px; cursor: pointer; }',
 
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
@@ -144,6 +138,7 @@
     '#dd-portal .dd-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; }',
     '#dd-portal .dd-tab:hover { color: var(--text); }',
     '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-portal .dd-tab-badge { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
     '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
     '#dd-portal .dd-section-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 32px; }',
@@ -158,13 +153,11 @@
     '#dd-portal .dd-card { background: var(--surface); padding: 24px; }',
     '#dd-portal .dd-card-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
     '#dd-portal .dd-card-value { font-family: "Cormorant Garamond", serif; font-size: 20px; color: var(--gold); font-weight: 400; }',
-
-    // Status badges
+    '#dd-portal .dd-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }',
     '#dd-portal .dd-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 32px; }',
     '#dd-portal .dd-status-card { background: var(--surface); padding: 20px 24px; }',
     '#dd-portal .dd-status-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
-    '#dd-portal .dd-status-badge { font-size: 11px; letter-spacing: 0.08em; padding: 6px 12px; display: inline-block; border: 1px solid; font-weight: 400; }',
-
+    '#dd-portal .dd-status-badge { font-size: 11px; letter-spacing: 0.08em; padding: 6px 12px; display: inline-block; border: 1px solid; }',
     '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
     '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
     '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); }',
@@ -175,6 +168,36 @@
     '#dd-portal .dd-timeline-label { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }',
     '#dd-portal .dd-timeline-label.muted { color: var(--muted); }',
     '#dd-portal .dd-timeline-badge { margin-left: auto; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--gold); color: var(--gold); }',
+
+    // Checklist
+    '#dd-portal .dd-checklist { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
+    '#dd-portal .dd-checklist-header { padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; }',
+    '#dd-portal .dd-checklist-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-portal .dd-checklist-progress { font-size: 11px; color: var(--muted); }',
+    '#dd-portal .dd-checklist-progress span { color: var(--gold); }',
+    '#dd-portal .dd-checklist-item { border-bottom: 1px solid var(--border); overflow: hidden; }',
+    '#dd-portal .dd-checklist-item:last-child { border-bottom: none; }',
+    '#dd-portal .dd-checklist-row { display: flex; align-items: flex-start; gap: 16px; padding: 18px 24px; cursor: pointer; transition: background 0.2s; }',
+    '#dd-portal .dd-checklist-row:hover { background: var(--gold-dim); }',
+    '#dd-portal .dd-check-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.2s; }',
+    '#dd-portal .dd-check-circle.done { border-color: var(--success); background: var(--success); }',
+    '#dd-portal .dd-check-circle.done::after { content: "✓"; font-size: 11px; color: white; font-weight: 600; }',
+    '#dd-portal .dd-check-info { flex: 1; }',
+    '#dd-portal .dd-check-label { font-size: 13px; color: var(--text); margin-bottom: 3px; font-weight: 400; }',
+    '#dd-portal .dd-check-label.done { text-decoration: line-through; color: var(--muted); }',
+    '#dd-portal .dd-check-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }',
+    '#dd-portal .dd-check-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--border); color: var(--muted); margin-top: 6px; display: inline-block; }',
+    '#dd-portal .dd-note-area { padding: 0 24px 20px; display: none; }',
+    '#dd-portal .dd-note-area.visible { display: block; }',
+    '#dd-portal .dd-note-textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 14px 16px; resize: vertical; min-height: 100px; outline: none; transition: border-color 0.2s; line-height: 1.7; }',
+    '#dd-portal .dd-note-textarea:focus { border-color: var(--gold); }',
+    '#dd-portal .dd-note-textarea::placeholder { color: var(--muted); }',
+    '#dd-portal .dd-note-save { margin-top: 8px; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 10px 24px; cursor: pointer; transition: opacity 0.2s; }',
+    '#dd-portal .dd-note-save:hover { opacity: 0.85; }',
+    '#dd-portal .dd-checklist-complete { text-align: center; padding: 24px; background: var(--gold-dim); border-top: 1px solid var(--gold); display: none; }',
+    '#dd-portal .dd-checklist-complete.visible { display: block; }',
+    '#dd-portal .dd-checklist-complete p { font-size: 13px; color: var(--gold); letter-spacing: 0.05em; }',
+
     '#dd-portal .dd-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }',
     '#dd-portal .dd-upload-card { border: 1px solid var(--border); background: var(--surface); overflow: hidden; }',
     '#dd-portal .dd-upload-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
@@ -218,11 +241,13 @@
     '@media (max-width: 600px) {',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
-    '  #dd-portal .dd-tabs { padding: 0 16px; }',
+    '  #dd-portal .dd-tabs { padding: 0 8px; }',
     '  #dd-portal .dd-content { padding: 24px 16px; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
     '  #dd-portal .dd-status-grid { grid-template-columns: 1fr; }',
+    '  #dd-portal .dd-checklist-row { padding: 14px 16px; }',
+    '  #dd-portal .dd-note-area { padding: 0 16px 16px; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
@@ -246,14 +271,24 @@
     '  </div>',
     '</div>',
     '<div id="ddDashboard" class="dd-dashboard">',
-    '  <div class="dd-install-banner" id="ddInstallBanner">',
-    '    <div class="dd-install-text">Add <span>Daydream Portal</span> to your home screen for quick access</div>',
-    '    <button class="dd-install-btn" id="ddInstallBtn">Install App</button>',
-    '    <button class="dd-install-dismiss" id="ddInstallDismiss">&times;</button>',
+
+    // PWA Banner
+    '  <div class="dd-pwa-banner" id="ddPwaBanner">',
+    '    <div class="dd-pwa-icon">&#128241;</div>',
+    '    <div class="dd-pwa-text">',
+    '      <div class="dd-pwa-title">Add Daydream Portal to your home screen</div>',
+    '      <div class="dd-pwa-sub" id="ddPwaSub">Install for quick access — works just like an app</div>',
+    '    </div>',
+    '    <div class="dd-pwa-btns">',
+    '      <button class="dd-pwa-install" id="ddPwaInstall">Add to Home Screen</button>',
+    '      <button class="dd-pwa-dismiss" id="ddPwaDismiss">Not Now</button>',
+    '    </div>',
     '  </div>',
+
     '  <nav class="dd-nav"><div class="dd-nav-logo">Daydream</div><div class="dd-nav-right"><span class="dd-nav-user" id="ddNavUser"></span><button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button></div></nav>',
     '  <div class="dd-tabs">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
+    '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
     '    <button class="dd-tab" data-tab="uploads">Documents</button>',
     '    <button class="dd-tab" data-tab="messages">Messages</button>',
     '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
@@ -271,32 +306,34 @@
     '        <div class="dd-card"><div class="dd-card-label">Service</div><div class="dd-card-value" id="ddService" style="font-size:14px">—</div></div>',
     '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
     '      </div>',
-
-    // Contract & Payment Status
     '      <div class="dd-status-grid">',
-    '        <div class="dd-status-card">',
-    '          <div class="dd-status-label">Contract Status</div>',
-    '          <div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div>',
-    '        </div>',
-    '        <div class="dd-status-card">',
-    '          <div class="dd-status-label">Payment Status</div>',
-    '          <div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div>',
-    '        </div>',
+    '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div></div>',
+    '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div></div>',
     '      </div>',
-
     '      <div class="dd-timeline"><div class="dd-timeline-header">Project Timeline</div><div id="ddTimeline"></div></div>',
+    '    </div>',
+
+    // CHECKLIST
+    '    <div class="dd-tab-content" id="tab-checklist">',
+    '      <div class="dd-section-title">Getting Started</div>',
+    '      <div class="dd-section-sub">Complete these items to help us get started on your project. The more detail you provide the better we can serve you.</div>',
+    '      <div class="dd-checklist" id="ddChecklist">',
+    '        <div class="dd-checklist-header"><div class="dd-checklist-title">Onboarding Checklist</div><div class="dd-checklist-progress"><span id="ddCheckCount">0</span> of ' + CHECKLIST_ITEMS.length + ' complete</div></div>',
+    '        <div id="ddChecklistItems"></div>',
+    '        <div class="dd-checklist-complete" id="ddChecklistComplete"><p>&#10003; &nbsp; All items complete — thank you! Our team will be in touch shortly.</p></div>',
+    '      </div>',
     '    </div>',
 
     // UPLOADS
     '    <div class="dd-tab-content" id="tab-uploads">',
     '      <div class="dd-section-title">Document Uploads</div>',
-    '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised into your project folder.</div>',
+    '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised into your project folder. You can upload HOA Bylaws under House Plans or Survey.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Existing site photographs</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI concepts, reference images</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans</div><div class="dd-upload-card-desc">Architectural plans and drawings</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Straight-on shots of the house and full project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage of the project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, Google saves, reference photos</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans & HOA Bylaws</div><div class="dd-upload-card-desc">Architectural plans, drawings, HOA rules and covenants</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Plans</div><div class="dd-upload-card-desc">Existing site plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-siteplans"></div></div></div>',
     '      </div>',
     '    </div>',
@@ -337,57 +374,54 @@
   var currentUser = null;
   var currentClient = null;
   var currentProject = null;
-  var deferredInstallPrompt = null;
+  var checklistState = {};
+  var notesState = {};
+  var deferredPrompt = null;
 
-  // ── PWA INSTALL PROMPT ────────────────────────────────────────────
-  // Android - catches beforeinstallprompt
+  // ── PWA INSTALL ───────────────────────────────────────────────────
+  function isIos() { return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()); }
+  function isAndroid() { return /android/.test(navigator.userAgent.toLowerCase()); }
+  function isStandalone() { return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches; }
+  function isDismissed() { try { return sessionStorage.getItem('dd_pwa_dismissed'); } catch(e) { return false; } }
+
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
-    deferredInstallPrompt = e;
-    showInstallBanner();
+    deferredPrompt = e;
+    if (!isStandalone() && !isDismissed()) showPwaBanner('android');
   });
 
-  // iOS Safari - show banner manually since beforeinstallprompt doesn't fire
-  function isIos() {
-    return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  }
-  function isInStandaloneMode() {
-    return window.navigator.standalone === true;
-  }
-  function showInstallBanner() {
-    var banner = document.getElementById('ddInstallBanner');
-    var dismissed = false;
-    try { dismissed = sessionStorage.getItem('dd_install_dismissed'); } catch(e) {}
-    if (banner && !dismissed) banner.classList.add('visible');
-  }
-  function checkIosInstall() {
-    if (isIos() && !isInStandaloneMode()) {
-      var btn = document.getElementById('ddInstallBtn');
-      if (btn) {
-        btn.textContent = 'How to Install';
-        btn.onclick = function() {
-          alert('To install: tap the Share button at the bottom of Safari, then tap "Add to Home Screen"');
-          document.getElementById('ddInstallBanner').classList.remove('visible');
-        };
-      }
-      showInstallBanner();
+  function showPwaBanner(type) {
+    var banner = document.getElementById('ddPwaBanner');
+    var sub = document.getElementById('ddPwaSub');
+    var btn = document.getElementById('ddPwaInstall');
+    if (!banner) return;
+    if (type === 'ios') {
+      sub.textContent = 'Tap the Share button below then "Add to Home Screen"';
+      btn.textContent = 'How to Install';
+      btn.onclick = function() {
+        alert('On iPhone or iPad:\n\n1. Tap the Share button (rectangle with arrow) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm\n\nThe Daydream portal will appear as an app on your home screen.');
+        hidePwaBanner();
+      };
+    } else {
+      sub.textContent = 'Install for quick access — works just like an app';
+      btn.textContent = 'Add to Home Screen';
+      btn.onclick = function() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function() { deferredPrompt = null; hidePwaBanner(); });
+        }
+      };
     }
+    banner.classList.add('visible');
   }
 
-  document.getElementById('ddInstallBtn').addEventListener('click', function() {
-    if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      deferredInstallPrompt.userChoice.then(function() {
-        deferredInstallPrompt = null;
-        document.getElementById('ddInstallBanner').classList.remove('visible');
-      });
-    }
-  });
+  function hidePwaBanner() {
+    var banner = document.getElementById('ddPwaBanner');
+    if (banner) banner.classList.remove('visible');
+    try { sessionStorage.setItem('dd_pwa_dismissed', '1'); } catch(e) {}
+  }
 
-  document.getElementById('ddInstallDismiss').addEventListener('click', function() {
-    document.getElementById('ddInstallBanner').classList.remove('visible');
-    try { sessionStorage.setItem('dd_install_dismissed', '1'); } catch(e) {}
-  });
+  document.getElementById('ddPwaDismiss').addEventListener('click', hidePwaBanner);
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
@@ -396,8 +430,14 @@
     hideLoading();
     document.getElementById('ddLoginWrap').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
-    if (currentUser) { var navName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email; document.getElementById('ddNavUser').textContent = navName; }
-    if (deferredInstallPrompt) showInstallBanner(); else checkIosInstall();
+    if (currentUser) {
+      var name = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
+      document.getElementById('ddNavUser').textContent = name;
+    }
+    if (!isStandalone() && !isDismissed()) {
+      if (isIos()) showPwaBanner('ios');
+      else if (deferredPrompt) showPwaBanner('android');
+    }
   }
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
@@ -418,8 +458,7 @@
   function renderTimeline(clientStage) {
     var currentIdx = getStageIndex(clientStage || 'inquiry_submitted');
     document.getElementById('ddTimeline').innerHTML = TIMELINE.map(function(stage, idx) {
-      var isDone = idx < currentIdx;
-      var isActive = idx === currentIdx;
+      var isDone = idx < currentIdx, isActive = idx === currentIdx;
       var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
       var labelClass = (isDone || isActive) ? '' : 'muted';
       var badge = isActive ? '<div class="dd-timeline-badge">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
@@ -427,21 +466,15 @@
     }).join('');
   }
 
-  // ── RENDER STATUS BADGES ──────────────────────────────────────────
   function renderStatusBadges(client) {
     var contractKey = (client && client.contract_status) || 'not_sent';
     var paymentKey = (client && client.payment_status) || 'not_sent';
     var contract = CONTRACT_LABELS[contractKey] || CONTRACT_LABELS['not_sent'];
     var payment = PAYMENT_LABELS[paymentKey] || PAYMENT_LABELS['not_sent'];
-
-    document.getElementById('ddContractStatus').innerHTML =
-      '<span class="dd-status-badge" style="color:' + contract.color + ';border-color:' + contract.color + ';background:' + contract.color + '18">' + contract.label + '</span>';
-
-    document.getElementById('ddPaymentStatus').innerHTML =
-      '<span class="dd-status-badge" style="color:' + payment.color + ';border-color:' + payment.color + ';background:' + payment.color + '18">' + payment.label + '</span>';
+    document.getElementById('ddContractStatus').innerHTML = '<span class="dd-status-badge" style="color:' + contract.color + ';border-color:' + contract.color + ';background:' + contract.color + '18">' + contract.label + '</span>';
+    document.getElementById('ddPaymentStatus').innerHTML = '<span class="dd-status-badge" style="color:' + payment.color + ';border-color:' + payment.color + ';background:' + payment.color + '18">' + payment.label + '</span>';
   }
 
-  // ── RENDER DRIVE LINKS ────────────────────────────────────────────
   function renderDriveLinks(client) {
     var container = document.getElementById('ddDriveList');
     var links = [
@@ -449,16 +482,160 @@
       { key: 'drive_permit_link',        label: 'Permit Folder',        sub: 'Permit plans, structural documents and approvals' },
       { key: 'drive_construction_link',  label: 'Construction Folder',  sub: 'Construction documents and site data' }
     ].filter(function(l) { return client && client[l.key]; });
-
-    if (!links.length) {
-      container.innerHTML = '<div class="dd-drive-empty">Your project files will appear here once your project is active. We will notify you when files are ready to view.</div>';
-      return;
-    }
-
+    if (!links.length) { container.innerHTML = '<div class="dd-drive-empty">Your project files will appear here once your project is active.</div>'; return; }
     container.innerHTML = '<div class="dd-drive-list">' + links.map(function(l) {
       return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + l.label + '</div><div class="dd-drive-item-sub">' + l.sub + '</div></div><a href="' + client[l.key] + '" target="_blank" class="dd-drive-link">Open Folder</a></div>';
     }).join('') + '</div>';
   }
+
+  // ── CHECKLIST ─────────────────────────────────────────────────────
+  function renderChecklist() {
+    var container = document.getElementById('ddChecklistItems');
+    var doneCount = 0;
+
+    container.innerHTML = CHECKLIST_ITEMS.map(function(item) {
+      var isDone = checklistState[item.key] === true;
+      if (isDone) doneCount++;
+      var noteContent = notesState[item.key] || '';
+      var noteArea = item.type === 'note'
+        ? '<div class="dd-note-area" id="note-area-' + item.key + '">'
+          + '<textarea class="dd-note-textarea" id="note-' + item.key + '" placeholder="Share your project goals, must-have features, style preferences, budget considerations..." rows="5">' + noteContent + '</textarea>'
+          + '<button class="dd-note-save" onclick="window._saveNote(\'' + item.key + '\')">Save</button>'
+          + '</div>'
+        : '';
+
+      return '<div class="dd-checklist-item">'
+        + '<div class="dd-checklist-row" onclick="window._toggleCheckItem(\'' + item.key + '\')">'
+        + '  <div class="dd-check-circle' + (isDone ? ' done' : '') + '" id="check-circle-' + item.key + '"></div>'
+        + '  <div class="dd-check-info">'
+        + '    <div class="dd-check-label' + (isDone ? ' done' : '') + '" id="check-label-' + item.key + '">' + item.label + '</div>'
+        + '    <div class="dd-check-desc">' + item.desc + '</div>'
+        + (item.type === 'upload' ? '<div class="dd-check-tag">Upload in Documents tab</div>' : '<div class="dd-check-tag">Fill in below</div>')
+        + '  </div>'
+        + '</div>'
+        + noteArea
+        + '</div>';
+    }).join('');
+
+    document.getElementById('ddCheckCount').textContent = doneCount;
+
+    // Show complete banner if all done
+    var completeBanner = document.getElementById('ddChecklistComplete');
+    if (doneCount === CHECKLIST_ITEMS.length) completeBanner.classList.add('visible');
+    else completeBanner.classList.remove('visible');
+
+    // Show note areas for note-type items that are not done
+    CHECKLIST_ITEMS.forEach(function(item) {
+      if (item.type === 'note') {
+        var area = document.getElementById('note-area-' + item.key);
+        if (area) area.classList.add('visible');
+      }
+    });
+
+    // Update checklist tab badge
+    var remaining = CHECKLIST_ITEMS.length - doneCount;
+    var tab = document.querySelector('[data-tab="checklist"]');
+    if (tab) {
+      var badge = tab.querySelector('.dd-tab-badge');
+      if (remaining > 0) {
+        if (!badge) { badge = document.createElement('span'); badge.className = 'dd-tab-badge'; tab.appendChild(badge); }
+        badge.textContent = remaining;
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+  }
+
+  window._toggleCheckItem = async function(key) {
+    var item = CHECKLIST_ITEMS.find(function(i) { return i.key === key; });
+    if (!item || !currentClient) return;
+
+    // For note items — toggle note area open/close instead
+    if (item.type === 'note') {
+      var area = document.getElementById('note-area-' + key);
+      if (area) { area.classList.toggle('visible'); return; }
+    }
+
+    var newState = !checklistState[key];
+    checklistState[key] = newState;
+
+    // Update UI immediately
+    var circle = document.getElementById('check-circle-' + key);
+    var label = document.getElementById('check-label-' + key);
+    if (circle) { circle.classList.toggle('done', newState); }
+    if (label) { label.classList.toggle('done', newState); }
+
+    // Save to Supabase
+    try {
+      var existing = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
+      var data = await existing.json();
+      if (data && data.length > 0) {
+        await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, {
+          method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ completed: newState, completed_at: newState ? new Date().toISOString() : null })
+        });
+      } else {
+        await apiFetch('/rest/v1/checklist_items', {
+          method: 'POST', headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: newState, completed_at: newState ? new Date().toISOString() : null })
+        });
+      }
+    } catch(e) {}
+
+    // Re-render to update count and badge
+    renderChecklist();
+  };
+
+  window._saveNote = async function(key) {
+    if (!currentClient) return;
+    var textarea = document.getElementById('note-' + key);
+    var content = textarea ? textarea.value.trim() : '';
+    notesState[key] = content;
+
+    // Mark checklist item as done if note has content
+    if (content && !checklistState[key]) {
+      checklistState[key] = true;
+    }
+
+    try {
+      var existing = await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key);
+      var data = await existing.json();
+      if (data && data.length > 0) {
+        await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key, {
+          method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ content: content, updated_at: new Date().toISOString() })
+        });
+      } else {
+        await apiFetch('/rest/v1/client_notes', {
+          method: 'POST', headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ client_id: currentClient.id, note_key: key, content: content })
+        });
+      }
+      // Also save checklist state
+      var existing2 = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
+      var data2 = await existing2.json();
+      if (data2 && data2.length > 0) {
+        await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, {
+          method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ completed: !!content, completed_at: content ? new Date().toISOString() : null })
+        });
+      } else {
+        await apiFetch('/rest/v1/checklist_items', {
+          method: 'POST', headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: !!content, completed_at: content ? new Date().toISOString() : null })
+        });
+      }
+      var btn = document.querySelector('[onclick="_saveNote(\'' + key + '\')"]') || document.querySelector('[onclick*="saveNote"][onclick*="' + key + '"]');
+      var saveBtn = document.querySelector('#note-area-' + key + ' .dd-note-save');
+      if (saveBtn) { saveBtn.textContent = 'Saved!'; saveBtn.style.background = 'var(--success)'; setTimeout(function() { saveBtn.textContent = 'Save'; saveBtn.style.background = 'var(--gold)'; }, 2000); }
+      renderChecklist();
+      // Restore note textarea value after re-render
+      var ta = document.getElementById('note-' + key);
+      if (ta) ta.value = content;
+      var area = document.getElementById('note-area-' + key);
+      if (area) area.classList.add('visible');
+    } catch(e) {}
+  };
 
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
   async function tryTokenFromUrl() {
@@ -485,8 +662,7 @@
       try {
         history.replaceState(null, '', window.location.pathname);
         var verifyRes = await fetch(SUPABASE_URL + '/auth/v1/verify', {
-          method: 'POST',
-          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: otpToken, type: 'magiclink' })
         });
         var verifyData = await verifyRes.json();
@@ -526,16 +702,35 @@
         renderTimeline(currentClient.client_stage || 'inquiry_submitted');
         renderStatusBadges(currentClient);
         renderDriveLinks(currentClient);
+        await loadChecklistData();
       } else {
         renderTimeline('inquiry_submitted');
         renderStatusBadges(null);
         renderDriveLinks(null);
+        renderChecklist();
       }
       var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + (currentClient ? currentClient.id : 'none') + '&limit=1');
       var projData = await projRes.json();
       if (projData && projData[0]) currentProject = projData[0];
       loadMessages();
-    } catch(e) { console.error('Load data error:', e); }
+    } catch(e) { console.error('Load error:', e); }
+  }
+
+  async function loadChecklistData() {
+    if (!currentClient) return;
+    try {
+      var [checkRes, noteRes] = await Promise.all([
+        apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id),
+        apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id)
+      ]);
+      var checks = await checkRes.json();
+      var notes = await noteRes.json();
+      checklistState = {};
+      notesState = {};
+      if (checks) checks.forEach(function(c) { checklistState[c.item_key] = c.completed; });
+      if (notes) notes.forEach(function(n) { notesState[n.note_key] = n.content; });
+      renderChecklist();
+    } catch(e) { renderChecklist(); }
   }
 
   async function loadMessages() {
@@ -563,7 +758,6 @@
     if (fromSession) { await loadClientData(); showDashboard(); return; }
     showLogin();
   }
-
   init();
 
   // ── LOGIN ─────────────────────────────────────────────────────────
@@ -571,20 +765,16 @@
     var email = document.getElementById('ddLoginEmail').value.trim();
     var msg = document.getElementById('ddLoginMsg');
     if (!email) { showMsg(msg, 'Please enter your email address.', 'error'); return; }
-    this.disabled = true;
-    this.textContent = 'Sending...';
+    this.disabled = true; this.textContent = 'Sending...';
     try {
       var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink?redirect_to=' + encodeURIComponent(PORTAL_URL), {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email })
       });
       showMsg(msg, res.ok ? 'Login link sent! Check your inbox and click the link to access your portal.' : 'Something went wrong. Please try again.', res.ok ? 'success' : 'error');
     } catch(e) { showMsg(msg, 'Something went wrong. Please try again.', 'error'); }
-    this.disabled = false;
-    this.textContent = 'Send Login Link';
+    this.disabled = false; this.textContent = 'Send Login Link';
   });
-
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
 
   // ── LOGOUT ────────────────────────────────────────────────────────
@@ -622,13 +812,20 @@
         var path = clientName + '/' + category + '/' + Date.now() + '_' + file.name;
         try {
           var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
-            body: file
+            method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type }, body: file
           });
           if (res.ok) {
             uploaded++;
             await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
+            // Auto-mark checklist item complete for this category
+            var checkItem = CHECKLIST_ITEMS.find(function(ci) { return ci.category === category; });
+            if (checkItem && currentClient && !checklistState[checkItem.key]) {
+              checklistState[checkItem.key] = true;
+              await apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: checkItem.key, completed: true, completed_at: new Date().toISOString() }) }).catch(function() {
+                return apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + checkItem.key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: true, completed_at: new Date().toISOString() }) });
+              });
+              renderChecklist();
+            }
           }
         } catch(e) {}
       }
@@ -644,17 +841,10 @@
     if (!content || !currentUser) return;
     input.value = '';
     try {
-      await apiFetch('/rest/v1/messages', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, sender: currentUser.email, content: content, is_read: false })
-      });
+      await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, sender: currentUser.email, content: content, is_read: false }) });
       await loadMessages();
     } catch(e) {}
   });
-
-  document.getElementById('ddMessageInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); }
-  });
+  document.getElementById('ddMessageInput').addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); } });
 
 })();
