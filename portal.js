@@ -102,6 +102,7 @@
     '#dd-portal .dd-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; }',
     '#dd-portal .dd-tab:hover { color: var(--text); }',
     '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-portal .dd-msg-dot { display: inline-block; background: var(--error); color: white; font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
     '#dd-portal .dd-tab-badge { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
     '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
@@ -649,6 +650,17 @@
         return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
       }).join('');
       list.scrollTop = list.scrollHeight;
+
+      // Show notification dot on Messages tab if there are unread team messages
+      var unread = msgs.filter(function(m) { return m.sender === 'daydream_team' && !m.is_read; }).length;
+      var tab = document.querySelector('[data-tab="messages"]');
+      if (tab) {
+        var dot = tab.querySelector('.dd-msg-dot');
+        if (unread > 0) {
+          if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; tab.appendChild(dot); }
+          dot.textContent = unread;
+        } else if (dot) { dot.remove(); }
+      }
     } catch(e) {}
   }
 
