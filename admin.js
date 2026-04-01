@@ -78,6 +78,30 @@
     'houseplans': 'Existing House Architectural Plans'
   };
 
+  var ALL_SERVICES = [
+    { key: '2d_concept',            label: '2D Concept Phase' },
+    { key: '3d_concept',            label: '3D Concept Phase' },
+    { key: '2d_3d_concept',         label: '2D + 3D Concept Phase' },
+    { key: 'permit_plan',           label: 'Permit Plan Phase' },
+    { key: '2d_3d_permit',          label: '2D + 3D + Permit Plan Phase' },
+    { key: 'site_plans',            label: 'Site Plans' },
+    { key: 'retaining_wall_permit', label: 'Permit Plans — Retaining Walls' },
+    { key: 'deck_permit',           label: 'Permit Plans — Decks' },
+    { key: 'footing_permit',        label: 'Footing Permit Plans' },
+    { key: 'pavilion_permit',       label: 'Permit Plans — Pavilion' },
+    { key: 'shade_structures',      label: 'Shade Structures' },
+    { key: 'pergolas',              label: 'Pergolas' },
+    { key: 'drainage_plans',        label: 'Drainage Plans' },
+    { key: 'planting_plans',        label: 'Planting Plans' },
+    { key: 'irrigation_plans',      label: 'Irrigation Plans' },
+    { key: 'outdoor_audio',         label: 'Outdoor Audio Plans' },
+    { key: 'outdoor_lighting',      label: 'Outdoor Lighting Plans' },
+    { key: 'furniture_layout',      label: 'Outdoor Furniture Layout' },
+    { key: 'grading_plans',         label: 'Grading Plans' },
+    { key: 'stormwater_plans',      label: 'Stormwater Management Plans' },
+    { key: 'site_consultation',     label: 'Site Consultation' }
+  ];
+
   function getPipelineStage(value) {
     return PIPELINE_STAGES.find(function(s) { return s.value === value; }) || { value: value, label: value || 'New Inquiry', color: '#8a8680' };
   }
@@ -233,6 +257,17 @@
     '#dd-admin .da-modal-submit { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity 0.2s; }',
     '#dd-admin .da-modal-submit:hover { opacity: 0.85; }',
     '#dd-admin .da-modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }',
+
+    // Services
+    '#dd-admin .da-services-wrap { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }',
+    '#dd-admin .da-service-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--border); }',
+    '#dd-admin .da-service-name { font-size: 12px; color: var(--text); flex: 1; }',
+    '#dd-admin .da-service-actions { display: flex; align-items: center; gap: 8px; }',
+    '#dd-admin .da-service-status { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 10px; padding: 4px 8px; outline: none; cursor: pointer; appearance: none; transition: border-color 0.2s; }',
+    '#dd-admin .da-service-status:focus { border-color: var(--gold); }',
+    '#dd-admin .da-service-remove { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 10px; padding: 4px 8px; cursor: pointer; transition: color 0.2s, border-color 0.2s; }',
+    '#dd-admin .da-service-remove:hover { color: var(--error); border-color: var(--error); }',
+    '#dd-admin .da-add-service-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }',
 
     // Admin Notes
     '#dd-admin .da-notes-tabs { display: flex; gap: 1px; background: var(--border); margin-top: 8px; }',
@@ -439,6 +474,8 @@
         + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
         + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
         + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
+        + '    <div class="da-section-divider">Project Services</div>'
+        + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
         + '    <div class="da-section-divider">Admin Notes</div>'
         + '    <div class="da-notes-tabs"><button class="da-note-tab active" data-note="general" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">General</button><button class="da-note-tab" data-note="discussion" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Discussion</button><button class="da-note-tab" data-note="design" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Design</button><button class="da-note-tab" data-note="construction" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Construction</button></div>'
         + '    <div class="da-note-panels">'
@@ -458,7 +495,110 @@
     var det = document.getElementById('det-' + id);
     var exp = document.getElementById('exp-' + id);
     if (det.classList.contains('visible')) { det.classList.remove('visible'); exp.classList.remove('open'); }
-    else { det.classList.add('visible'); exp.classList.add('open'); }
+    else { det.classList.add('visible'); exp.classList.add('open'); loadClientServices(id); }
+  };
+
+  async function loadClientServices(clientId) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+    try {
+      var res = await apiFetch('/rest/v1/client_services?client_id=eq.' + clientId + '&order=created_at.asc');
+      var services = await res.json();
+      renderClientServices(clientId, services || []);
+    } catch(e) { console.error('Services error:', e); }
+  }
+
+  function renderClientServices(clientId, services) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+
+    var serviceOpts = ALL_SERVICES.map(function(s) {
+      return '<option value="' + s.key + '">' + s.label + '</option>';
+    }).join('');
+
+    var existingHtml = services.length ? services.map(function(s) {
+      return '<div class="da-service-item" id="svc-' + s.id + '">'
+        + '<div class="da-service-name">' + s.service_name + '</div>'
+        + '<div class="da-service-actions">'
+        + '<select class="da-service-status" onchange="window._updateServiceStatus('' + s.id + '', this.value)">'
+        + '<option value="pending"' + (s.status === 'pending' ? ' selected' : '') + '>Pending</option>'
+        + '<option value="in_progress"' + (s.status === 'in_progress' ? ' selected' : '') + '>In Progress</option>'
+        + '<option value="complete"' + (s.status === 'complete' ? ' selected' : '') + '>Complete</option>'
+        + '</select>'
+        + '<button class="da-service-remove" onclick="window._removeService('' + s.id + '', '' + clientId + '')">&#10005;</button>'
+        + '</div>'
+        + '</div>';
+    }).join('') : '<div style="font-size:11px;color:var(--muted);padding:4px 0 8px">No services added yet</div>';
+
+    wrap.innerHTML = existingHtml
+      + '<div class="da-add-service-row">'
+      + '<select class="da-select" id="svc-select-' + clientId + '">'
+      + '<option value="">Select service to add...</option>'
+      + serviceOpts
+      + '<option value="__custom__">+ Add Custom Service</option>'
+      + '</select>'
+      + '<button class="da-update-btn" onclick="window._addService('' + clientId + '')">Add</button>'
+      + '</div>'
+      + '<div id="svc-custom-' + clientId + '" style="display:none;margin-top:8px">'
+      + '<input class="da-text-input" id="svc-custom-input-' + clientId + '" type="text" placeholder="Enter custom service name..." />'
+      + '</div>';
+
+    // Show/hide custom input
+    var sel = document.getElementById('svc-select-' + clientId);
+    if (sel) {
+      sel.addEventListener('change', function() {
+        var customDiv = document.getElementById('svc-custom-' + clientId);
+        if (customDiv) customDiv.style.display = this.value === '__custom__' ? 'block' : 'none';
+      });
+    }
+  }
+
+  window._addService = async function(clientId) {
+    var sel = document.getElementById('svc-select-' + clientId);
+    var customInput = document.getElementById('svc-custom-input-' + clientId);
+    if (!sel) return;
+
+    var serviceKey = sel.value;
+    var serviceName = '';
+
+    if (serviceKey === '__custom__') {
+      serviceName = customInput ? customInput.value.trim() : '';
+      serviceKey = null;
+      if (!serviceName) return;
+    } else if (serviceKey) {
+      var found = ALL_SERVICES.find(function(s) { return s.key === serviceKey; });
+      serviceName = found ? found.label : serviceKey;
+    } else { return; }
+
+    try {
+      await apiFetch('/rest/v1/client_services', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_id: clientId, service_name: serviceName, service_key: serviceKey, status: 'pending' })
+      });
+      if (customInput) customInput.value = '';
+      sel.value = '';
+      var customDiv = document.getElementById('svc-custom-' + clientId);
+      if (customDiv) customDiv.style.display = 'none';
+      await loadClientServices(clientId);
+    } catch(e) {}
+  };
+
+  window._updateServiceStatus = async function(serviceId, status) {
+    try {
+      await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ status: status })
+      });
+    } catch(e) {}
+  };
+
+  window._removeService = async function(serviceId, clientId) {
+    try {
+      await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' });
+      await loadClientServices(clientId);
+    } catch(e) {}
   };
 
   window._updateField = async function(id, field, selectId) {
