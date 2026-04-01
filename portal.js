@@ -3,9 +3,33 @@
   // ── CONFIG ────────────────────────────────────────────────────────
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
-  var PORTAL_URL = 'https://daydreamdesignandbuild.com/app/';
-  var CONSULTATION_URL = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
+  var PORTAL_URL   = 'https://daydreamdesignandbuild.com/app/';
+  var CONSULT_URL  = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
   var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
+
+  // ── PARSE TOKEN FROM URL HASH ─────────────────────────────────────
+  // Handles both direct landing and redirects from other pages
+  function getTokenFromUrl() {
+    var hash = window.location.hash || window.location.search;
+    if (!hash) return null;
+    var str = hash.replace(/^[#?]/, '');
+    var params = new URLSearchParams(str);
+    var token = params.get('access_token');
+    var refresh = params.get('refresh_token');
+    var error = params.get('error');
+    if (error) {
+      console.warn('Auth error in URL:', params.get('error_description'));
+      return null;
+    }
+    if (token) {
+      sessionStorage.setItem('dd_token', token);
+      if (refresh) sessionStorage.setItem('dd_refresh', refresh);
+      // Clean the URL
+      history.replaceState(null, '', window.location.pathname);
+      return token;
+    }
+    return null;
+  }
 
   // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
@@ -25,11 +49,16 @@
     '  font-family: Jost, sans-serif; font-weight: 300;',
     '  background: var(--bg); color: var(--text); min-height: 100vh; width: 100%;',
     '}',
+    '#dd-portal .dd-loading {',
+    '  min-height: 100vh; display: flex; align-items: center; justify-content: center;',
+    '  font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);',
+    '}',
     '#dd-portal .dd-login-wrap {',
-    '  min-height: 100vh; display: flex; flex-direction: column;',
+    '  min-height: 100vh; display: none; flex-direction: column;',
     '  align-items: center; justify-content: center; padding: 40px 20px;',
     '  animation: ddFadeUp 0.8s ease both;',
     '}',
+    '#dd-portal .dd-login-wrap.visible { display: flex; }',
     '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
     '#dd-portal .dd-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 36px 40px; text-align: center; }',
     '#dd-portal .dd-login-logo { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 400; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }',
@@ -47,8 +76,7 @@
     '#dd-portal .dd-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
     '#dd-portal .dd-btn:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
-    '#dd-portal .dd-btn.dd-btn-solid { background: var(--gold); color: var(--bg); }',
-    '#dd-portal .dd-msg { font-size: 11px; text-align: center; padding: 10px; margin-top: 12px; display: none; letter-spacing: 0.05em; }',
+    '#dd-portal .dd-msg { font-size: 11px; text-align: center; padding: 10px; margin-top: 12px; display: none; letter-spacing: 0.05em; line-height: 1.8; }',
     '#dd-portal .dd-msg.visible { display: block; }',
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
@@ -142,6 +170,8 @@
   if (!wrap) return;
 
   wrap.innerHTML = [
+    '<div id="ddLoading" class="dd-loading">Loading your portal...</div>',
+
     '<div id="ddLoginWrap" class="dd-login-wrap">',
     '  <div class="dd-login-card">',
     '    <div class="dd-login-header">',
@@ -149,8 +179,8 @@
     '      <div class="dd-login-sub">Design + Build &mdash; Atlanta, Georgia</div>',
     '    </div>',
     '    <div class="dd-login-body">',
-    '      <div class="dd-login-title">Welcome back.</div>',
-    '      <div class="dd-login-desc">Enter your email address and we will send you a secure link to access your project portal.</div>',
+    '      <div class="dd-login-title">Access Your Portal</div>',
+    '      <div class="dd-login-desc">Enter your email address and we will send you a secure one-click link to access your project portal.</div>',
     '      <div class="dd-input-wrap">',
     '        <label class="dd-input-label">Email Address</label>',
     '        <input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" />',
@@ -186,7 +216,7 @@
     '          <h3>Book Your Discovery Call</h3>',
     '          <p>Schedule a consultation with our design team to discuss your vision, timeline and investment in detail.</p>',
     '        </div>',
-    '        <a href="' + CONSULTATION_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a>',
+    '        <a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a>',
     '      </div>',
     '      <div class="dd-cards">',
     '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
@@ -234,7 +264,7 @@
     '      <div class="dd-section-title">Schedule a Meeting</div>',
     '      <div class="dd-section-sub">Book time with the Daydream team</div>',
     '      <div class="dd-cards">',
-    '        <div class="dd-card"><div class="dd-card-label">Discovery Consultation</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion and vision alignment</div><a href="' + CONSULTATION_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Discovery Consultation</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion and vision alignment</div><a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a></div>',
     '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review designs and discuss feedback and changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
     '      </div>',
     '    </div>',
@@ -279,23 +309,28 @@
     return map[key] || key || '—';
   }
 
+  function hideLoading() {
+    var el = document.getElementById('ddLoading');
+    if (el) el.style.display = 'none';
+  }
+
   // ── SESSION ───────────────────────────────────────────────────────
-  function checkSession() {
-    var hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
-      var params = new URLSearchParams(hash.replace('#', ''));
-      var token = params.get('access_token');
-      var refresh = params.get('refresh_token');
-      if (token) {
-        sessionStorage.setItem('dd_token', token);
-        if (refresh) sessionStorage.setItem('dd_refresh', refresh);
-        history.replaceState(null, '', window.location.pathname);
-        loadSession(token);
-        return;
-      }
+  async function init() {
+    // First check URL for token (from magic link click)
+    var urlToken = getTokenFromUrl();
+    if (urlToken) {
+      await loadSession(urlToken);
+      return;
     }
+    // Then check sessionStorage
     var saved = sessionStorage.getItem('dd_token');
-    if (saved) loadSession(saved);
+    if (saved) {
+      await loadSession(saved);
+      return;
+    }
+    // No session — show login
+    hideLoading();
+    document.getElementById('ddLoginWrap').classList.add('visible');
   }
 
   async function loadSession(token) {
@@ -307,10 +342,17 @@
       if (user && user.email) {
         currentUser = { access_token: token, email: user.email, id: user.id };
         await loadClientData();
+        hideLoading();
         showDashboard();
+      } else {
+        sessionStorage.removeItem('dd_token');
+        hideLoading();
+        document.getElementById('ddLoginWrap').classList.add('visible');
       }
     } catch (e) {
       console.error('Session error:', e);
+      hideLoading();
+      document.getElementById('ddLoginWrap').classList.add('visible');
     }
   }
 
@@ -351,9 +393,7 @@
       var res = await supabaseFetch('/rest/v1/messages?project_id=eq.' + currentProject.id + '&order=created_at.asc');
       var msgs = await res.json();
       renderMessages(msgs || []);
-    } catch (e) {
-      console.error('Messages error:', e);
-    }
+    } catch (e) { console.error('Messages error:', e); }
   }
 
   function renderMessages(msgs) {
@@ -370,7 +410,7 @@
   }
 
   function showDashboard() {
-    document.getElementById('ddLoginWrap').style.display = 'none';
+    document.getElementById('ddLoginWrap').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
     if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
   }
@@ -389,7 +429,7 @@
         body: JSON.stringify({ email: email, options: { emailRedirectTo: PORTAL_URL } })
       });
       if (res.ok) {
-        showMsg(msg, 'Login link sent! Check your inbox and click the link to sign in to your portal.', 'success');
+        showMsg(msg, 'Login link sent! Check your inbox and click the link to access your portal.', 'success');
       } else {
         showMsg(msg, 'Something went wrong. Please try again.', 'error');
       }
@@ -410,7 +450,7 @@
     sessionStorage.removeItem('dd_refresh');
     currentUser = null; currentClient = null; currentProject = null;
     document.getElementById('ddDashboard').classList.remove('visible');
-    document.getElementById('ddLoginWrap').style.display = 'flex';
+    document.getElementById('ddLoginWrap').classList.add('visible');
   });
 
   // ── TABS ──────────────────────────────────────────────────────────
@@ -481,7 +521,7 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); }
   });
 
-  // ── INIT ──────────────────────────────────────────────────────────
-  checkSession();
+  // ── START ─────────────────────────────────────────────────────────
+  init();
 
 })();
