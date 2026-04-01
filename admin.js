@@ -55,6 +55,20 @@
     { value: 'project_complete',             label: 'Project Complete' }
   ];
 
+  var CONTRACT_STAGES = [
+    { value: 'not_sent',   label: 'Not Yet Sent',               color: '#8a8680' },
+    { value: 'sent',       label: 'Sent — Awaiting Signature',  color: '#eeb24a' },
+    { value: 'signed',     label: 'Signed ✓',                   color: '#6a9e7a' }
+  ];
+
+  var PAYMENT_STAGES = [
+    { value: 'not_sent',          label: 'Invoice Not Yet Sent',          color: '#8a8680' },
+    { value: 'invoice_sent',      label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
+    { value: 'deposit_paid',      label: 'Deposit Paid — Balance Due',    color: '#5a8e9e' },
+    { value: 'partially_paid',    label: 'Partially Paid',                color: '#7a9e8a' },
+    { value: 'payment_complete',  label: 'Payment Complete ✓',            color: '#6a9e7a' }
+  ];
+
   function getPipelineStage(value) {
     return PIPELINE_STAGES.find(function(s) { return s.value === value; }) || { value: value, label: value || 'New Inquiry', color: '#8a8680' };
   }
@@ -131,7 +145,7 @@
     '#dd-admin .da-detail-value { font-size: 12px; color: var(--text); }',
     '#dd-admin .da-card-actions { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }',
     '#dd-admin .da-action-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }',
-    '#dd-admin .da-action-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); width: 130px; flex-shrink: 0; }',
+    '#dd-admin .da-action-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); width: 140px; flex-shrink: 0; }',
     '#dd-admin .da-select { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 8px 12px; outline: none; cursor: pointer; appearance: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }',
     '#dd-admin .da-select:focus { border-color: var(--gold); }',
     '#dd-admin .da-text-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 8px 12px; outline: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }',
@@ -301,18 +315,14 @@
       var stage = getPipelineStage(c.status || 'client_inquiry_made');
       var inv = formatInvestment(c.investment || '');
 
-      var pOpts = PIPELINE_STAGES.map(function(s) {
-        return '<option value="' + s.value + '"' + (c.status === s.value ? ' selected' : '') + '>' + s.label + '</option>';
-      }).join('');
-
-      var cOpts = CLIENT_STAGES.map(function(s) {
-        return '<option value="' + s.value + '"' + (c.client_stage === s.value ? ' selected' : '') + '>' + s.label + '</option>';
-      }).join('');
+      var pOpts = PIPELINE_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
+      var cOpts = CLIENT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.client_stage === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
+      var contractOpts = CONTRACT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.contract_status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
+      var paymentOpts = PAYMENT_STAGES.map(function(s) { return '<option value="' + s.value + '"' + (c.payment_status === s.value ? ' selected' : '') + '>' + s.label + '</option>'; }).join('');
 
       return '<div class="da-client-card" id="card-' + c.id + '">'
         + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
-        + '  <div class="da-card-left">'
-        + '    <div class="da-card-avatar">' + initials(c.full_name) + '</div>'
+        + '  <div class="da-card-left"><div class="da-card-avatar">' + initials(c.full_name) + '</div>'
         + '    <div><div class="da-card-name">' + (c.full_name || 'Unknown') + '</div><div class="da-card-sub">' + (c.email || '') + (c.phone ? ' &middot; ' + c.phone : '') + '</div></div>'
         + '  </div>'
         + '  <div class="da-card-right">'
@@ -331,23 +341,18 @@
         + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + (c.notes || '—') + '</div></div>'
         + '  </div>'
         + '  <div class="da-card-actions">'
-
-        // Pipeline stage
         + '    <div class="da-section-divider">Internal Pipeline</div>'
         + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updatePipeline(\'' + c.id + '\')">Update</button></div>'
-
-        // Client timeline
         + '    <div class="da-section-divider">Client Timeline</div>'
         + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateClientStage(\'' + c.id + '\')">Update</button></div>'
-
-        // Drive links
+        + '    <div class="da-section-divider">Contract &amp; Payment</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Contract Status</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateContract(\'' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Payment Status</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updatePayment(\'' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Client Drive Links</div>'
         + '    <div class="da-action-row"><div class="da-action-label">Design Folder</div><input class="da-text-input" id="dlink-design-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_design_link || '') + '" /></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Permit Folder</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_permit_link || '') + '" /></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Construction Folder</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
         + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
-
-        // Email
         + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
         + '  </div>'
         + '</div>'
@@ -363,62 +368,48 @@
     else { det.classList.add('visible'); exp.classList.add('open'); }
   };
 
-  // ── UPDATE PIPELINE ───────────────────────────────────────────────
-  window._updatePipeline = async function(id) {
-    var val = document.getElementById('psel-' + id).value;
+  // ── UPDATE FUNCTIONS ──────────────────────────────────────────────
+  async function updateField(id, field, selectId) {
+    var val = document.getElementById(selectId + id).value;
     try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: val }) });
+      var body = {};
+      body[field] = val;
+      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
       var c = allClients.find(function(x) { return x.id === id; });
-      if (c) c.status = val;
-      var stage = getPipelineStage(val);
-      var card = document.getElementById('card-' + id);
-      if (card) { var pill = card.querySelector('.da-stage-pill'); if (pill) { pill.textContent = stage.label; pill.style.color = stage.color; pill.style.borderColor = stage.color; pill.style.background = stage.color + '18'; } }
-      updateStats();
-      flashSaved('psel-' + id);
+      if (c) c[field] = val;
+      flashSaved(selectId + id);
+      if (field === 'status') {
+        var stage = getPipelineStage(val);
+        var card = document.getElementById('card-' + id);
+        if (card) { var pill = card.querySelector('.da-stage-pill'); if (pill) { pill.textContent = stage.label; pill.style.color = stage.color; pill.style.borderColor = stage.color; pill.style.background = stage.color + '18'; } }
+        updateStats();
+      }
     } catch(e) {}
-  };
+  }
 
-  // ── UPDATE CLIENT STAGE ───────────────────────────────────────────
-  window._updateClientStage = async function(id) {
-    var val = document.getElementById('csel-' + id).value;
-    try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_stage: val }) });
-      var c = allClients.find(function(x) { return x.id === id; });
-      if (c) c.client_stage = val;
-      flashSaved('csel-' + id);
-    } catch(e) {}
-  };
+  window._updatePipeline = function(id) { updateField(id, 'status', 'psel-'); };
+  window._updateClientStage = function(id) { updateField(id, 'client_stage', 'csel-'); };
+  window._updateContract = function(id) { updateField(id, 'contract_status', 'contractsel-'); };
+  window._updatePayment = function(id) { updateField(id, 'payment_status', 'paymentsel-'); };
 
-  // ── UPDATE DRIVE LINKS ────────────────────────────────────────────
   window._updateDriveLinks = async function(id) {
     var design = document.getElementById('dlink-design-' + id).value.trim();
     var permit = document.getElementById('dlink-permit-' + id).value.trim();
     var construction = document.getElementById('dlink-construction-' + id).value.trim();
     try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({
-          drive_design_link: design || null,
-          drive_permit_link: permit || null,
-          drive_construction_link: construction || null
-        })
-      });
+      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ drive_design_link: design || null, drive_permit_link: permit || null, drive_construction_link: construction || null }) });
       var c = allClients.find(function(x) { return x.id === id; });
       if (c) { c.drive_design_link = design; c.drive_permit_link = permit; c.drive_construction_link = construction; }
       var card = document.getElementById('card-' + id);
-      if (card) {
-        var btn = card.querySelector('[onclick*="_updateDriveLinks"]');
-        if (btn) { btn.textContent = 'Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Save Drive Links'; btn.style.background = 'var(--gold)'; }, 2000); }
-      }
-    } catch(e) { console.error('Drive links error:', e); }
+      if (card) { var btn = card.querySelector('[onclick*="_updateDriveLinks"]'); if (btn) { btn.textContent = 'Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Save Drive Links'; btn.style.background = 'var(--gold)'; }, 2000); } }
+    } catch(e) {}
   };
 
   function flashSaved(selectId) {
     var sel = document.getElementById(selectId);
     if (!sel) return;
     var btn = sel.nextElementSibling;
-    if (!btn) return;
+    if (!btn || btn.tagName !== 'BUTTON') return;
     var orig = btn.textContent;
     btn.textContent = 'Saved!';
     btn.style.background = 'var(--success)';
@@ -444,7 +435,7 @@
       var res = await apiFetch('/rest/v1/messages?order=created_at.asc&limit=200');
       allMessages = await res.json();
       renderMessages();
-    } catch(e) { console.error('Messages error:', e); }
+    } catch(e) {}
   }
 
   function renderMessages() {
@@ -465,43 +456,23 @@
       var hasUnread = msgs.some(function(m) { return !m.is_read && m.sender !== 'daydream_team'; });
       var threadHtml = msgs.map(function(m) {
         var isTeam = m.sender === 'daydream_team';
-        return '<div style="display:flex;flex-direction:column;margin-bottom:8px;align-items:' + (isTeam ? 'flex-end' : 'flex-start') + '">'
-          + '<div class="da-msg-bubble ' + (isTeam ? 'team' : 'client') + '">' + m.content + '</div>'
-          + '<div style="font-size:9px;color:var(--muted);margin-top:2px' + (isTeam ? ';text-align:right' : '') + '">' + (isTeam ? 'Daydream Team' : name) + ' &middot; ' + formatDate(m.created_at) + '</div>'
-          + '</div>';
+        return '<div style="display:flex;flex-direction:column;margin-bottom:8px;align-items:' + (isTeam ? 'flex-end' : 'flex-start') + '"><div class="da-msg-bubble ' + (isTeam ? 'team' : 'client') + '">' + m.content + '</div><div style="font-size:9px;color:var(--muted);margin-top:2px' + (isTeam ? ';text-align:right' : '') + '">' + (isTeam ? 'Daydream Team' : name) + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
       }).join('');
-      return '<div class="da-msg-card' + (hasUnread ? ' unread' : '') + '">'
-        + '<div style="cursor:pointer" onclick="window._toggleThread(\'' + clientId + '\')">'
-        + '  <div class="da-msg-client">' + name + '</div>'
-        + '  <div class="da-msg-preview">' + (latest.content || '').substring(0, 100) + '</div>'
-        + '  <div class="da-msg-meta">' + msgs.length + ' message(s) &middot; ' + formatDate(latest.created_at) + '</div>'
-        + '</div>'
-        + '<div class="da-msg-thread" id="thread-' + clientId + '">'
-        + '  <div style="max-height:300px;overflow-y:auto;padding:8px 0">' + threadHtml + '</div>'
-        + '  <div class="da-msg-reply"><textarea id="reply-' + clientId + '" placeholder="Type your reply..."></textarea><button class="da-reply-btn" onclick="window._sendReply(\'' + clientId + '\', \'' + (msgs[0].project_id || '') + '\')">Send</button></div>'
-        + '</div>'
-        + '</div>';
+      return '<div class="da-msg-card' + (hasUnread ? ' unread' : '') + '"><div style="cursor:pointer" onclick="window._toggleThread(\'' + clientId + '\')"><div class="da-msg-client">' + name + '</div><div class="da-msg-preview">' + (latest.content || '').substring(0, 100) + '</div><div class="da-msg-meta">' + msgs.length + ' message(s) &middot; ' + formatDate(latest.created_at) + '</div></div><div class="da-msg-thread" id="thread-' + clientId + '"><div style="max-height:300px;overflow-y:auto;padding:8px 0">' + threadHtml + '</div><div class="da-msg-reply"><textarea id="reply-' + clientId + '" placeholder="Type your reply..."></textarea><button class="da-reply-btn" onclick="window._sendReply(\'' + clientId + '\', \'' + (msgs[0].project_id || '') + '\')">Send</button></div></div></div>';
     }).join('');
   }
 
-  window._toggleThread = function(clientId) {
-    var thread = document.getElementById('thread-' + clientId);
-    if (thread) thread.classList.toggle('visible');
-  };
+  window._toggleThread = function(clientId) { var t = document.getElementById('thread-' + clientId); if (t) t.classList.toggle('visible'); };
 
   window._sendReply = async function(clientId, projectId) {
     var textarea = document.getElementById('reply-' + clientId);
     var content = textarea ? textarea.value.trim() : '';
     if (!content) return;
     try {
-      await apiFetch('/rest/v1/messages', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ project_id: projectId || null, client_id: clientId || null, sender: 'daydream_team', content: content, is_read: true })
-      });
+      await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: projectId || null, client_id: clientId || null, sender: 'daydream_team', content: content, is_read: true }) });
       textarea.value = '';
       await loadMessages();
-    } catch(e) { console.error('Reply error:', e); }
+    } catch(e) {}
   };
 
 })();
