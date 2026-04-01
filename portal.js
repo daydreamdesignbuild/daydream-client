@@ -234,37 +234,51 @@
     return fetch(SUPABASE_URL + path, opts);
   }
 
-  // ── CORE: VERIFY OTP TOKEN FROM URL ──────────────────────────────
-  // This is the key function — it reads the token from the URL hash
-  // and exchanges it with Supabase for a real session
+  // ── TOKEN HANDLING ─────────────────────────────────────────────────
   async function tryTokenFromUrl() {
     var hash = window.location.hash;
-    if (!hash || hash.indexOf('access_token') === -1) return false;
+    if (!hash) return false;
+    var params = new URLSearchParams(hash.replace('#', ''));
 
-    var params = new URLSearchParams(hash.replace(/^#/, ''));
+    // Case 1: Full JWT access_token (from direct URL paste or old flow)
     var accessToken = params.get('access_token');
-    var refreshToken = params.get('refresh_token');
+    if (accessToken && accessToken.length > 100) {
+      try {
+        var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
+        });
+        var user = await res.json();
+        if (user && user.email) {
+          currentUser = { access_token: accessToken, email: user.email, id: user.id };
+          try { sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
+          history.replaceState(null, '', window.location.pathname);
+          return true;
+        }
+      } catch(e) { console.error('JWT verify error:', e); }
+      return false;
+    }
+
+    // Case 2: Short OTP token from our Edge Function redirect
+    var otpToken = params.get('token');
     var type = params.get('type');
+    if (otpToken && type === 'magiclink') {
+      try {
+        history.replaceState(null, '', window.location.pathname);
+        var verifyRes = await fetch(SUPABASE_URL + '/auth/v1/verify', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: otpToken, type: 'magiclink' })
+        });
+        var verifyData = await verifyRes.json();
+        if (verifyData.access_token) {
+          currentUser = { access_token: verifyData.access_token, email: verifyData.user.email, id: verifyData.user.id };
+          try { sessionStorage.setItem('dd_token', verifyData.access_token); } catch(e) {}
+          return true;
+        }
+      } catch(e) { console.error('OTP verify error:', e); }
+      return false;
+    }
 
-    if (!accessToken) return false;
-
-    // Clean URL immediately
-    try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
-
-    try {
-      // Verify the token is valid by fetching the user
-      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
-      });
-      var user = await res.json();
-
-      if (user && user.email) {
-        currentUser = { access_token: accessToken, refresh_token: refreshToken, email: user.email, id: user.id };
-        // Save to sessionStorage so refresh works
-        try { sessionStorage.setItem('dd_token', accessToken); sessionStorage.setItem('dd_refresh', refreshToken || ''); } catch(e) {}
-        return true;
-      }
-    } catch(e) { console.error('Token verify error:', e); }
     return false;
   }
 
@@ -272,7 +286,6 @@
     var token = null;
     try { token = sessionStorage.getItem('dd_token'); } catch(e) {}
     if (!token) return false;
-
     try {
       var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
@@ -327,21 +340,16 @@
 
   // ── INIT ──────────────────────────────────────────────────────────
   async function init() {
-    // First try URL token (from magic link click)
     var fromUrl = await tryTokenFromUrl();
     if (fromUrl) { await loadClientData(); showDashboard(); return; }
-
-    // Then try saved session
     var fromSession = await tryTokenFromSession();
     if (fromSession) { await loadClientData(); showDashboard(); return; }
-
-    // No session found
     showLogin();
   }
 
   init();
 
-  // ── LOGIN BUTTON ──────────────────────────────────────────────────
+  // ── LOGIN ─────────────────────────────────────────────────────────
   document.getElementById('ddLoginBtn').addEventListener('click', async function() {
     var email = document.getElementById('ddLoginEmail').value.trim();
     var msg = document.getElementById('ddLoginMsg');
@@ -349,11 +357,11 @@
     this.disabled = true;
     this.textContent = 'Sending...';
     try {
-     var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink?redirect_to=' + encodeURIComponent('https://daydreamdesignandbuild.com/app'), {
-  method: 'POST',
-  headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: email })
-});
+      var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink?redirect_to=' + encodeURIComponent(PORTAL_URL), {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      });
       showMsg(msg, res.ok ? 'Login link sent! Check your inbox and click the link to access your portal.' : 'Something went wrong. Please try again.', res.ok ? 'success' : 'error');
     } catch(e) { showMsg(msg, 'Something went wrong. Please try again.', 'error'); }
     this.disabled = false;
