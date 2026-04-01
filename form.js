@@ -1,267 +1,487 @@
-(function() {
+(function () {
 
-  // ── Google Fonts ──────────────────────────────────────────────────
+  // ── CONFIG ────────────────────────────────────────────────────────
+  var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+  var PORTAL_URL = 'https://daydreamdesignandbuild.com/app/';
+  var CONSULTATION_URL = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
+  var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
+
+  // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
   font.rel = 'stylesheet';
-  font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap';
+  font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap';
   document.head.appendChild(font);
 
-  // ── Styles ────────────────────────────────────────────────────────
+  // ── STYLES ────────────────────────────────────────────────────────
   var style = document.createElement('style');
   style.textContent = [
-    '#dd-form-wrap * { box-sizing: border-box; margin: 0; padding: 0; }',
-    '#dd-form-wrap {',
-    '  --surface: #131310; --surface-2: #181815; --border: #252520;',
-    '  --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a;',
-    '  --gold-dim: rgba(238,178,74,0.07); --error: #c07a6a;',
+    '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
+    '#dd-portal {',
+    '  --bg: #0d0d0b; --surface: #131310; --surface-2: #181815;',
+    '  --border: #252520; --text: #f0ebe0; --muted: #8a8680;',
+    '  --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08);',
+    '  --error: #c07a6a; --success: #6a9e7a;',
     '  font-family: Jost, sans-serif; font-weight: 300;',
-    '  color: var(--text); width: 100%; max-width: 660px; margin: 0 auto; padding: 48px 0;',
+    '  background: var(--bg); color: var(--text); min-height: 100vh; width: 100%;',
     '}',
-
-    /* Header */
-    '#dd-form-wrap header { text-align: center; margin-bottom: 48px; animation: ddFadeUp 0.9s ease both; }',
-    '#dd-form-wrap .dd-logo { font-family: "Cormorant Garamond", serif; font-weight: 400; font-size: clamp(28px,5vw,40px); letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; line-height: 1; margin-bottom: 8px; }',
-    '#dd-form-wrap .dd-logo-sub { font-size: 9px; letter-spacing: 0.45em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }',
-    '#dd-form-wrap .dd-rule { display: flex; align-items: center; gap: 16px; justify-content: center; margin-bottom: 18px; }',
-    '#dd-form-wrap .dd-rule span { display: block; height: 1px; width: 60px; background: linear-gradient(90deg, transparent, #252520); }',
-    '#dd-form-wrap .dd-rule span:last-child { background: linear-gradient(90deg, #252520, transparent); }',
-    '#dd-form-wrap .dd-diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }',
-    '#dd-form-wrap .dd-subtitle { font-family: "Cormorant Garamond", serif; font-size: clamp(14px,2.5vw,17px); font-style: italic; font-weight: 300; color: var(--muted); letter-spacing: 0.04em; line-height: 1.5; }',
-
-    /* Form */
-    '#dd-form-wrap form { display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--surface); animation: ddFadeUp 0.7s 0.2s ease both; opacity: 0; animation-fill-mode: both; }',
-    '#dd-form-wrap .dd-section { font-size: 8px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); padding: 16px 24px 10px; border-bottom: 1px solid var(--border); background: var(--surface-2); opacity: 0.8; }',
-    '#dd-form-wrap .dd-row { display: grid; grid-template-columns: 1fr 1fr; }',
-    '#dd-form-wrap .dd-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; }',
-
-    /* Fields */
-    '#dd-form-wrap .dd-field { position: relative; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); transition: background 0.25s; }',
-    '#dd-form-wrap .dd-row .dd-field:last-child, #dd-form-wrap .dd-row-3 .dd-field:last-child, #dd-form-wrap .dd-field.dd-full { border-right: none; }',
-    '#dd-form-wrap .dd-field:focus-within { background: var(--gold-dim); z-index: 2; }',
-    '#dd-form-wrap .dd-field:focus-within::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gold); }',
-    '#dd-form-wrap .dd-field label { display: block; font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 16px 24px 5px; transition: color 0.2s; font-family: Jost, sans-serif; }',
-    '#dd-form-wrap .dd-field:focus-within label { color: var(--gold); }',
-
-    /* Inputs - force dark bg on everything including autofill */
-    '#dd-form-wrap .dd-field input,',
-    '#dd-form-wrap .dd-field select,',
-    '#dd-form-wrap .dd-field textarea {',
-    '  width: 100%; background: #131310 !important; border: none !important; outline: none;',
-    '  color: #f0ebe0 !important; font-family: Jost, sans-serif; font-weight: 300; font-size: 14px;',
-    '  padding: 2px 24px 16px; letter-spacing: 0.03em; appearance: none; -webkit-appearance: none;',
-    '  box-shadow: none !important;',
+    '#dd-portal .dd-login-wrap {',
+    '  min-height: 100vh; display: flex; flex-direction: column;',
+    '  align-items: center; justify-content: center; padding: 40px 20px;',
+    '  animation: ddFadeUp 0.8s ease both;',
     '}',
-
-    /* Autofill override */
-    '#dd-form-wrap .dd-field input:-webkit-autofill,',
-    '#dd-form-wrap .dd-field input:-webkit-autofill:hover,',
-    '#dd-form-wrap .dd-field input:-webkit-autofill:focus,',
-    '#dd-form-wrap .dd-field input:-webkit-autofill:active {',
-    '  -webkit-box-shadow: 0 0 0 60px #131310 inset !important;',
-    '  -webkit-text-fill-color: #f0ebe0 !important;',
-    '  caret-color: #f0ebe0;',
-    '  transition: background-color 5000s ease-in-out 0s;',
-    '}',
-
-    /* Select specific */
-    '#dd-form-wrap .dd-field select { cursor: pointer; padding-right: 44px; }',
-    '#dd-form-wrap .dd-field select:focus { background: #131310 !important; color: #f0ebe0 !important; }',
-    '#dd-form-wrap .dd-field select option { background: #131310 !important; color: #f0ebe0 !important; }',
-
-    '#dd-form-wrap .dd-field:focus-within { background: var(--gold-dim) !important; }',
-    '#dd-form-wrap .dd-field:focus-within input,',
-    '#dd-form-wrap .dd-field:focus-within select,',
-    '#dd-form-wrap .dd-field:focus-within textarea { background: transparent !important; }',
-
-    '#dd-form-wrap .dd-arrow { position: absolute; right: 20px; top: 50%; transform: translateY(4px); pointer-events: none; color: var(--muted); font-size: 9px; }',
-    '#dd-form-wrap .dd-field textarea { resize: none; min-height: 120px; line-height: 1.75; }',
-    '#dd-form-wrap .dd-field input::placeholder, #dd-form-wrap .dd-field textarea::placeholder { color: #5a5a54; }',
-
-    /* Submit */
-    '#dd-form-wrap .dd-submit-wrap { padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; background: var(--surface-2); border-top: 1px solid var(--border); }',
-    '#dd-form-wrap button[type="submit"] { width: 100%; max-width: 300px; background: transparent; border: 1px solid var(--gold) !important; color: var(--gold); font-family: Jost, sans-serif; font-weight: 300; font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase; padding: 18px 40px; cursor: pointer; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }',
-    '#dd-form-wrap button[type="submit"]:hover { background: var(--gold) !important; color: #0d0d0b !important; box-shadow: 0 0 30px rgba(238,178,74,0.15); }',
-    '#dd-form-wrap button[type="submit"]:disabled { opacity: 0.35; cursor: not-allowed; }',
-    '#dd-form-wrap button[type="submit"].loading .btn-text { display: none; }',
-    '#dd-form-wrap button[type="submit"].loading .btn-loading { display: inline; }',
-    '#dd-form-wrap .btn-loading { display: none; }',
-    '#dd-form-wrap .dd-privacy { font-size: 9px; letter-spacing: 0.2em; color: var(--muted); text-align: center; text-transform: uppercase; }',
-
-    /* Error / Success */
-    '#dd-form-wrap .dd-error { font-size: 11px; color: var(--error); text-align: center; letter-spacing: 0.1em; display: none; }',
-    '#dd-form-wrap .dd-error.visible { display: block; }',
-    '#dd-form-wrap .dd-success { display: none; text-align: center; padding: 60px 20px; animation: ddFadeUp 0.7s ease both; }',
-    '#dd-form-wrap .dd-success.visible { display: block; }',
-    '#dd-form-wrap .dd-success-diamond { display: inline-block; width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); margin-bottom: 28px; }',
-    '#dd-form-wrap .dd-success h2 { font-family: "Cormorant Garamond", serif; font-size: 30px; font-weight: 300; font-style: italic; color: var(--gold); margin-bottom: 14px; }',
-    '#dd-form-wrap .dd-success p { font-size: 13px; color: var(--muted); line-height: 2; letter-spacing: 0.08em; }',
-
+    '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
+    '#dd-portal .dd-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 36px 40px; text-align: center; }',
+    '#dd-portal .dd-login-logo { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 400; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }',
+    '#dd-portal .dd-login-sub { font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--muted); }',
+    '#dd-portal .dd-login-body { padding: 36px 40px; }',
+    '#dd-portal .dd-login-title { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 8px; }',
+    '#dd-portal .dd-login-desc { font-size: 12px; color: var(--muted); line-height: 1.8; margin-bottom: 28px; letter-spacing: 0.03em; }',
+    '#dd-portal .dd-input-wrap { border: 1px solid var(--border); background: var(--surface-2); margin-bottom: 16px; transition: border-color 0.2s; }',
+    '#dd-portal .dd-input-wrap:focus-within { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-input-wrap:focus-within::after { content: ""; display: block; height: 2px; background: var(--gold); }',
+    '#dd-portal .dd-input-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 4px; display: block; }',
+    '#dd-portal .dd-input-wrap:focus-within .dd-input-label { color: var(--gold); }',
+    '#dd-portal .dd-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 14px; font-weight: 300; padding: 4px 16px 12px; letter-spacing: 0.03em; }',
+    '#dd-portal .dd-input:-webkit-autofill, #dd-portal .dd-input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0 60px #131310 inset !important; -webkit-text-fill-color: #f0ebe0 !important; }',
+    '#dd-portal .dd-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
+    '#dd-portal .dd-btn:hover { background: var(--gold); color: var(--bg); }',
+    '#dd-portal .dd-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
+    '#dd-portal .dd-btn.dd-btn-solid { background: var(--gold); color: var(--bg); }',
+    '#dd-portal .dd-msg { font-size: 11px; text-align: center; padding: 10px; margin-top: 12px; display: none; letter-spacing: 0.05em; }',
+    '#dd-portal .dd-msg.visible { display: block; }',
+    '#dd-portal .dd-msg.success { color: var(--success); }',
+    '#dd-portal .dd-msg.error { color: var(--error); }',
+    '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
+    '#dd-portal .dd-dashboard.visible { display: flex; }',
+    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }',
+    '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
+    '#dd-portal .dd-nav-right { display: flex; align-items: center; gap: 24px; }',
+    '#dd-portal .dd-nav-user { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); }',
+    '#dd-portal .dd-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
+    '#dd-portal .dd-nav-logout:hover { color: var(--gold); }',
+    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; }',
+    '#dd-portal .dd-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; }',
+    '#dd-portal .dd-tab:hover { color: var(--text); }',
+    '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
+    '#dd-portal .dd-section-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 32px; }',
+    '#dd-portal .dd-welcome-card { border: 1px solid var(--gold); background: var(--gold-dim); padding: 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }',
+    '#dd-portal .dd-welcome-text h3 { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; color: var(--gold); margin-bottom: 8px; }',
+    '#dd-portal .dd-welcome-text p { font-size: 12px; color: var(--muted); line-height: 1.8; max-width: 400px; }',
+    '#dd-portal .dd-cal-btn { display: inline-block; background: var(--gold); color: var(--bg); text-decoration: none; font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px 28px; font-weight: 500; white-space: nowrap; transition: opacity 0.2s; }',
+    '#dd-portal .dd-cal-btn:hover { opacity: 0.85; }',
+    '#dd-portal .dd-cal-btn.outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }',
+    '#dd-portal .dd-cal-btn.outline:hover { background: var(--gold); color: var(--bg); }',
+    '#dd-portal .dd-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 32px; }',
+    '#dd-portal .dd-card { background: var(--surface); padding: 24px; }',
+    '#dd-portal .dd-card-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
+    '#dd-portal .dd-card-value { font-family: "Cormorant Garamond", serif; font-size: 20px; color: var(--gold); font-weight: 400; }',
+    '#dd-portal .dd-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }',
+    '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
+    '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
+    '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }',
+    '#dd-portal .dd-timeline-item:last-child { border-bottom: none; }',
+    '#dd-portal .dd-timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; }',
+    '#dd-portal .dd-timeline-dot.done { background: var(--gold); }',
+    '#dd-portal .dd-timeline-dot.active { background: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }',
+    '#dd-portal .dd-timeline-label { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }',
+    '#dd-portal .dd-timeline-label.muted { color: var(--muted); }',
+    '#dd-portal .dd-timeline-badge { margin-left: auto; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--gold); color: var(--gold); }',
+    '#dd-portal .dd-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }',
+    '#dd-portal .dd-upload-card { border: 1px solid var(--border); background: var(--surface); overflow: hidden; }',
+    '#dd-portal .dd-upload-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
+    '#dd-portal .dd-upload-card-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }',
+    '#dd-portal .dd-upload-card-desc { font-size: 10px; color: var(--muted); letter-spacing: 0.03em; }',
+    '#dd-portal .dd-upload-card-body { padding: 20px; }',
+    '#dd-portal .dd-drop-zone { border: 1px dashed var(--border); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; }',
+    '#dd-portal .dd-drop-zone:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }',
+    '#dd-portal .dd-drop-icon { font-size: 20px; color: var(--gold); margin-bottom: 8px; }',
+    '#dd-portal .dd-drop-text { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }',
+    '#dd-portal .dd-upload-status { font-size: 10px; color: var(--success); margin-top: 8px; text-align: center; min-height: 16px; }',
+    '#dd-portal .dd-messages-wrap { border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; height: 500px; }',
+    '#dd-portal .dd-messages-header { padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface-2); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-portal .dd-messages-list { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }',
+    '#dd-portal .dd-message { display: flex; flex-direction: column; gap: 4px; max-width: 75%; }',
+    '#dd-portal .dd-message.mine { align-self: flex-end; }',
+    '#dd-portal .dd-message.theirs { align-self: flex-start; }',
+    '#dd-portal .dd-message-bubble { padding: 12px 16px; font-size: 13px; line-height: 1.7; letter-spacing: 0.02em; }',
+    '#dd-portal .dd-message.mine .dd-message-bubble { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); }',
+    '#dd-portal .dd-message.theirs .dd-message-bubble { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
+    '#dd-portal .dd-message-meta { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }',
+    '#dd-portal .dd-message.mine .dd-message-meta { text-align: right; }',
+    '#dd-portal .dd-messages-input { border-top: 1px solid var(--border); display: flex; }',
+    '#dd-portal .dd-messages-input textarea { flex: 1; background: var(--surface-2); border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 16px 20px; resize: none; height: 56px; }',
+    '#dd-portal .dd-messages-input textarea::placeholder { color: var(--muted); }',
+    '#dd-portal .dd-send-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 24px; cursor: pointer; transition: opacity 0.2s; }',
+    '#dd-portal .dd-send-btn:hover { opacity: 0.85; }',
+    '#dd-portal .dd-drive-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }',
+    '#dd-portal .dd-drive-item { background: var(--surface); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }',
+    '#dd-portal .dd-drive-item-name { font-size: 13px; color: var(--text); letter-spacing: 0.03em; }',
+    '#dd-portal .dd-drive-item-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }',
+    '#dd-portal .dd-drive-link { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 16px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
+    '#dd-portal .dd-drive-link:hover { background: var(--gold); color: var(--bg); }',
+    '#dd-portal .dd-tab-content { display: none; }',
+    '#dd-portal .dd-tab-content.active { display: block; }',
+    '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
-    '@media (max-width: 540px) {',
-    '  #dd-form-wrap .dd-row { grid-template-columns: 1fr; }',
-    '  #dd-form-wrap .dd-row-3 { grid-template-columns: 1fr; }',
-    '  #dd-form-wrap .dd-field { border-right: none; }',
+    '@media (max-width: 600px) {',
+    '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
+    '  #dd-portal .dd-nav { padding: 0 16px; }',
+    '  #dd-portal .dd-tabs { padding: 0 16px; }',
+    '  #dd-portal .dd-content { padding: 24px 16px; }',
+    '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
 
   // ── HTML ──────────────────────────────────────────────────────────
-  var wrap = document.getElementById('dd-form-wrap');
+  var wrap = document.getElementById('dd-portal');
   if (!wrap) return;
 
   wrap.innerHTML = [
-    '<header>',
-    '  <div class="dd-logo">Daydream</div>',
-    '  <div class="dd-logo-sub">Design &amp; Build \u2014 Atlanta, Georgia</div>',
-    '  <div class="dd-rule"><span></span><div class="dd-diamond"></div><span></span></div>',
-    '  <div class="dd-subtitle">High-End Outdoor Projects Built on Clarity and Truth</div>',
-    '</header>',
-
-    '<div class="dd-success" id="ddSuccess">',
-    '  <div class="dd-success-diamond"></div>',
-    '  <h2>Thank you.</h2>',
-    '  <p>Your inquiry has been received.<br/>We\u2019ll be in touch shortly<br/>to discuss your project.</p>',
+    '<div id="ddLoginWrap" class="dd-login-wrap">',
+    '  <div class="dd-login-card">',
+    '    <div class="dd-login-header">',
+    '      <div class="dd-login-logo">Daydream</div>',
+    '      <div class="dd-login-sub">Design + Build &mdash; Atlanta, Georgia</div>',
+    '    </div>',
+    '    <div class="dd-login-body">',
+    '      <div class="dd-login-title">Welcome back.</div>',
+    '      <div class="dd-login-desc">Enter your email address and we will send you a secure link to access your project portal.</div>',
+    '      <div class="dd-input-wrap">',
+    '        <label class="dd-input-label">Email Address</label>',
+    '        <input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" />',
+    '      </div>',
+    '      <button class="dd-btn" id="ddLoginBtn">Send Login Link</button>',
+    '      <div class="dd-msg" id="ddLoginMsg"></div>',
+    '    </div>',
+    '  </div>',
     '</div>',
 
-    '<form id="ddForm">',
+    '<div id="ddDashboard" class="dd-dashboard">',
+    '  <nav class="dd-nav">',
+    '    <div class="dd-nav-logo">Daydream</div>',
+    '    <div class="dd-nav-right">',
+    '      <span class="dd-nav-user" id="ddNavUser"></span>',
+    '      <button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button>',
+    '    </div>',
+    '  </nav>',
+    '  <div class="dd-tabs">',
+    '    <button class="dd-tab active" data-tab="overview">Overview</button>',
+    '    <button class="dd-tab" data-tab="uploads">Documents</button>',
+    '    <button class="dd-tab" data-tab="messages">Messages</button>',
+    '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
+    '    <button class="dd-tab" data-tab="drive">Project Files</button>',
+    '  </div>',
+    '  <div class="dd-content">',
 
-    '  <div class="dd-section">Personal Information</div>',
-    '  <div class="dd-row">',
-    '    <div class="dd-field"><label>First Name</label><input type="text" id="ddFirstName" placeholder="Jane" required /></div>',
-    '    <div class="dd-field"><label>Last Name</label><input type="text" id="ddLastName" placeholder="Smith" required /></div>',
-    '  </div>',
-    '  <div class="dd-row">',
-    '    <div class="dd-field"><label>Email Address</label><input type="email" id="ddEmail" placeholder="youremail@email.com" required /></div>',
-    '    <div class="dd-field"><label>Phone Number</label><input type="tel" id="ddPhone" placeholder="+1 (404) 000-0000" /></div>',
-    '  </div>',
+    '    <div class="dd-tab-content active" id="tab-overview">',
+    '      <div class="dd-section-title">Your Project</div>',
+    '      <div class="dd-section-sub">Welcome to your Daydream client portal</div>',
+    '      <div class="dd-welcome-card">',
+    '        <div class="dd-welcome-text">',
+    '          <h3>Book Your Discovery Call</h3>',
+    '          <p>Schedule a consultation with our design team to discuss your vision, timeline and investment in detail.</p>',
+    '        </div>',
+    '        <a href="' + CONSULTATION_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a>',
+    '      </div>',
+    '      <div class="dd-cards">',
+    '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Service</div><div class="dd-card-value" id="ddService" style="font-size:14px">—</div></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
+    '      </div>',
+    '      <div class="dd-timeline">',
+    '        <div class="dd-timeline-header">Project Timeline</div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot done"></div><div class="dd-timeline-label">Inquiry Submitted</div><div class="dd-timeline-badge">Complete</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot active"></div><div class="dd-timeline-label">Discovery Call</div><div class="dd-timeline-badge">In Progress</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Document Collection</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Concept Design Phase</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Design Review &amp; Revisions</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Final Deliverables</div></div>',
+    '      </div>',
+    '    </div>',
 
-    '  <div class="dd-section">Project Address</div>',
-    '  <div class="dd-field dd-full">',
-    '    <label>Country</label>',
-    '    <select id="ddCountry">',
-    '      <option value="" disabled selected>Select a country</option>',
-    '      <option value="US">United States</option>',
-    '      <option value="CA">Canada</option>',
-    '      <option value="GB">United Kingdom</option>',
-    '      <option value="AU">Australia</option>',
-    '      <option value="other">Other</option>',
-    '    </select>',
-    '    <span class="dd-arrow">&#9662;</span>',
-    '  </div>',
-    '  <div class="dd-field dd-full"><label>Street Address</label><input type="text" id="ddStreet" placeholder="123 Peachtree Street NE" /></div>',
-    '  <div class="dd-row-3">',
-    '    <div class="dd-field"><label>City</label><input type="text" id="ddCity" placeholder="Atlanta" /></div>',
-    '    <div class="dd-field"><label>State</label><input type="text" id="ddState" placeholder="GA" /></div>',
-    '    <div class="dd-field"><label>Zip Code</label><input type="text" id="ddZip" placeholder="30067" /></div>',
-    '  </div>',
+    '    <div class="dd-tab-content" id="tab-uploads">',
+    '      <div class="dd-section-title">Document Uploads</div>',
+    '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised into your project folder.</div>',
+    '      <div class="dd-upload-grid">',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Existing site photographs</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI concepts, reference images</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans</div><div class="dd-upload-card-desc">Architectural plans and drawings</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Plans</div><div class="dd-upload-card-desc">Existing site plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-siteplans"></div></div></div>',
+    '      </div>',
+    '    </div>',
 
-    '  <div class="dd-section">Project Details</div>',
-    '  <div class="dd-field dd-full">',
-    '    <label>How Did You Hear About Us?</label>',
-    '    <select id="ddReferral">',
-    '      <option value="" disabled selected>Select an option</option>',
-    '      <option value="google">Google Search</option>',
-    '      <option value="instagram">Instagram</option>',
-    '      <option value="facebook">Facebook</option>',
-    '      <option value="referral">Friend / Referral</option>',
-    '      <option value="houzz">Houzz</option>',
-    '      <option value="other">Other</option>',
-    '    </select>',
-    '    <span class="dd-arrow">&#9662;</span>',
-    '  </div>',
-    '  <div class="dd-field dd-full">',
-    '    <label>What Design Services Are You Interested In?</label>',
-    '    <select id="ddServices" required>',
-    '      <option value="" disabled selected>Select an option</option>',
-    '      <option value="2d_concept">2D Concept Phase</option>',
-    '      <option value="3d_concept">3D Concept Phase</option>',
-    '      <option value="2d_3d_concept">2D + 3D Concept Phase</option>',
-    '      <option value="permit_plan">Permit Plan Phase</option>',
-    '      <option value="2d_3d_permit">2D + 3D Concept Phase &amp; Permit Plan Phase</option>',
-    '    </select>',
-    '    <span class="dd-arrow">&#9662;</span>',
-    '  </div>',
-    '  <div class="dd-field dd-full"><label>What Level of Investment Are You Preparing for This Project?</label><input type="text" id="ddInvestment" placeholder="e.g. $75,000" /></div>',
-    '  <div class="dd-field dd-full"><label>Anything Else We Need to Know?</label><textarea id="ddNotes" placeholder="Tell us about your vision, timeline, or any other details..."></textarea></div>',
+    '    <div class="dd-tab-content" id="tab-messages">',
+    '      <div class="dd-section-title">Messages</div>',
+    '      <div class="dd-section-sub">Communicate directly with the Daydream team</div>',
+    '      <div class="dd-messages-wrap">',
+    '        <div class="dd-messages-header">Project Messages</div>',
+    '        <div class="dd-messages-list" id="ddMessagesList"><div class="dd-empty">No messages yet. Send us a message below.</div></div>',
+    '        <div class="dd-messages-input">',
+    '          <textarea id="ddMessageInput" placeholder="Type your message..."></textarea>',
+    '          <button class="dd-send-btn" id="ddSendBtn">Send</button>',
+    '        </div>',
+    '      </div>',
+    '    </div>',
 
-    '  <div class="dd-submit-wrap">',
-    '    <div class="dd-error" id="ddError">Something went wrong. Please try again.</div>',
-    '    <button type="submit" id="ddSubmit"><span class="btn-text">Submit Inquiry</span><span class="btn-loading">Sending...</span></button>',
-    '    <div class="dd-privacy">Your information is kept private and never shared</div>',
-    '  </div>',
+    '    <div class="dd-tab-content" id="tab-schedule">',
+    '      <div class="dd-section-title">Schedule a Meeting</div>',
+    '      <div class="dd-section-sub">Book time with the Daydream team</div>',
+    '      <div class="dd-cards">',
+    '        <div class="dd-card"><div class="dd-card-label">Discovery Consultation</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion and vision alignment</div><a href="' + CONSULTATION_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review designs and discuss feedback and changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
+    '      </div>',
+    '    </div>',
 
-    '</form>'
+    '    <div class="dd-tab-content" id="tab-drive">',
+    '      <div class="dd-section-title">Project Files</div>',
+    '      <div class="dd-section-sub">Access your shared Google Drive project folder</div>',
+    '      <div class="dd-drive-list" id="ddDriveList"><div class="dd-empty">Your project folder will appear here once your project is active.</div></div>',
+    '    </div>',
+
+    '  </div>',
+    '</div>'
   ].join('\n');
 
-  // ── Supabase ──────────────────────────────────────────────────────
-  var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+  // ── STATE ─────────────────────────────────────────────────────────
+  var currentUser = null;
+  var currentClient = null;
+  var currentProject = null;
 
-  var form     = document.getElementById('ddForm');
-  var btn      = document.getElementById('ddSubmit');
-  var errMsg   = document.getElementById('ddError');
-  var success  = document.getElementById('ddSuccess');
+  // ── HELPERS ───────────────────────────────────────────────────────
+  function supabaseFetch(path, options) {
+    var opts = options || {};
+    opts.headers = opts.headers || {};
+    opts.headers['apikey'] = SUPABASE_KEY;
+    opts.headers['Authorization'] = 'Bearer ' + (currentUser ? currentUser.access_token : SUPABASE_KEY);
+    opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json';
+    return fetch(SUPABASE_URL + path, opts);
+  }
 
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    errMsg.classList.remove('visible');
-    btn.classList.add('loading');
-    btn.disabled = true;
+  function showMsg(el, text, type) {
+    el.textContent = text;
+    el.className = 'dd-msg visible ' + (type || '');
+  }
 
-    var data = {
-      full_name:    (document.getElementById('ddFirstName').value.trim() + ' ' + document.getElementById('ddLastName').value.trim()).trim(),
-      email:        document.getElementById('ddEmail').value.trim(),
-      phone:        document.getElementById('ddPhone').value.trim(),
-      street:       document.getElementById('ddStreet').value.trim(),
-      city:         document.getElementById('ddCity').value.trim(),
-      state:        document.getElementById('ddState').value.trim(),
-      zip:          document.getElementById('ddZip').value.trim(),
-      country:      document.getElementById('ddCountry').value || '',
-      referral:     document.getElementById('ddReferral').value || '',
-      project_type: document.getElementById('ddServices').value,
-      investment:   document.getElementById('ddInvestment').value.trim(),
-      notes:        document.getElementById('ddNotes').value.trim(),
-      status:       'new_lead'
-    };
+  function formatDate(str) {
+    if (!str) return '—';
+    return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
 
-    try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/clients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(data)
-      });
+  function serviceLabel(key) {
+    var map = { '2d_concept': '2D Concept', '3d_concept': '3D Concept', '2d_3d_concept': '2D + 3D Concept', 'permit_plan': 'Permit Plan', '2d_3d_permit': '2D + 3D + Permit' };
+    return map[key] || key || '—';
+  }
 
-      if (!res.ok) {
-        var errBody = await res.text();
-        console.error('Supabase insert error:', res.status, errBody);
-        throw new Error('Insert failed');
+  // ── SESSION ───────────────────────────────────────────────────────
+  function checkSession() {
+    var hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      var params = new URLSearchParams(hash.replace('#', ''));
+      var token = params.get('access_token');
+      var refresh = params.get('refresh_token');
+      if (token) {
+        sessionStorage.setItem('dd_token', token);
+        if (refresh) sessionStorage.setItem('dd_refresh', refresh);
+        history.replaceState(null, '', window.location.pathname);
+        loadSession(token);
+        return;
       }
-
-      // Create auth account (ignore error if email already exists)
-      await fetch(SUPABASE_URL + '/auth/v1/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({
-          email: data.email,
-          password: Math.random().toString(36).slice(-10) + 'Dd1!',
-          data: { full_name: data.full_name }
-        })
-      });
-
-      form.style.display = 'none';
-      success.classList.add('visible');
-
-    } catch(err) {
-      console.error('Form error:', err);
-      errMsg.classList.add('visible');
-      btn.classList.remove('loading');
-      btn.disabled = false;
     }
+    var saved = sessionStorage.getItem('dd_token');
+    if (saved) loadSession(saved);
+  }
+
+  async function loadSession(token) {
+    try {
+      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
+      });
+      var user = await res.json();
+      if (user && user.email) {
+        currentUser = { access_token: token, email: user.email, id: user.id };
+        await loadClientData();
+        showDashboard();
+      }
+    } catch (e) {
+      console.error('Session error:', e);
+    }
+  }
+
+  async function loadClientData() {
+    try {
+      var res = await supabaseFetch('/rest/v1/clients?email=eq.' + encodeURIComponent(currentUser.email) + '&limit=1');
+      var data = await res.json();
+      if (data && data[0]) {
+        currentClient = data[0];
+        document.getElementById('ddStatus').textContent = currentClient.status || 'New Inquiry';
+        document.getElementById('ddService').textContent = serviceLabel(currentClient.project_type);
+        document.getElementById('ddSince').textContent = formatDate(currentClient.created_at);
+      }
+      var projRes = await supabaseFetch('/rest/v1/projects?client_id=eq.' + (currentClient ? currentClient.id : '') + '&limit=1');
+      var projData = await projRes.json();
+      if (projData && projData[0]) {
+        currentProject = projData[0];
+        if (currentProject.drive_link) loadDriveLinks(currentProject.drive_link);
+      }
+      loadMessages();
+    } catch (e) {
+      console.error('Client data error:', e);
+    }
+  }
+
+  function loadDriveLinks(driveLink) {
+    document.getElementById('ddDriveList').innerHTML = [
+      '<div class="dd-drive-item">',
+      '  <div><div class="dd-drive-item-name">Project Folder</div><div class="dd-drive-item-sub">Your complete project files and deliverables</div></div>',
+      '  <a href="' + driveLink + '" target="_blank" class="dd-drive-link">Open in Drive</a>',
+      '</div>'
+    ].join('');
+  }
+
+  async function loadMessages() {
+    if (!currentProject) return;
+    try {
+      var res = await supabaseFetch('/rest/v1/messages?project_id=eq.' + currentProject.id + '&order=created_at.asc');
+      var msgs = await res.json();
+      renderMessages(msgs || []);
+    } catch (e) {
+      console.error('Messages error:', e);
+    }
+  }
+
+  function renderMessages(msgs) {
+    var list = document.getElementById('ddMessagesList');
+    if (!msgs || msgs.length === 0) {
+      list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>';
+      return;
+    }
+    list.innerHTML = msgs.map(function(m) {
+      var isMe = m.sender === currentUser.email;
+      return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
+    }).join('');
+    list.scrollTop = list.scrollHeight;
+  }
+
+  function showDashboard() {
+    document.getElementById('ddLoginWrap').style.display = 'none';
+    document.getElementById('ddDashboard').classList.add('visible');
+    if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
+  }
+
+  // ── LOGIN ─────────────────────────────────────────────────────────
+  document.getElementById('ddLoginBtn').addEventListener('click', async function() {
+    var email = document.getElementById('ddLoginEmail').value.trim();
+    var msg = document.getElementById('ddLoginMsg');
+    if (!email) { showMsg(msg, 'Please enter your email address.', 'error'); return; }
+    this.disabled = true;
+    this.textContent = 'Sending...';
+    try {
+      var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink', {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, options: { emailRedirectTo: PORTAL_URL } })
+      });
+      if (res.ok) {
+        showMsg(msg, 'Login link sent! Check your inbox and click the link to sign in to your portal.', 'success');
+      } else {
+        showMsg(msg, 'Something went wrong. Please try again.', 'error');
+      }
+    } catch (e) {
+      showMsg(msg, 'Something went wrong. Please try again.', 'error');
+    }
+    this.disabled = false;
+    this.textContent = 'Send Login Link';
   });
+
+  document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('ddLoginBtn').click();
+  });
+
+  // ── LOGOUT ────────────────────────────────────────────────────────
+  document.getElementById('ddLogoutBtn').addEventListener('click', function() {
+    sessionStorage.removeItem('dd_token');
+    sessionStorage.removeItem('dd_refresh');
+    currentUser = null; currentClient = null; currentProject = null;
+    document.getElementById('ddDashboard').classList.remove('visible');
+    document.getElementById('ddLoginWrap').style.display = 'flex';
+  });
+
+  // ── TABS ──────────────────────────────────────────────────────────
+  document.querySelectorAll('#dd-portal .dd-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = document.getElementById('tab-' + tab.dataset.tab);
+      if (target) target.classList.add('active');
+    });
+  });
+
+  // ── FILE UPLOADS ──────────────────────────────────────────────────
+  document.querySelectorAll('#dd-portal .dd-file-input').forEach(function(input) {
+    input.addEventListener('change', async function() {
+      var files = Array.from(this.files);
+      var category = this.dataset.category;
+      var statusEl = document.getElementById('status-' + category);
+      if (!files.length) return;
+      if (!currentUser) { statusEl.textContent = 'Please log in first.'; return; }
+      statusEl.textContent = 'Uploading ' + files.length + ' file(s)...';
+      statusEl.style.color = 'var(--muted)';
+      var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
+      var uploaded = 0;
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var path = clientName + '/' + category + '/' + Date.now() + '_' + file.name;
+        try {
+          var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
+            body: file
+          });
+          if (res.ok) {
+            uploaded++;
+            await supabaseFetch('/rest/v1/documents', {
+              method: 'POST',
+              headers: { 'Prefer': 'return=minimal' },
+              body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email })
+            });
+          }
+        } catch (e) { console.error('Upload error:', e); }
+      }
+      statusEl.textContent = uploaded === files.length ? uploaded + ' file(s) uploaded successfully' : uploaded + ' of ' + files.length + ' uploaded';
+      statusEl.style.color = uploaded === files.length ? 'var(--success)' : 'var(--error)';
+    });
+  });
+
+  // ── MESSAGES ──────────────────────────────────────────────────────
+  document.getElementById('ddSendBtn').addEventListener('click', async function() {
+    var input = document.getElementById('ddMessageInput');
+    var content = input.value.trim();
+    if (!content || !currentUser) return;
+    if (!currentProject) { alert('Your project is being set up. Please try again shortly.'); return; }
+    input.value = '';
+    try {
+      await supabaseFetch('/rest/v1/messages', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ project_id: currentProject.id, sender: currentUser.email, content: content, is_read: false })
+      });
+      await loadMessages();
+    } catch (e) { console.error('Message error:', e); }
+  });
+
+  document.getElementById('ddMessageInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); }
+  });
+
+  // ── INIT ──────────────────────────────────────────────────────────
+  checkSession();
 
 })();
