@@ -426,7 +426,7 @@
       var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink', {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, options: { emailRedirectTo: PORTAL_URL } })
+        body: JSON.stringify({ email: email, redirect_to: PORTAL_URL })
       });
       if (res.ok) {
         showMsg(msg, 'Login link sent! Check your inbox and click the link to access your portal.', 'success');
