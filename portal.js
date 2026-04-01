@@ -349,7 +349,7 @@
     this.disabled = true;
     this.textContent = 'Sending...';
     try {
-     var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink?redirect_to=' + encodeURIComponent('https://daydreamdesignandbuild.com/app/'), {
+     var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink?redirect_to=' + encodeURIComponent('https://daydreamdesignandbuild.com/app'), {
   method: 'POST',
   headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
   body: JSON.stringify({ email: email })
