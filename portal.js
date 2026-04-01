@@ -6,6 +6,31 @@
   var CONSULT_URL  = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
   var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
 
+  // ── CLIENT TIMELINE STAGES ────────────────────────────────────────
+  var TIMELINE = [
+    { value: 'inquiry_submitted',                label: 'Inquiry Submitted' },
+    { value: 'discovery_call',                   label: 'Discovery Call' },
+    { value: 'design_proposal',                  label: 'Design Proposal' },
+    { value: 'contract_signed',                  label: 'Contract Signed' },
+    { value: 'concept_design_phase',             label: 'Concept Design Phase' },
+    { value: 'design_review_revisions',          label: 'Design Review & Revisions' },
+    { value: 'construction_document_phase',      label: 'Construction Document Phase' },
+    { value: 'permit_submittal',                 label: 'Permit Submittal' },
+    { value: 'permit_design_revisions',          label: 'Permit Design Revisions' },
+    { value: 'permit_approved',                  label: 'Permit Approved' },
+    { value: 'final_deliverables',               label: 'Final Deliverables' },
+    { value: 'construction_start_scheduled',     label: 'Construction Start Date Scheduled' },
+    { value: '50_percent_completion',            label: '50% Completion' },
+    { value: '90_percent_completion',            label: '90% Completion' },
+    { value: 'final_walk_through',               label: 'Final Walk Through' },
+    { value: 'project_complete',                 label: 'Project Complete' }
+  ];
+
+  function getStageIndex(value) {
+    var idx = TIMELINE.findIndex(function(s) { return s.value === value; });
+    return idx === -1 ? 0 : idx;
+  }
+
   // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
   font.rel = 'stylesheet';
@@ -67,10 +92,11 @@
     '#dd-portal .dd-card { background: var(--surface); padding: 24px; }',
     '#dd-portal .dd-card-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
     '#dd-portal .dd-card-value { font-family: "Cormorant Garamond", serif; font-size: 20px; color: var(--gold); font-weight: 400; }',
-    '#dd-portal .dd-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }',
+
+    // Timeline
     '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
     '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
-    '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }',
+    '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); }',
     '#dd-portal .dd-timeline-item:last-child { border-bottom: none; }',
     '#dd-portal .dd-timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; }',
     '#dd-portal .dd-timeline-dot.done { background: var(--gold); }',
@@ -78,6 +104,7 @@
     '#dd-portal .dd-timeline-label { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }',
     '#dd-portal .dd-timeline-label.muted { color: var(--muted); }',
     '#dd-portal .dd-timeline-badge { margin-left: auto; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--gold); color: var(--gold); }',
+
     '#dd-portal .dd-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }',
     '#dd-portal .dd-upload-card { border: 1px solid var(--border); background: var(--surface); overflow: hidden; }',
     '#dd-portal .dd-upload-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
@@ -148,6 +175,8 @@
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '  </div>',
     '  <div class="dd-content">',
+
+    // OVERVIEW
     '    <div class="dd-tab-content active" id="tab-overview">',
     '      <div class="dd-section-title">Your Project</div>',
     '      <div class="dd-section-sub">Welcome to your Daydream client portal</div>',
@@ -159,14 +188,11 @@
     '      </div>',
     '      <div class="dd-timeline">',
     '        <div class="dd-timeline-header">Project Timeline</div>',
-    '        <div class="dd-timeline-item"><div class="dd-timeline-dot done"></div><div class="dd-timeline-label">Inquiry Submitted</div><div class="dd-timeline-badge">Complete</div></div>',
-    '        <div class="dd-timeline-item"><div class="dd-timeline-dot active"></div><div class="dd-timeline-label">Discovery Call</div><div class="dd-timeline-badge">In Progress</div></div>',
-    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Document Collection</div></div>',
-    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Concept Design Phase</div></div>',
-    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Design Review &amp; Revisions</div></div>',
-    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Final Deliverables</div></div>',
+    '        <div id="ddTimeline"></div>',
     '      </div>',
     '    </div>',
+
+    // UPLOADS
     '    <div class="dd-tab-content" id="tab-uploads">',
     '      <div class="dd-section-title">Document Uploads</div>',
     '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised into your project folder.</div>',
@@ -179,6 +205,8 @@
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Plans</div><div class="dd-upload-card-desc">Existing site plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-siteplans"></div></div></div>',
     '      </div>',
     '    </div>',
+
+    // MESSAGES
     '    <div class="dd-tab-content" id="tab-messages">',
     '      <div class="dd-section-title">Messages</div>',
     '      <div class="dd-section-sub">Communicate directly with the Daydream team</div>',
@@ -188,6 +216,8 @@
     '        <div class="dd-messages-input"><textarea id="ddMessageInput" placeholder="Type your message..."></textarea><button class="dd-send-btn" id="ddSendBtn">Send</button></div>',
     '      </div>',
     '    </div>',
+
+    // SCHEDULE
     '    <div class="dd-tab-content" id="tab-schedule">',
     '      <div class="dd-section-title">Schedule a Meeting</div>',
     '      <div class="dd-section-sub">Book time with the Daydream team</div>',
@@ -196,11 +226,14 @@
     '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review designs and discuss feedback and changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
     '      </div>',
     '    </div>',
+
+    // DRIVE
     '    <div class="dd-tab-content" id="tab-drive">',
     '      <div class="dd-section-title">Project Files</div>',
     '      <div class="dd-section-sub">Access your shared Google Drive project folder</div>',
     '      <div class="dd-drive-list" id="ddDriveList"><div class="dd-empty">Your project folder will appear here once your project is active.</div></div>',
     '    </div>',
+
     '  </div>',
     '</div>'
   ].join('\n');
@@ -234,13 +267,29 @@
     return fetch(SUPABASE_URL + path, opts);
   }
 
+  // ── RENDER TIMELINE ───────────────────────────────────────────────
+  function renderTimeline(clientStage) {
+    var currentIdx = getStageIndex(clientStage || 'inquiry_submitted');
+    var html = TIMELINE.map(function(stage, idx) {
+      var isDone = idx < currentIdx;
+      var isActive = idx === currentIdx;
+      var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
+      var labelClass = (isDone || isActive) ? '' : 'muted';
+      var badge = isActive ? '<div class="dd-timeline-badge">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
+      return '<div class="dd-timeline-item">'
+        + '<div class="dd-timeline-dot ' + dotClass + '"></div>'
+        + '<div class="dd-timeline-label ' + labelClass + '">' + stage.label + '</div>'
+        + badge
+        + '</div>';
+    }).join('');
+    document.getElementById('ddTimeline').innerHTML = html;
+  }
+
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
   async function tryTokenFromUrl() {
     var hash = window.location.hash;
     if (!hash) return false;
     var params = new URLSearchParams(hash.replace('#', ''));
-
-    // Case 1: Full JWT access_token (from direct URL paste or old flow)
     var accessToken = params.get('access_token');
     if (accessToken && accessToken.length > 100) {
       try {
@@ -254,11 +303,9 @@
           history.replaceState(null, '', window.location.pathname);
           return true;
         }
-      } catch(e) { console.error('JWT verify error:', e); }
+      } catch(e) {}
       return false;
     }
-
-    // Case 2: Short OTP token from our Edge Function redirect
     var otpToken = params.get('token');
     var type = params.get('type');
     if (otpToken && type === 'magiclink') {
@@ -275,10 +322,8 @@
           try { sessionStorage.setItem('dd_token', verifyData.access_token); } catch(e) {}
           return true;
         }
-      } catch(e) { console.error('OTP verify error:', e); }
-      return false;
+      } catch(e) {}
     }
-
     return false;
   }
 
@@ -310,8 +355,11 @@
         document.getElementById('ddStatus').textContent = currentClient.status || 'New Inquiry';
         document.getElementById('ddService').textContent = serviceLabel(currentClient.project_type);
         document.getElementById('ddSince').textContent = formatDate(currentClient.created_at);
+        renderTimeline(currentClient.client_stage || 'inquiry_submitted');
+      } else {
+        renderTimeline('inquiry_submitted');
       }
-      var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + (currentClient ? currentClient.id : '') + '&limit=1');
+      var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + (currentClient ? currentClient.id : 'none') + '&limit=1');
       var projData = await projRes.json();
       if (projData && projData[0]) {
         currentProject = projData[0];
@@ -324,26 +372,43 @@
   }
 
   async function loadMessages() {
-    if (!currentProject) return;
     try {
-      var res = await apiFetch('/rest/v1/messages?project_id=eq.' + currentProject.id + '&order=created_at.asc');
+      var clientId = currentClient ? currentClient.id : null;
+      var url = clientId
+        ? '/rest/v1/messages?client_id=eq.' + clientId + '&order=created_at.asc'
+        : '/rest/v1/messages?sender=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.asc';
+      var res = await apiFetch(url);
       var msgs = await res.json();
-      var list = document.getElementById('ddMessagesList');
-      if (!msgs || !msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>'; return; }
-      list.innerHTML = msgs.map(function(m) {
-        var isMe = m.sender === currentUser.email;
-        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
-      }).join('');
-      list.scrollTop = list.scrollHeight;
-    } catch(e) {}
+      renderMessages(msgs || []);
+    } catch(e) { console.error('Messages error:', e); }
+  }
+
+  function renderMessages(msgs) {
+    var list = document.getElementById('ddMessagesList');
+    if (!msgs || !msgs.length) {
+      list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>';
+      return;
+    }
+    list.innerHTML = msgs.map(function(m) {
+      var isMe = m.sender === currentUser.email;
+      return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
+    }).join('');
+    list.scrollTop = list.scrollHeight;
+  }
+
+  function showDashboardView() {
+    hideLoading();
+    document.getElementById('ddLoginWrap').classList.remove('visible');
+    document.getElementById('ddDashboard').classList.add('visible');
+    if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
   }
 
   // ── INIT ──────────────────────────────────────────────────────────
   async function init() {
     var fromUrl = await tryTokenFromUrl();
-    if (fromUrl) { await loadClientData(); showDashboard(); return; }
+    if (fromUrl) { await loadClientData(); showDashboardView(); return; }
     var fromSession = await tryTokenFromSession();
-    if (fromSession) { await loadClientData(); showDashboard(); return; }
+    if (fromSession) { await loadClientData(); showDashboardView(); return; }
     showLogin();
   }
 
@@ -374,7 +439,7 @@
 
   // ── LOGOUT ────────────────────────────────────────────────────────
   document.getElementById('ddLogoutBtn').addEventListener('click', function() {
-    try { sessionStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_refresh'); } catch(e) {}
+    try { sessionStorage.removeItem('dd_token'); } catch(e) {}
     currentUser = null; currentClient = null; currentProject = null;
     document.getElementById('ddDashboard').classList.remove('visible');
     showLogin();
@@ -426,12 +491,22 @@
   document.getElementById('ddSendBtn').addEventListener('click', async function() {
     var input = document.getElementById('ddMessageInput');
     var content = input.value.trim();
-    if (!content || !currentUser || !currentProject) return;
+    if (!content || !currentUser) return;
     input.value = '';
     try {
-      await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject.id, sender: currentUser.email, content: content, is_read: false }) });
+      await apiFetch('/rest/v1/messages', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          project_id: currentProject ? currentProject.id : null,
+          client_id: currentClient ? currentClient.id : null,
+          sender: currentUser.email,
+          content: content,
+          is_read: false
+        })
+      });
       await loadMessages();
-    } catch(e) {}
+    } catch(e) { console.error('Message error:', e); }
   });
 
   document.getElementById('ddMessageInput').addEventListener('keydown', function(e) {
