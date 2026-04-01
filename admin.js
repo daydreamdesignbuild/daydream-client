@@ -204,7 +204,49 @@
     '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
-    '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 16px; } }'
+
+    // Add Client Button
+    '#dd-admin .da-add-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }',
+    '#dd-admin .da-add-btn:hover { opacity: 0.85; }',
+
+    // Add Client Modal
+    '#dd-admin .da-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }',
+    '#dd-admin .da-modal-overlay.visible { display: flex; }',
+    '#dd-admin .da-modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }',
+    '#dd-admin .da-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); position: sticky; top: 0; }',
+    '#dd-admin .da-modal-title { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 300; color: var(--gold); }',
+    '#dd-admin .da-modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }',
+    '#dd-admin .da-modal-close:hover { color: var(--text); }',
+    '#dd-admin .da-modal-body { padding: 24px; }',
+    '#dd-admin .da-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }',
+    '#dd-admin .da-modal-field { display: flex; flex-direction: column; gap: 6px; }',
+    '#dd-admin .da-field-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-admin .da-field-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.2s; width: 100%; resize: vertical; }',
+    '#dd-admin .da-field-input:focus { border-color: var(--gold); }',
+    '#dd-admin .da-field-input::placeholder { color: var(--muted); }',
+    '#dd-admin .da-modal-check { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 12px; color: var(--text); }',
+    '#dd-admin .da-modal-check input { accent-color: var(--gold); width: 14px; height: 14px; cursor: pointer; }',
+    '#dd-admin .da-modal-check label { cursor: pointer; }',
+    '#dd-admin .da-modal-msg { font-size: 11px; min-height: 20px; margin-bottom: 12px; }',
+    '#dd-admin .da-modal-msg.success { color: var(--success); }',
+    '#dd-admin .da-modal-msg.error { color: var(--error); }',
+    '#dd-admin .da-modal-submit { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity 0.2s; }',
+    '#dd-admin .da-modal-submit:hover { opacity: 0.85; }',
+    '#dd-admin .da-modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }',
+
+    // Admin Notes
+    '#dd-admin .da-notes-tabs { display: flex; gap: 1px; background: var(--border); margin-top: 8px; }',
+    '#dd-admin .da-note-tab { flex: 1; background: var(--surface-2); border: none; color: var(--muted); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 10px; cursor: pointer; transition: color 0.2s, background 0.2s; }',
+    '#dd-admin .da-note-tab:hover { color: var(--text); }',
+    '#dd-admin .da-note-tab.active { background: var(--gold-dim); color: var(--gold); border-bottom: 2px solid var(--gold); }',
+    '#dd-admin .da-note-panels { }',
+    '#dd-admin .da-note-panel { display: none; }',
+    '#dd-admin .da-note-panel.active { display: block; }',
+    '#dd-admin .da-note-textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-top: none; color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 12px 14px; resize: vertical; min-height: 100px; outline: none; line-height: 1.7; transition: border-color 0.2s; }',
+    '#dd-admin .da-note-textarea:focus { border-color: var(--gold); }',
+    '#dd-admin .da-note-textarea::placeholder { color: var(--muted); }',
+
+    '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 16px; } #dd-admin .da-modal-grid { grid-template-columns: 1fr; } }'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -397,6 +439,15 @@
         + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
         + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
         + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
+        + '    <div class="da-section-divider">Admin Notes</div>'
+        + '    <div class="da-notes-tabs"><button class="da-note-tab active" data-note="general" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">General</button><button class="da-note-tab" data-note="discussion" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Discussion</button><button class="da-note-tab" data-note="design" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Design</button><button class="da-note-tab" data-note="construction" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Construction</button></div>'
+        + '    <div class="da-note-panels">'
+        + '      <div class="da-note-panel active" id="note-panel-general-' + c.id + '"><textarea class="da-note-textarea" id="note-general-' + c.id + '" placeholder="General notes about this client...">' + (c.admin_notes_general || '') + '</textarea></div>'
+        + '      <div class="da-note-panel" id="note-panel-discussion-' + c.id + '"><textarea class="da-note-textarea" id="note-discussion-' + c.id + '" placeholder="Discussion and call notes...">' + (c.admin_notes_discussion || '') + '</textarea></div>'
+        + '      <div class="da-note-panel" id="note-panel-design-' + c.id + '"><textarea class="da-note-textarea" id="note-design-' + c.id + '" placeholder="Design phase notes...">' + (c.admin_notes_design || '') + '</textarea></div>'
+        + '      <div class="da-note-panel" id="note-panel-construction-' + c.id + '"><textarea class="da-note-textarea" id="note-construction-' + c.id + '" placeholder="Construction phase notes...">' + (c.admin_notes_construction || '') + '</textarea></div>'
+        + '    </div>'
+        + '    <button class="da-update-btn" style="margin-top:8px" onclick="window._saveAdminNotes('' + c.id + '')">Save Notes</button>'
         + '  </div>'
         + '</div>'
         + '</div>';
@@ -590,6 +641,141 @@
       textarea.value = '';
       await loadMessages();
     } catch(e) {}
+  };
+
+  // ── ADD CLIENT MODAL ──────────────────────────────────────────────
+  document.getElementById('daAddClientBtn').addEventListener('click', function() {
+    document.getElementById('daAddClientModal').classList.add('visible');
+  });
+
+  document.getElementById('daAddClientClose').addEventListener('click', function() {
+    document.getElementById('daAddClientModal').classList.remove('visible');
+  });
+
+  document.getElementById('daAddClientModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('visible');
+  });
+
+  document.getElementById('acSubmit').addEventListener('click', async function() {
+    var name = document.getElementById('acName').value.trim();
+    var email = document.getElementById('acEmail').value.trim();
+    var phone = document.getElementById('acPhone').value.trim();
+    var service = document.getElementById('acService').value;
+    var investment = document.getElementById('acInvestment').value.trim();
+    var referral = document.getElementById('acReferral').value.trim();
+    var street = document.getElementById('acStreet').value.trim();
+    var city = document.getElementById('acCity').value.trim();
+    var state = document.getElementById('acState').value.trim();
+    var notes = document.getElementById('acNotes').value.trim();
+    var sendEmail = document.getElementById('acSendEmail').checked;
+    var msg = document.getElementById('acMsg');
+
+    if (!name || !email) {
+      msg.textContent = 'Name and email are required.';
+      msg.className = 'da-modal-msg error';
+      return;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Adding Client...';
+    msg.textContent = '';
+
+    try {
+      var res = await apiFetch('/rest/v1/clients', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          full_name: name, email: email, phone: phone || null,
+          project_type: service || null, investment: investment || null,
+          referral: referral || null, street: street || null,
+          city: city || null, state: state || null, notes: notes || null,
+          status: 'client_inquiry_made', client_stage: 'inquiry_submitted'
+        })
+      });
+
+      if (res.ok) {
+        msg.textContent = sendEmail
+          ? 'Client added! Welcome email will be sent automatically via your webhook.'
+          : 'Client added successfully!';
+        msg.className = 'da-modal-msg success';
+
+        // Clear form
+        ['acName','acEmail','acPhone','acInvestment','acReferral','acStreet','acCity','acState','acNotes'].forEach(function(id) {
+          var el = document.getElementById(id); if (el) el.value = '';
+        });
+        document.getElementById('acService').value = '';
+
+        // Reload clients
+        await loadClients();
+
+        setTimeout(function() {
+          document.getElementById('daAddClientModal').classList.remove('visible');
+          msg.textContent = '';
+        }, 2000);
+      } else {
+        var err = await res.json();
+        msg.textContent = 'Error: ' + (err.message || 'Something went wrong');
+        msg.className = 'da-modal-msg error';
+      }
+    } catch(e) {
+      msg.textContent = 'Something went wrong. Please try again.';
+      msg.className = 'da-modal-msg error';
+    }
+
+    this.disabled = false;
+    this.textContent = 'Add Client';
+  });
+
+  // ── ADMIN NOTES ───────────────────────────────────────────────────
+  window._switchNoteTab = function(btn) {
+    var id = btn.dataset.id;
+    var note = btn.dataset.note;
+    // Update tab buttons
+    var allTabs = btn.closest('.da-notes-tabs').querySelectorAll('.da-note-tab');
+    allTabs.forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    // Update panels
+    ['general','discussion','design','construction'].forEach(function(n) {
+      var panel = document.getElementById('note-panel-' + n + '-' + id);
+      if (panel) panel.classList.toggle('active', n === note);
+    });
+  };
+
+  window._saveAdminNotes = async function(id) {
+    var general = document.getElementById('note-general-' + id);
+    var discussion = document.getElementById('note-discussion-' + id);
+    var design = document.getElementById('note-design-' + id);
+    var construction = document.getElementById('note-construction-' + id);
+
+    try {
+      await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          admin_notes_general: general ? general.value : null,
+          admin_notes_discussion: discussion ? discussion.value : null,
+          admin_notes_design: design ? design.value : null,
+          admin_notes_construction: construction ? construction.value : null
+        })
+      });
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) {
+        if (general) c.admin_notes_general = general.value;
+        if (discussion) c.admin_notes_discussion = discussion.value;
+        if (design) c.admin_notes_design = design.value;
+        if (construction) c.admin_notes_construction = construction.value;
+      }
+      // Flash saved
+      var card = document.getElementById('card-' + id);
+      if (card) {
+        var btn = card.querySelector('[onclick*="_saveAdminNotes"]');
+        if (btn) {
+          btn.textContent = 'Notes Saved!';
+          btn.style.background = 'var(--success)';
+          setTimeout(function() { btn.textContent = 'Save Notes'; btn.style.background = 'var(--gold)'; }, 2000);
+        }
+      }
+    } catch(e) { console.error('Notes save error:', e); }
   };
 
 })();
