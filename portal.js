@@ -54,36 +54,11 @@
     return idx === -1 ? 0 : idx;
   }
 
-  // ── PWA ───────────────────────────────────────────────────────────
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').catch(function() {});
-    });
-  }
-
-  // ── FONTS & META ──────────────────────────────────────────────────
+  // ── FONTS
   var font = document.createElement('link');
   font.rel = 'stylesheet';
   font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap';
   document.head.appendChild(font);
-
-  ['manifest', 'apple-touch-icon'].forEach(function(rel) {
-    var link = document.createElement('link');
-    link.rel = rel;
-    if (rel === 'manifest') link.href = 'https://daydreamdesignbuild.github.io/daydream-client/manifest.json';
-    document.head.appendChild(link);
-  });
-
-  [
-    ['theme-color', '#eeb24a'],
-    ['apple-mobile-web-app-capable', 'yes'],
-    ['apple-mobile-web-app-status-bar-style', 'black-translucent'],
-    ['apple-mobile-web-app-title', 'Daydream']
-  ].forEach(function(m) {
-    var meta = document.createElement('meta');
-    meta.name = m[0]; meta.content = m[1];
-    document.head.appendChild(meta);
-  });
 
   // ── STYLES ────────────────────────────────────────────────────────
   var style = document.createElement('style');
@@ -114,17 +89,6 @@
     '#dd-portal .dd-msg.visible { display: block; }',
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
-
-    // PWA Banner
-    '#dd-portal .dd-pwa-banner { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 14px 24px; display: none; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }',
-    '#dd-portal .dd-pwa-banner.visible { display: flex; }',
-    '#dd-portal .dd-pwa-icon { font-size: 20px; flex-shrink: 0; }',
-    '#dd-portal .dd-pwa-text { flex: 1; }',
-    '#dd-portal .dd-pwa-title { font-size: 12px; color: var(--text); margin-bottom: 2px; }',
-    '#dd-portal .dd-pwa-sub { font-size: 10px; color: var(--muted); }',
-    '#dd-portal .dd-pwa-btns { display: flex; gap: 8px; align-items: center; }',
-    '#dd-portal .dd-pwa-install { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 9px 18px; cursor: pointer; white-space: nowrap; }',
-    '#dd-portal .dd-pwa-dismiss { background: none; border: 1px solid var(--border); color: var(--muted); font-family: Jost, sans-serif; font-size: 9px; padding: 8px 12px; cursor: pointer; }',
 
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
@@ -272,19 +236,6 @@
     '</div>',
     '<div id="ddDashboard" class="dd-dashboard">',
 
-    // PWA Banner
-    '  <div class="dd-pwa-banner" id="ddPwaBanner">',
-    '    <div class="dd-pwa-icon">&#128241;</div>',
-    '    <div class="dd-pwa-text">',
-    '      <div class="dd-pwa-title">Add Daydream Portal to your home screen</div>',
-    '      <div class="dd-pwa-sub" id="ddPwaSub">Install for quick access — works just like an app</div>',
-    '    </div>',
-    '    <div class="dd-pwa-btns">',
-    '      <button class="dd-pwa-install" id="ddPwaInstall">Add to Home Screen</button>',
-    '      <button class="dd-pwa-dismiss" id="ddPwaDismiss">Not Now</button>',
-    '    </div>',
-    '  </div>',
-
     '  <nav class="dd-nav"><div class="dd-nav-logo">Daydream</div><div class="dd-nav-right"><span class="dd-nav-user" id="ddNavUser"></span><button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button></div></nav>',
     '  <div class="dd-tabs">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
@@ -376,52 +327,6 @@
   var currentProject = null;
   var checklistState = {};
   var notesState = {};
-  var deferredPrompt = null;
-
-  // ── PWA INSTALL ───────────────────────────────────────────────────
-  function isIos() { return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()); }
-  function isAndroid() { return /android/.test(navigator.userAgent.toLowerCase()); }
-  function isStandalone() { return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches; }
-  function isDismissed() { try { return sessionStorage.getItem('dd_pwa_dismissed'); } catch(e) { return false; } }
-
-  window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (!isStandalone() && !isDismissed()) showPwaBanner('android');
-  });
-
-  function showPwaBanner(type) {
-    var banner = document.getElementById('ddPwaBanner');
-    var sub = document.getElementById('ddPwaSub');
-    var btn = document.getElementById('ddPwaInstall');
-    if (!banner) return;
-    if (type === 'ios') {
-      sub.textContent = 'Tap the Share button below then "Add to Home Screen"';
-      btn.textContent = 'How to Install';
-      btn.onclick = function() {
-        alert('On iPhone or iPad:\n\n1. Tap the Share button (rectangle with arrow) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm\n\nThe Daydream portal will appear as an app on your home screen.');
-        hidePwaBanner();
-      };
-    } else {
-      sub.textContent = 'Install for quick access — works just like an app';
-      btn.textContent = 'Add to Home Screen';
-      btn.onclick = function() {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(function() { deferredPrompt = null; hidePwaBanner(); });
-        }
-      };
-    }
-    banner.classList.add('visible');
-  }
-
-  function hidePwaBanner() {
-    var banner = document.getElementById('ddPwaBanner');
-    if (banner) banner.classList.remove('visible');
-    try { sessionStorage.setItem('dd_pwa_dismissed', '1'); } catch(e) {}
-  }
-
-  document.getElementById('ddPwaDismiss').addEventListener('click', hidePwaBanner);
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
@@ -434,10 +339,7 @@
       var name = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
       document.getElementById('ddNavUser').textContent = name;
     }
-    if (!isStandalone() && !isDismissed()) {
-      if (isIos()) showPwaBanner('ios');
-      else if (deferredPrompt) showPwaBanner('android');
-    }
+
   }
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
