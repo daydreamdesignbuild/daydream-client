@@ -123,6 +123,10 @@
     '#dd-portal .dd-status-card { background: var(--surface); padding: 20px 24px; }',
     '#dd-portal .dd-status-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
     '#dd-portal .dd-status-badge { font-size: 11px; letter-spacing: 0.08em; padding: 6px 12px; display: inline-block; border: 1px solid; }',
+    '#dd-portal .dd-service-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-bottom: 1px solid var(--border); }',
+    '#dd-portal .dd-service-row:last-child { border-bottom: none; }',
+    '#dd-portal .dd-service-row-name { font-size: 12px; color: var(--text); }',
+    '#dd-portal .dd-service-status-pill { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid; }',
     '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
     '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
     '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); }',
@@ -540,6 +544,25 @@
     } catch(e) {}
   };
 
+  // ── RENDER SERVICES ──────────────────────────────────────────────
+  function renderServices(services) {
+    var card = document.getElementById('ddServicesCard');
+    var list = document.getElementById('ddServicesList');
+    if (!card || !list) return;
+    if (!services || !services.length) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    var STATUS_COLORS = { 'pending': '#8a8680', 'in_progress': '#eeb24a', 'complete': '#6a9e7a' };
+    var STATUS_LABELS = { 'pending': 'Pending', 'in_progress': 'In Progress', 'complete': 'Complete' };
+    list.innerHTML = services.map(function(s) {
+      var color = STATUS_COLORS[s.status] || '#8a8680';
+      var label = STATUS_LABELS[s.status] || s.status;
+      return '<div class="dd-service-row">'
+        + '<div class="dd-service-row-name">' + s.service_name + '</div>'
+        + '<div class="dd-service-status-pill" style="color:' + color + ';border-color:' + color + ';background:' + color + '18">' + label + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
   async function tryTokenFromUrl() {
     var hash = window.location.hash;
@@ -612,6 +635,15 @@
         renderDriveLinks(null);
         renderChecklist();
       }
+      // Load client services
+      if (currentClient) {
+        try {
+          var svcRes = await apiFetch('/rest/v1/client_services?client_id=eq.' + currentClient.id + '&order=created_at.asc');
+          var svcs = await svcRes.json();
+          renderServices(svcs || []);
+        } catch(e) {}
+      }
+
       var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + (currentClient ? currentClient.id : 'none') + '&limit=1');
       var projData = await projRes.json();
       if (projData && projData[0]) currentProject = projData[0];
