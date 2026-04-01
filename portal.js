@@ -3,6 +3,7 @@
   // ── CONFIG ────────────────────────────────────────────────────────
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+  var PORTAL_URL = 'https://daydreamdesignandbuild.com/app/';
   var CONSULTATION_URL = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
   var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
 
@@ -17,594 +18,115 @@
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
     '#dd-portal {',
-    '  --bg: #0d0d0b;',
-    '  --surface: #131310;',
-    '  --surface-2: #181815;',
-    '  --border: #252520;',
-    '  --text: #f0ebe0;',
-    '  --muted: #8a8680;',
-    '  --gold: #eeb24a;',
-    '  --gold-dim: rgba(238,178,74,0.08);',
-    '  --gold-glow: rgba(238,178,74,0.15);',
-    '  --error: #c07a6a;',
-    '  --success: #6a9e7a;',
-    '  font-family: Jost, sans-serif;',
-    '  font-weight: 300;',
-    '  background: var(--bg);',
-    '  color: var(--text);',
-    '  min-height: 100vh;',
-    '  width: 100%;',
+    '  --bg: #0d0d0b; --surface: #131310; --surface-2: #181815;',
+    '  --border: #252520; --text: #f0ebe0; --muted: #8a8680;',
+    '  --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08);',
+    '  --error: #c07a6a; --success: #6a9e7a;',
+    '  font-family: Jost, sans-serif; font-weight: 300;',
+    '  background: var(--bg); color: var(--text); min-height: 100vh; width: 100%;',
     '}',
-
-    // Login screen
     '#dd-portal .dd-login-wrap {',
-    '  min-height: 100vh;',
-    '  display: flex;',
-    '  flex-direction: column;',
-    '  align-items: center;',
-    '  justify-content: center;',
-    '  padding: 40px 20px;',
+    '  min-height: 100vh; display: flex; flex-direction: column;',
+    '  align-items: center; justify-content: center; padding: 40px 20px;',
     '  animation: ddFadeUp 0.8s ease both;',
     '}',
-    '#dd-portal .dd-login-card {',
-    '  width: 100%;',
-    '  max-width: 440px;',
-    '  border: 1px solid var(--border);',
-    '  background: var(--surface);',
-    '}',
-    '#dd-portal .dd-login-header {',
-    '  background: var(--bg);',
-    '  border-bottom: 3px solid var(--gold);',
-    '  padding: 36px 40px;',
-    '  text-align: center;',
-    '}',
-    '#dd-portal .dd-login-logo {',
-    '  font-family: "Cormorant Garamond", serif;',
-    '  font-size: 32px;',
-    '  font-weight: 400;',
-    '  letter-spacing: 0.2em;',
-    '  color: var(--gold);',
-    '  text-transform: uppercase;',
-    '  margin-bottom: 6px;',
-    '}',
-    '#dd-portal .dd-login-sub {',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.4em;',
-    '  text-transform: uppercase;',
-    '  color: var(--muted);',
-    '}',
+    '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
+    '#dd-portal .dd-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 36px 40px; text-align: center; }',
+    '#dd-portal .dd-login-logo { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 400; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }',
+    '#dd-portal .dd-login-sub { font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--muted); }',
     '#dd-portal .dd-login-body { padding: 36px 40px; }',
-    '#dd-portal .dd-login-title {',
-    '  font-family: "Cormorant Garamond", serif;',
-    '  font-size: 20px;',
-    '  font-weight: 300;',
-    '  font-style: italic;',
-    '  color: var(--text);',
-    '  margin-bottom: 8px;',
-    '}',
-    '#dd-portal .dd-login-desc {',
-    '  font-size: 12px;',
-    '  color: var(--muted);',
-    '  line-height: 1.8;',
-    '  margin-bottom: 28px;',
-    '  letter-spacing: 0.03em;',
-    '}',
-    '#dd-portal .dd-input-wrap {',
-    '  border: 1px solid var(--border);',
-    '  background: var(--surface-2);',
-    '  margin-bottom: 16px;',
-    '  transition: border-color 0.2s;',
-    '}',
-    '#dd-portal .dd-input-wrap:focus-within {',
-    '  border-color: var(--gold);',
-    '  background: var(--gold-dim);',
-    '}',
-    '#dd-portal .dd-input-wrap:focus-within::after {',
-    '  content: "";',
-    '  display: block;',
-    '  height: 2px;',
-    '  background: var(--gold);',
-    '}',
-    '#dd-portal .dd-input-label {',
-    '  font-size: 8px;',
-    '  letter-spacing: 0.35em;',
-    '  text-transform: uppercase;',
-    '  color: var(--muted);',
-    '  padding: 12px 16px 4px;',
-    '  display: block;',
-    '}',
+    '#dd-portal .dd-login-title { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 8px; }',
+    '#dd-portal .dd-login-desc { font-size: 12px; color: var(--muted); line-height: 1.8; margin-bottom: 28px; letter-spacing: 0.03em; }',
+    '#dd-portal .dd-input-wrap { border: 1px solid var(--border); background: var(--surface-2); margin-bottom: 16px; transition: border-color 0.2s; }',
+    '#dd-portal .dd-input-wrap:focus-within { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-input-wrap:focus-within::after { content: ""; display: block; height: 2px; background: var(--gold); }',
+    '#dd-portal .dd-input-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 4px; display: block; }',
     '#dd-portal .dd-input-wrap:focus-within .dd-input-label { color: var(--gold); }',
-    '#dd-portal .dd-input {',
-    '  width: 100%;',
-    '  background: transparent;',
-    '  border: none;',
-    '  outline: none;',
-    '  color: var(--text);',
-    '  font-family: Jost, sans-serif;',
-    '  font-size: 14px;',
-    '  font-weight: 300;',
-    '  padding: 4px 16px 12px;',
-    '  letter-spacing: 0.03em;',
-    '}',
-    '#dd-portal .dd-input:-webkit-autofill,',
-    '#dd-portal .dd-input:-webkit-autofill:focus {',
-    '  -webkit-box-shadow: 0 0 0 60px #131310 inset !important;',
-    '  -webkit-text-fill-color: #f0ebe0 !important;',
-    '}',
-    '#dd-portal .dd-btn {',
-    '  width: 100%;',
-    '  background: transparent;',
-    '  border: 1px solid var(--gold);',
-    '  color: var(--gold);',
-    '  font-family: Jost, sans-serif;',
-    '  font-size: 10px;',
-    '  font-weight: 400;',
-    '  letter-spacing: 0.4em;',
-    '  text-transform: uppercase;',
-    '  padding: 16px;',
-    '  cursor: pointer;',
-    '  transition: background 0.3s, color 0.3s;',
-    '  margin-top: 8px;',
-    '}',
+    '#dd-portal .dd-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 14px; font-weight: 300; padding: 4px 16px 12px; letter-spacing: 0.03em; }',
+    '#dd-portal .dd-input:-webkit-autofill, #dd-portal .dd-input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0 60px #131310 inset !important; -webkit-text-fill-color: #f0ebe0 !important; }',
+    '#dd-portal .dd-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
     '#dd-portal .dd-btn:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
     '#dd-portal .dd-btn.dd-btn-solid { background: var(--gold); color: var(--bg); }',
-    '#dd-portal .dd-btn.dd-btn-solid:hover { opacity: 0.85; }',
-    '#dd-portal .dd-msg {',
-    '  font-size: 11px;',
-    '  text-align: center;',
-    '  padding: 10px;',
-    '  margin-top: 12px;',
-    '  display: none;',
-    '  letter-spacing: 0.05em;',
-    '}',
+    '#dd-portal .dd-msg { font-size: 11px; text-align: center; padding: 10px; margin-top: 12px; display: none; letter-spacing: 0.05em; }',
     '#dd-portal .dd-msg.visible { display: block; }',
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
-
-    // Dashboard layout
-    '#dd-portal .dd-dashboard {',
-    '  display: none;',
-    '  min-height: 100vh;',
-    '  flex-direction: column;',
-    '}',
+    '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
-
-    // Top nav
-    '#dd-portal .dd-nav {',
-    '  background: var(--bg);',
-    '  border-bottom: 1px solid var(--border);',
-    '  padding: 0 32px;',
-    '  display: flex;',
-    '  align-items: center;',
-    '  justify-content: space-between;',
-    '  height: 64px;',
-    '  position: sticky;',
-    '  top: 0;',
-    '  z-index: 100;',
-    '}',
-    '#dd-portal .dd-nav-logo {',
-    '  font-family: "Cormorant Garamond", serif;',
-    '  font-size: 22px;',
-    '  font-weight: 400;',
-    '  letter-spacing: 0.18em;',
-    '  color: var(--gold);',
-    '  text-transform: uppercase;',
-    '}',
-    '#dd-portal .dd-nav-right {',
-    '  display: flex;',
-    '  align-items: center;',
-    '  gap: 24px;',
-    '}',
-    '#dd-portal .dd-nav-user {',
-    '  font-size: 11px;',
-    '  letter-spacing: 0.1em;',
-    '  color: var(--muted);',
-    '}',
-    '#dd-portal .dd-nav-logout {',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.3em;',
-    '  text-transform: uppercase;',
-    '  color: var(--muted);',
-    '  cursor: pointer;',
-    '  background: none;',
-    '  border: none;',
-    '  transition: color 0.2s;',
-    '}',
+    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }',
+    '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
+    '#dd-portal .dd-nav-right { display: flex; align-items: center; gap: 24px; }',
+    '#dd-portal .dd-nav-user { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); }',
+    '#dd-portal .dd-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
     '#dd-portal .dd-nav-logout:hover { color: var(--gold); }',
-
-    // Tab bar
-    '#dd-portal .dd-tabs {',
-    '  background: var(--surface);',
-    '  border-bottom: 1px solid var(--border);',
-    '  display: flex;',
-    '  overflow-x: auto;',
-    '  padding: 0 32px;',
-    '}',
-    '#dd-portal .dd-tab {',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.3em;',
-    '  text-transform: uppercase;',
-    '  color: var(--muted);',
-    '  padding: 16px 20px;',
-    '  cursor: pointer;',
-    '  border-bottom: 2px solid transparent;',
-    '  transition: color 0.2s, border-color 0.2s;',
-    '  white-space: nowrap;',
-    '  background: none;',
-    '  border-left: none;',
-    '  border-right: none;',
-    '  border-top: none;',
-    '}',
+    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; }',
+    '#dd-portal .dd-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; }',
     '#dd-portal .dd-tab:hover { color: var(--text); }',
     '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
-
-    // Main content
-    '#dd-portal .dd-content {',
-    '  flex: 1;',
-    '  padding: 40px 32px;',
-    '  max-width: 900px;',
-    '  width: 100%;',
-    '  margin: 0 auto;',
-    '}',
-
-    // Section title
-    '#dd-portal .dd-section-title {',
-    '  font-family: "Cormorant Garamond", serif;',
-    '  font-size: 26px;',
-    '  font-weight: 300;',
-    '  color: var(--text);',
-    '  margin-bottom: 6px;',
-    '}',
-    '#dd-portal .dd-section-sub {',
-    '  font-size: 11px;',
-    '  color: var(--muted);',
-    '  letter-spacing: 0.08em;',
-    '  margin-bottom: 32px;',
-    '}',
-
-    // Welcome card
-    '#dd-portal .dd-welcome-card {',
-    '  border: 1px solid var(--gold);',
-    '  background: var(--gold-dim);',
-    '  padding: 32px;',
-    '  margin-bottom: 32px;',
-    '  display: flex;',
-    '  align-items: center;',
-    '  justify-content: space-between;',
-    '  gap: 24px;',
-    '  flex-wrap: wrap;',
-    '}',
-    '#dd-portal .dd-welcome-text h3 {',
-    '  font-family: "Cormorant Garamond", serif;',
-    '  font-size: 20px;',
-    '  font-weight: 400;',
-    '  color: var(--gold);',
-    '  margin-bottom: 8px;',
-    '}',
-    '#dd-portal .dd-welcome-text p {',
-    '  font-size: 12px;',
-    '  color: var(--muted);',
-    '  line-height: 1.8;',
-    '  max-width: 400px;',
-    '}',
-    '#dd-portal .dd-cal-btn {',
-    '  display: inline-block;',
-    '  background: var(--gold);',
-    '  color: var(--bg);',
-    '  text-decoration: none;',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.4em;',
-    '  text-transform: uppercase;',
-    '  padding: 14px 28px;',
-    '  font-weight: 500;',
-    '  white-space: nowrap;',
-    '  transition: opacity 0.2s;',
-    '}',
+    '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
+    '#dd-portal .dd-section-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 32px; }',
+    '#dd-portal .dd-welcome-card { border: 1px solid var(--gold); background: var(--gold-dim); padding: 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }',
+    '#dd-portal .dd-welcome-text h3 { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; color: var(--gold); margin-bottom: 8px; }',
+    '#dd-portal .dd-welcome-text p { font-size: 12px; color: var(--muted); line-height: 1.8; max-width: 400px; }',
+    '#dd-portal .dd-cal-btn { display: inline-block; background: var(--gold); color: var(--bg); text-decoration: none; font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px 28px; font-weight: 500; white-space: nowrap; transition: opacity 0.2s; }',
     '#dd-portal .dd-cal-btn:hover { opacity: 0.85; }',
-    '#dd-portal .dd-cal-btn.outline {',
-    '  background: transparent;',
-    '  border: 1px solid var(--gold);',
-    '  color: var(--gold);',
-    '}',
+    '#dd-portal .dd-cal-btn.outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }',
     '#dd-portal .dd-cal-btn.outline:hover { background: var(--gold); color: var(--bg); }',
-
-    // Cards grid
-    '#dd-portal .dd-cards {',
-    '  display: grid;',
-    '  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));',
-    '  gap: 1px;',
-    '  background: var(--border);',
-    '  border: 1px solid var(--border);',
-    '  margin-bottom: 32px;',
-    '}',
-    '#dd-portal .dd-card {',
-    '  background: var(--surface);',
-    '  padding: 24px;',
-    '}',
-    '#dd-portal .dd-card-label {',
-    '  font-size: 8px;',
-    '  letter-spacing: 0.35em;',
-    '  text-transform: uppercase;',
-    '  color: var(--muted);',
-    '  margin-bottom: 10px;',
-    '}',
-    '#dd-portal .dd-card-value {',
-    '  font-family: "Cormorant Garamond", serif;',
-    '  font-size: 20px;',
-    '  color: var(--gold);',
-    '  font-weight: 400;',
-    '}',
-    '#dd-portal .dd-card-sub {',
-    '  font-size: 11px;',
-    '  color: var(--muted);',
-    '  margin-top: 4px;',
-    '}',
-
-    // Timeline
-    '#dd-portal .dd-timeline {',
-    '  border: 1px solid var(--border);',
-    '  background: var(--surface);',
-    '  margin-bottom: 32px;',
-    '}',
-    '#dd-portal .dd-timeline-header {',
-    '  padding: 16px 24px;',
-    '  border-bottom: 1px solid var(--border);',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.35em;',
-    '  text-transform: uppercase;',
-    '  color: var(--gold);',
-    '  background: var(--surface-2);',
-    '}',
-    '#dd-portal .dd-timeline-item {',
-    '  display: flex;',
-    '  align-items: center;',
-    '  gap: 16px;',
-    '  padding: 16px 24px;',
-    '  border-bottom: 1px solid var(--border);',
-    '}',
+    '#dd-portal .dd-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 32px; }',
+    '#dd-portal .dd-card { background: var(--surface); padding: 24px; }',
+    '#dd-portal .dd-card-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
+    '#dd-portal .dd-card-value { font-family: "Cormorant Garamond", serif; font-size: 20px; color: var(--gold); font-weight: 400; }',
+    '#dd-portal .dd-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }',
+    '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
+    '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
+    '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }',
     '#dd-portal .dd-timeline-item:last-child { border-bottom: none; }',
-    '#dd-portal .dd-timeline-dot {',
-    '  width: 10px;',
-    '  height: 10px;',
-    '  border-radius: 50%;',
-    '  background: var(--border);',
-    '  flex-shrink: 0;',
-    '}',
+    '#dd-portal .dd-timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; }',
     '#dd-portal .dd-timeline-dot.done { background: var(--gold); }',
-    '#dd-portal .dd-timeline-dot.active {',
-    '  background: var(--gold);',
-    '  box-shadow: 0 0 0 3px var(--gold-dim);',
-    '}',
-    '#dd-portal .dd-timeline-label {',
-    '  font-size: 12px;',
-    '  color: var(--text);',
-    '  letter-spacing: 0.05em;',
-    '}',
+    '#dd-portal .dd-timeline-dot.active { background: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }',
+    '#dd-portal .dd-timeline-label { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }',
     '#dd-portal .dd-timeline-label.muted { color: var(--muted); }',
-    '#dd-portal .dd-timeline-badge {',
-    '  margin-left: auto;',
-    '  font-size: 8px;',
-    '  letter-spacing: 0.2em;',
-    '  text-transform: uppercase;',
-    '  padding: 4px 10px;',
-    '  border: 1px solid var(--gold);',
-    '  color: var(--gold);',
-    '}',
-
-    // Upload sections
-    '#dd-portal .dd-upload-grid {',
-    '  display: grid;',
-    '  grid-template-columns: 1fr 1fr;',
-    '  gap: 16px;',
-    '  margin-bottom: 32px;',
-    '}',
-    '#dd-portal .dd-upload-card {',
-    '  border: 1px solid var(--border);',
-    '  background: var(--surface);',
-    '  overflow: hidden;',
-    '}',
-    '#dd-portal .dd-upload-card-header {',
-    '  padding: 14px 20px;',
-    '  border-bottom: 1px solid var(--border);',
-    '  background: var(--surface-2);',
-    '}',
-    '#dd-portal .dd-upload-card-title {',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.35em;',
-    '  text-transform: uppercase;',
-    '  color: var(--gold);',
-    '  margin-bottom: 3px;',
-    '}',
-    '#dd-portal .dd-upload-card-desc {',
-    '  font-size: 10px;',
-    '  color: var(--muted);',
-    '  letter-spacing: 0.03em;',
-    '}',
+    '#dd-portal .dd-timeline-badge { margin-left: auto; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--gold); color: var(--gold); }',
+    '#dd-portal .dd-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }',
+    '#dd-portal .dd-upload-card { border: 1px solid var(--border); background: var(--surface); overflow: hidden; }',
+    '#dd-portal .dd-upload-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
+    '#dd-portal .dd-upload-card-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }',
+    '#dd-portal .dd-upload-card-desc { font-size: 10px; color: var(--muted); letter-spacing: 0.03em; }',
     '#dd-portal .dd-upload-card-body { padding: 20px; }',
-    '#dd-portal .dd-drop-zone {',
-    '  border: 1px dashed var(--border);',
-    '  padding: 24px;',
-    '  text-align: center;',
-    '  cursor: pointer;',
-    '  transition: border-color 0.2s, background 0.2s;',
-    '  position: relative;',
-    '}',
-    '#dd-portal .dd-drop-zone:hover {',
-    '  border-color: var(--gold);',
-    '  background: var(--gold-dim);',
-    '}',
-    '#dd-portal .dd-drop-zone input[type=file] {',
-    '  position: absolute;',
-    '  inset: 0;',
-    '  opacity: 0;',
-    '  cursor: pointer;',
-    '  width: 100%;',
-    '  height: 100%;',
-    '}',
-    '#dd-portal .dd-drop-icon {',
-    '  font-size: 20px;',
-    '  color: var(--gold);',
-    '  margin-bottom: 8px;',
-    '}',
-    '#dd-portal .dd-drop-text {',
-    '  font-size: 11px;',
-    '  color: var(--muted);',
-    '  letter-spacing: 0.05em;',
-    '}',
-    '#dd-portal .dd-upload-status {',
-    '  font-size: 10px;',
-    '  color: var(--success);',
-    '  margin-top: 8px;',
-    '  text-align: center;',
-    '  min-height: 16px;',
-    '}',
-
-    // Messages
-    '#dd-portal .dd-messages-wrap {',
-    '  border: 1px solid var(--border);',
-    '  background: var(--surface);',
-    '  display: flex;',
-    '  flex-direction: column;',
-    '  height: 500px;',
-    '}',
-    '#dd-portal .dd-messages-header {',
-    '  padding: 14px 24px;',
-    '  border-bottom: 1px solid var(--border);',
-    '  background: var(--surface-2);',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.35em;',
-    '  text-transform: uppercase;',
-    '  color: var(--gold);',
-    '}',
-    '#dd-portal .dd-messages-list {',
-    '  flex: 1;',
-    '  overflow-y: auto;',
-    '  padding: 20px 24px;',
-    '  display: flex;',
-    '  flex-direction: column;',
-    '  gap: 16px;',
-    '}',
-    '#dd-portal .dd-message {',
-    '  display: flex;',
-    '  flex-direction: column;',
-    '  gap: 4px;',
-    '  max-width: 75%;',
-    '}',
+    '#dd-portal .dd-drop-zone { border: 1px dashed var(--border); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; }',
+    '#dd-portal .dd-drop-zone:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }',
+    '#dd-portal .dd-drop-icon { font-size: 20px; color: var(--gold); margin-bottom: 8px; }',
+    '#dd-portal .dd-drop-text { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }',
+    '#dd-portal .dd-upload-status { font-size: 10px; color: var(--success); margin-top: 8px; text-align: center; min-height: 16px; }',
+    '#dd-portal .dd-messages-wrap { border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; height: 500px; }',
+    '#dd-portal .dd-messages-header { padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface-2); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-portal .dd-messages-list { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }',
+    '#dd-portal .dd-message { display: flex; flex-direction: column; gap: 4px; max-width: 75%; }',
     '#dd-portal .dd-message.mine { align-self: flex-end; }',
     '#dd-portal .dd-message.theirs { align-self: flex-start; }',
-    '#dd-portal .dd-message-bubble {',
-    '  padding: 12px 16px;',
-    '  font-size: 13px;',
-    '  line-height: 1.7;',
-    '  letter-spacing: 0.02em;',
-    '}',
-    '#dd-portal .dd-message.mine .dd-message-bubble {',
-    '  background: var(--gold-dim);',
-    '  border: 1px solid var(--gold);',
-    '  color: var(--text);',
-    '}',
-    '#dd-portal .dd-message.theirs .dd-message-bubble {',
-    '  background: var(--surface-2);',
-    '  border: 1px solid var(--border);',
-    '  color: var(--text);',
-    '}',
-    '#dd-portal .dd-message-meta {',
-    '  font-size: 9px;',
-    '  color: var(--muted);',
-    '  letter-spacing: 0.1em;',
-    '}',
+    '#dd-portal .dd-message-bubble { padding: 12px 16px; font-size: 13px; line-height: 1.7; letter-spacing: 0.02em; }',
+    '#dd-portal .dd-message.mine .dd-message-bubble { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); }',
+    '#dd-portal .dd-message.theirs .dd-message-bubble { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
+    '#dd-portal .dd-message-meta { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }',
     '#dd-portal .dd-message.mine .dd-message-meta { text-align: right; }',
-    '#dd-portal .dd-messages-input {',
-    '  border-top: 1px solid var(--border);',
-    '  display: flex;',
-    '  gap: 0;',
-    '}',
-    '#dd-portal .dd-messages-input textarea {',
-    '  flex: 1;',
-    '  background: var(--surface-2);',
-    '  border: none;',
-    '  outline: none;',
-    '  color: var(--text);',
-    '  font-family: Jost, sans-serif;',
-    '  font-size: 13px;',
-    '  font-weight: 300;',
-    '  padding: 16px 20px;',
-    '  resize: none;',
-    '  height: 56px;',
-    '}',
+    '#dd-portal .dd-messages-input { border-top: 1px solid var(--border); display: flex; }',
+    '#dd-portal .dd-messages-input textarea { flex: 1; background: var(--surface-2); border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 16px 20px; resize: none; height: 56px; }',
     '#dd-portal .dd-messages-input textarea::placeholder { color: var(--muted); }',
-    '#dd-portal .dd-send-btn {',
-    '  background: var(--gold);',
-    '  border: none;',
-    '  color: var(--bg);',
-    '  font-family: Jost, sans-serif;',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.3em;',
-    '  text-transform: uppercase;',
-    '  padding: 0 24px;',
-    '  cursor: pointer;',
-    '  transition: opacity 0.2s;',
-    '}',
+    '#dd-portal .dd-send-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 24px; cursor: pointer; transition: opacity 0.2s; }',
     '#dd-portal .dd-send-btn:hover { opacity: 0.85; }',
-
-    // Drive links
-    '#dd-portal .dd-drive-list {',
-    '  display: flex;',
-    '  flex-direction: column;',
-    '  gap: 1px;',
-    '  background: var(--border);',
-    '  border: 1px solid var(--border);',
-    '}',
-    '#dd-portal .dd-drive-item {',
-    '  background: var(--surface);',
-    '  padding: 18px 24px;',
-    '  display: flex;',
-    '  align-items: center;',
-    '  justify-content: space-between;',
-    '  gap: 16px;',
-    '}',
-    '#dd-portal .dd-drive-item-name {',
-    '  font-size: 13px;',
-    '  color: var(--text);',
-    '  letter-spacing: 0.03em;',
-    '}',
-    '#dd-portal .dd-drive-item-sub {',
-    '  font-size: 10px;',
-    '  color: var(--muted);',
-    '  margin-top: 2px;',
-    '}',
-    '#dd-portal .dd-drive-link {',
-    '  font-size: 9px;',
-    '  letter-spacing: 0.3em;',
-    '  text-transform: uppercase;',
-    '  color: var(--gold);',
-    '  text-decoration: none;',
-    '  border: 1px solid var(--gold);',
-    '  padding: 8px 16px;',
-    '  white-space: nowrap;',
-    '  transition: background 0.2s, color 0.2s;',
-    '}',
+    '#dd-portal .dd-drive-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }',
+    '#dd-portal .dd-drive-item { background: var(--surface); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }',
+    '#dd-portal .dd-drive-item-name { font-size: 13px; color: var(--text); letter-spacing: 0.03em; }',
+    '#dd-portal .dd-drive-item-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }',
+    '#dd-portal .dd-drive-link { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 16px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-portal .dd-drive-link:hover { background: var(--gold); color: var(--bg); }',
-
-    // Tabs content
     '#dd-portal .dd-tab-content { display: none; }',
     '#dd-portal .dd-tab-content.active { display: block; }',
-
-    // Empty state
-    '#dd-portal .dd-empty {',
-    '  text-align: center;',
-    '  padding: 48px 24px;',
-    '  color: var(--muted);',
-    '  font-size: 12px;',
-    '  letter-spacing: 0.08em;',
-    '}',
-
-    '@keyframes ddFadeUp {',
-    '  from { opacity: 0; transform: translateY(16px); }',
-    '  to   { opacity: 1; transform: translateY(0); }',
-    '}',
-
+    '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
+    '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 600px) {',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-nav { padding: 0 16px; }',
@@ -620,7 +142,6 @@
   if (!wrap) return;
 
   wrap.innerHTML = [
-    // LOGIN SCREEN
     '<div id="ddLoginWrap" class="dd-login-wrap">',
     '  <div class="dd-login-card">',
     '    <div class="dd-login-header">',
@@ -629,7 +150,7 @@
     '    </div>',
     '    <div class="dd-login-body">',
     '      <div class="dd-login-title">Welcome back.</div>',
-    '      <div class="dd-login-desc">Enter your email address and we will send you a secure login link to access your project portal.</div>',
+    '      <div class="dd-login-desc">Enter your email address and we will send you a secure link to access your project portal.</div>',
     '      <div class="dd-input-wrap">',
     '        <label class="dd-input-label">Email Address</label>',
     '        <input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" />',
@@ -640,10 +161,7 @@
     '  </div>',
     '</div>',
 
-    // DASHBOARD
     '<div id="ddDashboard" class="dd-dashboard">',
-
-    // Nav
     '  <nav class="dd-nav">',
     '    <div class="dd-nav-logo">Daydream</div>',
     '    <div class="dd-nav-right">',
@@ -651,8 +169,6 @@
     '      <button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button>',
     '    </div>',
     '  </nav>',
-
-    // Tabs
     '  <div class="dd-tabs">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="uploads">Documents</button>',
@@ -660,15 +176,11 @@
     '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '  </div>',
-
-    // Content
     '  <div class="dd-content">',
 
-    // OVERVIEW TAB
     '    <div class="dd-tab-content active" id="tab-overview">',
     '      <div class="dd-section-title">Your Project</div>',
     '      <div class="dd-section-sub">Welcome to your Daydream client portal</div>',
-
     '      <div class="dd-welcome-card">',
     '        <div class="dd-welcome-text">',
     '          <h3>Book Your Discovery Call</h3>',
@@ -676,161 +188,41 @@
     '        </div>',
     '        <a href="' + CONSULTATION_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a>',
     '      </div>',
-
     '      <div class="dd-cards">',
-    '        <div class="dd-card">',
-    '          <div class="dd-card-label">Project Status</div>',
-    '          <div class="dd-card-value" id="ddStatus">New Inquiry</div>',
-    '        </div>',
-    '        <div class="dd-card">',
-    '          <div class="dd-card-label">Service</div>',
-    '          <div class="dd-card-value" id="ddService" style="font-size:14px">—</div>',
-    '        </div>',
-    '        <div class="dd-card">',
-    '          <div class="dd-card-label">Member Since</div>',
-    '          <div class="dd-card-value" id="ddSince" style="font-size:14px">—</div>',
-    '        </div>',
+    '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Service</div><div class="dd-card-value" id="ddService" style="font-size:14px">—</div></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
     '      </div>',
-
     '      <div class="dd-timeline">',
     '        <div class="dd-timeline-header">Project Timeline</div>',
-    '        <div class="dd-timeline-item">',
-    '          <div class="dd-timeline-dot done"></div>',
-    '          <div class="dd-timeline-label">Inquiry Submitted</div>',
-    '          <div class="dd-timeline-badge">Complete</div>',
-    '        </div>',
-    '        <div class="dd-timeline-item">',
-    '          <div class="dd-timeline-dot active" id="tl2dot"></div>',
-    '          <div class="dd-timeline-label" id="tl2label">Discovery Call</div>',
-    '          <div class="dd-timeline-badge" id="tl2badge" style="border-color:var(--gold);color:var(--gold)">In Progress</div>',
-    '        </div>',
-    '        <div class="dd-timeline-item">',
-    '          <div class="dd-timeline-dot" id="tl3dot"></div>',
-    '          <div class="dd-timeline-label muted">Document Collection</div>',
-    '        </div>',
-    '        <div class="dd-timeline-item">',
-    '          <div class="dd-timeline-dot" id="tl4dot"></div>',
-    '          <div class="dd-timeline-label muted">Concept Design Phase</div>',
-    '        </div>',
-    '        <div class="dd-timeline-item">',
-    '          <div class="dd-timeline-dot" id="tl5dot"></div>',
-    '          <div class="dd-timeline-label muted">Design Review &amp; Revisions</div>',
-    '        </div>',
-    '        <div class="dd-timeline-item">',
-    '          <div class="dd-timeline-dot" id="tl6dot"></div>',
-    '          <div class="dd-timeline-label muted">Final Deliverables</div>',
-    '        </div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot done"></div><div class="dd-timeline-label">Inquiry Submitted</div><div class="dd-timeline-badge">Complete</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot active"></div><div class="dd-timeline-label">Discovery Call</div><div class="dd-timeline-badge">In Progress</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Document Collection</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Concept Design Phase</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Design Review &amp; Revisions</div></div>',
+    '        <div class="dd-timeline-item"><div class="dd-timeline-dot"></div><div class="dd-timeline-label muted">Final Deliverables</div></div>',
     '      </div>',
     '    </div>',
 
-    // UPLOADS TAB
     '    <div class="dd-tab-content" id="tab-uploads">',
     '      <div class="dd-section-title">Document Uploads</div>',
-    '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised in your project folder.</div>',
+    '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised into your project folder.</div>',
     '      <div class="dd-upload-grid">',
-
-    '        <div class="dd-upload-card">',
-    '          <div class="dd-upload-card-header">',
-    '            <div class="dd-upload-card-title">Site Survey</div>',
-    '            <div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div>',
-    '          </div>',
-    '          <div class="dd-upload-card-body">',
-    '            <div class="dd-drop-zone" id="drop-survey">',
-    '              <input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="survey" class="dd-file-input" />',
-    '              <div class="dd-drop-icon">&#8679;</div>',
-    '              <div class="dd-drop-text">Drop files or click to upload</div>',
-    '            </div>',
-    '            <div class="dd-upload-status" id="status-survey"></div>',
-    '          </div>',
-    '        </div>',
-
-    '        <div class="dd-upload-card">',
-    '          <div class="dd-upload-card-header">',
-    '            <div class="dd-upload-card-title">Site Photos</div>',
-    '            <div class="dd-upload-card-desc">Existing site photographs</div>',
-    '          </div>',
-    '          <div class="dd-upload-card-body">',
-    '            <div class="dd-drop-zone" id="drop-photos">',
-    '              <input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" />',
-    '              <div class="dd-drop-icon">&#8679;</div>',
-    '              <div class="dd-drop-text">Drop files or click to upload</div>',
-    '            </div>',
-    '            <div class="dd-upload-status" id="status-photos"></div>',
-    '          </div>',
-    '        </div>',
-
-    '        <div class="dd-upload-card">',
-    '          <div class="dd-upload-card-header">',
-    '            <div class="dd-upload-card-title">Site Videos</div>',
-    '            <div class="dd-upload-card-desc">Walkthrough or drone footage</div>',
-    '          </div>',
-    '          <div class="dd-upload-card-body">',
-    '            <div class="dd-drop-zone" id="drop-videos">',
-    '              <input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" />',
-    '              <div class="dd-drop-icon">&#8679;</div>',
-    '              <div class="dd-drop-text">Drop files or click to upload</div>',
-    '            </div>',
-    '            <div class="dd-upload-status" id="status-videos"></div>',
-    '          </div>',
-    '        </div>',
-
-    '        <div class="dd-upload-card">',
-    '          <div class="dd-upload-card-header">',
-    '            <div class="dd-upload-card-title">Inspiration</div>',
-    '            <div class="dd-upload-card-desc">Pinterest boards, AI concepts, reference images</div>',
-    '          </div>',
-    '          <div class="dd-upload-card-body">',
-    '            <div class="dd-drop-zone" id="drop-inspo">',
-    '              <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" />',
-    '              <div class="dd-drop-icon">&#8679;</div>',
-    '              <div class="dd-drop-text">Drop files or click to upload</div>',
-    '            </div>',
-    '            <div class="dd-upload-status" id="status-inspo"></div>',
-    '          </div>',
-    '        </div>',
-
-    '        <div class="dd-upload-card">',
-    '          <div class="dd-upload-card-header">',
-    '            <div class="dd-upload-card-title">House Plans</div>',
-    '            <div class="dd-upload-card-desc">Architectural plans and drawings</div>',
-    '          </div>',
-    '          <div class="dd-upload-card-body">',
-    '            <div class="dd-drop-zone" id="drop-houseplans">',
-    '              <input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" />',
-    '              <div class="dd-drop-icon">&#8679;</div>',
-    '              <div class="dd-drop-text">Drop files or click to upload</div>',
-    '            </div>',
-    '            <div class="dd-upload-status" id="status-houseplans"></div>',
-    '          </div>',
-    '        </div>',
-
-    '        <div class="dd-upload-card">',
-    '          <div class="dd-upload-card-header">',
-    '            <div class="dd-upload-card-title">Site Plans</div>',
-    '            <div class="dd-upload-card-desc">Existing site plans and layouts</div>',
-    '          </div>',
-    '          <div class="dd-upload-card-body">',
-    '            <div class="dd-drop-zone" id="drop-siteplans">',
-    '              <input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" />',
-    '              <div class="dd-drop-icon">&#8679;</div>',
-    '              <div class="dd-drop-text">Drop files or click to upload</div>',
-    '            </div>',
-    '            <div class="dd-upload-status" id="status-siteplans"></div>',
-    '          </div>',
-    '        </div>',
-
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Existing site photographs</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI concepts, reference images</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans</div><div class="dd-upload-card-desc">Architectural plans and drawings</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Plans</div><div class="dd-upload-card-desc">Existing site plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-siteplans"></div></div></div>',
     '      </div>',
     '    </div>',
 
-    // MESSAGES TAB
     '    <div class="dd-tab-content" id="tab-messages">',
     '      <div class="dd-section-title">Messages</div>',
     '      <div class="dd-section-sub">Communicate directly with the Daydream team</div>',
     '      <div class="dd-messages-wrap">',
     '        <div class="dd-messages-header">Project Messages</div>',
-    '        <div class="dd-messages-list" id="ddMessagesList">',
-    '          <div class="dd-empty">No messages yet. Send us a message below.</div>',
-    '        </div>',
+    '        <div class="dd-messages-list" id="ddMessagesList"><div class="dd-empty">No messages yet. Send us a message below.</div></div>',
     '        <div class="dd-messages-input">',
     '          <textarea id="ddMessageInput" placeholder="Type your message..."></textarea>',
     '          <button class="dd-send-btn" id="ddSendBtn">Send</button>',
@@ -838,31 +230,19 @@
     '      </div>',
     '    </div>',
 
-    // SCHEDULE TAB
     '    <div class="dd-tab-content" id="tab-schedule">',
     '      <div class="dd-section-title">Schedule a Meeting</div>',
     '      <div class="dd-section-sub">Book time with the Daydream team</div>',
-    '      <div class="dd-cards" style="margin-bottom:24px">',
-    '        <div class="dd-card">',
-    '          <div class="dd-card-label">Discovery Consultation</div>',
-    '          <div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion and vision alignment</div>',
-    '          <a href="' + CONSULTATION_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a>',
-    '        </div>',
-    '        <div class="dd-card">',
-    '          <div class="dd-card-label">Design Revision Meeting</div>',
-    '          <div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review designs and discuss feedback and changes</div>',
-    '          <a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a>',
-    '        </div>',
+    '      <div class="dd-cards">',
+    '        <div class="dd-card"><div class="dd-card-label">Discovery Consultation</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion and vision alignment</div><a href="' + CONSULTATION_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review designs and discuss feedback and changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
     '      </div>',
     '    </div>',
 
-    // DRIVE TAB
     '    <div class="dd-tab-content" id="tab-drive">',
     '      <div class="dd-section-title">Project Files</div>',
     '      <div class="dd-section-sub">Access your shared Google Drive project folder</div>',
-    '      <div class="dd-drive-list" id="ddDriveList">',
-    '        <div class="dd-empty">Your project folder will appear here once your project is active.</div>',
-    '      </div>',
+    '      <div class="dd-drive-list" id="ddDriveList"><div class="dd-empty">Your project folder will appear here once your project is active.</div></div>',
     '    </div>',
 
     '  </div>',
@@ -895,17 +275,11 @@
   }
 
   function serviceLabel(key) {
-    var map = {
-      '2d_concept': '2D Concept',
-      '3d_concept': '3D Concept',
-      '2d_3d_concept': '2D + 3D Concept',
-      'permit_plan': 'Permit Plan',
-      '2d_3d_permit': '2D + 3D + Permit'
-    };
+    var map = { '2d_concept': '2D Concept', '3d_concept': '3D Concept', '2d_3d_concept': '2D + 3D Concept', 'permit_plan': 'Permit Plan', '2d_3d_permit': '2D + 3D + Permit' };
     return map[key] || key || '—';
   }
 
-  // ── CHECK SESSION ─────────────────────────────────────────────────
+  // ── SESSION ───────────────────────────────────────────────────────
   function checkSession() {
     var hash = window.location.hash;
     if (hash && hash.includes('access_token')) {
@@ -914,16 +288,14 @@
       var refresh = params.get('refresh_token');
       if (token) {
         sessionStorage.setItem('dd_token', token);
-        sessionStorage.setItem('dd_refresh', refresh || '');
-        window.location.hash = '';
+        if (refresh) sessionStorage.setItem('dd_refresh', refresh);
+        history.replaceState(null, '', window.location.pathname);
         loadSession(token);
         return;
       }
     }
     var saved = sessionStorage.getItem('dd_token');
-    if (saved) {
-      loadSession(saved);
-    }
+    if (saved) loadSession(saved);
   }
 
   async function loadSession(token) {
@@ -956,9 +328,7 @@
       var projData = await projRes.json();
       if (projData && projData[0]) {
         currentProject = projData[0];
-        if (currentProject.drive_link) {
-          loadDriveLinks(currentProject.drive_link);
-        }
+        if (currentProject.drive_link) loadDriveLinks(currentProject.drive_link);
       }
       loadMessages();
     } catch (e) {
@@ -967,13 +337,9 @@
   }
 
   function loadDriveLinks(driveLink) {
-    var list = document.getElementById('ddDriveList');
-    list.innerHTML = [
+    document.getElementById('ddDriveList').innerHTML = [
       '<div class="dd-drive-item">',
-      '  <div>',
-      '    <div class="dd-drive-item-name">Project Folder</div>',
-      '    <div class="dd-drive-item-sub">Your complete project files and deliverables</div>',
-      '  </div>',
+      '  <div><div class="dd-drive-item-name">Project Folder</div><div class="dd-drive-item-sub">Your complete project files and deliverables</div></div>',
       '  <a href="' + driveLink + '" target="_blank" class="dd-drive-link">Open in Drive</a>',
       '</div>'
     ].join('');
@@ -998,14 +364,15 @@
     }
     list.innerHTML = msgs.map(function(m) {
       var isMe = m.sender === currentUser.email;
-      return [
-        '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '">',
-        '  <div class="dd-message-bubble">' + m.content + '</div>',
-        '  <div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div>',
-        '</div>'
-      ].join('');
+      return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
     }).join('');
     list.scrollTop = list.scrollHeight;
+  }
+
+  function showDashboard() {
+    document.getElementById('ddLoginWrap').style.display = 'none';
+    document.getElementById('ddDashboard').classList.add('visible');
+    if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
   }
 
   // ── LOGIN ─────────────────────────────────────────────────────────
@@ -1019,10 +386,10 @@
       var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink', {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, options: { emailRedirectTo: window.location.href } })
+        body: JSON.stringify({ email: email, options: { emailRedirectTo: PORTAL_URL } })
       });
       if (res.ok) {
-        showMsg(msg, 'Login link sent! Check your inbox and click the link to access your portal.', 'success');
+        showMsg(msg, 'Login link sent! Check your inbox and click the link to sign in to your portal.', 'success');
       } else {
         showMsg(msg, 'Something went wrong. Please try again.', 'error');
       }
@@ -1033,7 +400,6 @@
     this.textContent = 'Send Login Link';
   });
 
-  // Enter key on email input
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') document.getElementById('ddLoginBtn').click();
   });
@@ -1042,20 +408,10 @@
   document.getElementById('ddLogoutBtn').addEventListener('click', function() {
     sessionStorage.removeItem('dd_token');
     sessionStorage.removeItem('dd_refresh');
-    currentUser = null;
-    currentClient = null;
+    currentUser = null; currentClient = null; currentProject = null;
     document.getElementById('ddDashboard').classList.remove('visible');
     document.getElementById('ddLoginWrap').style.display = 'flex';
   });
-
-  // ── SHOW DASHBOARD ────────────────────────────────────────────────
-  function showDashboard() {
-    document.getElementById('ddLoginWrap').style.display = 'none';
-    document.getElementById('ddDashboard').classList.add('visible');
-    if (currentUser) {
-      document.getElementById('ddNavUser').textContent = currentUser.email;
-    }
-  }
 
   // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-portal .dd-tab').forEach(function(tab) {
@@ -1069,15 +425,6 @@
   });
 
   // ── FILE UPLOADS ──────────────────────────────────────────────────
-  var categoryMap = {
-    'survey':     'survey',
-    'photos':     'photos',
-    'videos':     'videos',
-    'inspo':      'inspo',
-    'houseplans': 'houseplans',
-    'siteplans':  'siteplans'
-  };
-
   document.querySelectorAll('#dd-portal .dd-file-input').forEach(function(input) {
     input.addEventListener('change', async function() {
       var files = Array.from(this.files);
@@ -1085,88 +432,53 @@
       var statusEl = document.getElementById('status-' + category);
       if (!files.length) return;
       if (!currentUser) { statusEl.textContent = 'Please log in first.'; return; }
-
       statusEl.textContent = 'Uploading ' + files.length + ' file(s)...';
       statusEl.style.color = 'var(--muted)';
-
       var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
       var uploaded = 0;
-
       for (var i = 0; i < files.length; i++) {
         var file = files[i];
         var path = clientName + '/' + category + '/' + Date.now() + '_' + file.name;
         try {
           var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
             method: 'POST',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + currentUser.access_token,
-              'Content-Type': file.type
-            },
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
             body: file
           });
           if (res.ok) {
             uploaded++;
-            // Save to documents table
             await supabaseFetch('/rest/v1/documents', {
               method: 'POST',
               headers: { 'Prefer': 'return=minimal' },
-              body: JSON.stringify({
-                project_id: currentProject ? currentProject.id : null,
-                file_name: file.name,
-                file_url: path,
-                uploaded_by: currentUser.email
-              })
+              body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email })
             });
           }
-        } catch (e) {
-          console.error('Upload error:', e);
-        }
+        } catch (e) { console.error('Upload error:', e); }
       }
-
-      if (uploaded === files.length) {
-        statusEl.textContent = uploaded + ' file(s) uploaded successfully';
-        statusEl.style.color = 'var(--success)';
-      } else {
-        statusEl.textContent = uploaded + ' of ' + files.length + ' uploaded';
-        statusEl.style.color = 'var(--error)';
-      }
+      statusEl.textContent = uploaded === files.length ? uploaded + ' file(s) uploaded successfully' : uploaded + ' of ' + files.length + ' uploaded';
+      statusEl.style.color = uploaded === files.length ? 'var(--success)' : 'var(--error)';
     });
   });
 
-  // ── SEND MESSAGE ──────────────────────────────────────────────────
+  // ── MESSAGES ──────────────────────────────────────────────────────
   document.getElementById('ddSendBtn').addEventListener('click', async function() {
     var input = document.getElementById('ddMessageInput');
     var content = input.value.trim();
     if (!content || !currentUser) return;
-    if (!currentProject) {
-      alert('Your project is being set up. Please try again shortly.');
-      return;
-    }
+    if (!currentProject) { alert('Your project is being set up. Please try again shortly.'); return; }
     input.value = '';
     try {
       await supabaseFetch('/rest/v1/messages', {
         method: 'POST',
         headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({
-          project_id: currentProject.id,
-          sender: currentUser.email,
-          content: content,
-          is_read: false
-        })
+        body: JSON.stringify({ project_id: currentProject.id, sender: currentUser.email, content: content, is_read: false })
       });
       await loadMessages();
-    } catch (e) {
-      console.error('Message error:', e);
-    }
+    } catch (e) { console.error('Message error:', e); }
   });
 
-  // Enter key to send message
   document.getElementById('ddMessageInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      document.getElementById('ddSendBtn').click();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); }
   });
 
   // ── INIT ──────────────────────────────────────────────────────────
