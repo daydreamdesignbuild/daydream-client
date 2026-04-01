@@ -340,12 +340,39 @@
   var deferredInstallPrompt = null;
 
   // ── PWA INSTALL PROMPT ────────────────────────────────────────────
+  // Android - catches beforeinstallprompt
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredInstallPrompt = e;
-    var banner = document.getElementById('ddInstallBanner');
-    if (banner && currentUser) banner.classList.add('visible');
+    showInstallBanner();
   });
+
+  // iOS Safari - show banner manually since beforeinstallprompt doesn't fire
+  function isIos() {
+    return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  }
+  function isInStandaloneMode() {
+    return window.navigator.standalone === true;
+  }
+  function showInstallBanner() {
+    var banner = document.getElementById('ddInstallBanner');
+    var dismissed = false;
+    try { dismissed = sessionStorage.getItem('dd_install_dismissed'); } catch(e) {}
+    if (banner && !dismissed) banner.classList.add('visible');
+  }
+  function checkIosInstall() {
+    if (isIos() && !isInStandaloneMode()) {
+      var btn = document.getElementById('ddInstallBtn');
+      if (btn) {
+        btn.textContent = 'How to Install';
+        btn.onclick = function() {
+          alert('To install: tap the Share button at the bottom of Safari, then tap "Add to Home Screen"');
+          document.getElementById('ddInstallBanner').classList.remove('visible');
+        };
+      }
+      showInstallBanner();
+    }
+  }
 
   document.getElementById('ddInstallBtn').addEventListener('click', function() {
     if (deferredInstallPrompt) {
@@ -359,6 +386,7 @@
 
   document.getElementById('ddInstallDismiss').addEventListener('click', function() {
     document.getElementById('ddInstallBanner').classList.remove('visible');
+    try { sessionStorage.setItem('dd_install_dismissed', '1'); } catch(e) {}
   });
 
   // ── HELPERS ───────────────────────────────────────────────────────
@@ -368,8 +396,8 @@
     hideLoading();
     document.getElementById('ddLoginWrap').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
-    if (currentUser) document.getElementById('ddNavUser').textContent = currentUser.email;
-    if (deferredInstallPrompt) document.getElementById('ddInstallBanner').classList.add('visible');
+    if (currentUser) { var navName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email; document.getElementById('ddNavUser').textContent = navName; }
+    if (deferredInstallPrompt) showInstallBanner(); else checkIosInstall();
   }
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
