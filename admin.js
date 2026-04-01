@@ -286,7 +286,12 @@
       if (target) target.classList.add('active');
       if (tab.dataset.tab === 'messages') {
         loadMessages();
-        try { sessionStorage.setItem('da_msgs_last_read', Date.now().toString()); } catch(e) {}
+        // Mark all client messages as read
+        apiFetch('/rest/v1/messages?sender=neq.daydream_team&is_read=eq.false', {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ is_read: true })
+        }).catch(function() {});
         var dot = tab.querySelector('.da-msg-dot');
         if (dot) dot.remove();
       }
@@ -316,6 +321,22 @@
       allClients = await res.json();
       updateStats();
       renderCards(allClients);
+      // Silently check for unread messages to show dot
+      checkUnreadMessages();
+    } catch(e) {}
+  }
+
+  async function checkUnreadMessages() {
+    try {
+      var res = await apiFetch('/rest/v1/messages?is_read=eq.false&order=created_at.desc&limit=50');
+      var msgs = await res.json();
+      var unread = (msgs || []).filter(function(m) { return m.sender !== 'daydream_team'; }).length;
+      var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
+      if (msgTab && unread > 0) {
+        var dot = msgTab.querySelector('.da-msg-dot');
+        if (!dot) { dot = document.createElement('span'); dot.className = 'da-msg-dot'; msgTab.appendChild(dot); }
+        dot.textContent = unread;
+      }
     } catch(e) {}
   }
 
