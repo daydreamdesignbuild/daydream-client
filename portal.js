@@ -39,14 +39,13 @@
     'payment_complete': { label: 'Payment Complete ✓',             color: '#6a9e7a' }
   };
 
-  // Checklist items — key maps to upload category or note
   var CHECKLIST_ITEMS = [
-    { key: 'goals',       label: 'Project Goals & Must-Have Features',        desc: 'Tell us the main purpose of the space and any non-negotiable features.',        type: 'note',   noteKey: 'goals' },
-    { key: 'inspo',       label: 'Inspiration Photos or Boards',              desc: 'Upload your Pinterest boards, AI images, Google saves or any reference images. Upload in the Documents tab.',   type: 'upload', category: 'inspo' },
-    { key: 'photos',      label: 'Detailed Site Photos & Walkthrough Video',  desc: 'Show the entire project area with straight-on shots of the house. Upload in the Documents tab.',             type: 'upload', category: 'photos' },
-    { key: 'survey',      label: 'Property Survey / Site Plat',               desc: 'Crucial for accuracy. Should show topography, property lines and trees. Upload in the Documents tab.',        type: 'upload', category: 'survey' },
-    { key: 'bylaws',      label: 'HOA Bylaws & Neighborhood Covenants',       desc: 'All construction rules and regulations. You can upload these under House Plans or Survey in the Documents tab.', type: 'upload', category: 'houseplans' },
-    { key: 'houseplans',  label: 'Existing House Architectural Plans',        desc: 'If available. Upload in the Documents tab under House Plans.',                  type: 'upload', category: 'houseplans' }
+    { key: 'goals',       label: 'Project Goals & Must-Have Features',        desc: 'Tell us the main purpose of the space and any non-negotiable features.', type: 'note', noteKey: 'goals' },
+    { key: 'inspo',       label: 'Inspiration Photos or Boards',              desc: 'Upload your Pinterest boards, AI images, Google saves or any reference images. Upload in the Documents tab.', type: 'upload', category: 'inspo' },
+    { key: 'photos',      label: 'Detailed Site Photos & Walkthrough Video',  desc: 'Show the entire project area with straight-on shots of the house. Upload in the Documents tab.', type: 'upload', category: 'photos' },
+    { key: 'survey',      label: 'Property Survey / Site Plat',               desc: 'Crucial for accuracy. Should show topography, property lines and trees. Upload in the Documents tab.', type: 'upload', category: 'survey' },
+    { key: 'bylaws',      label: 'HOA Bylaws & Neighborhood Covenants',       desc: 'All construction rules and regulations. Upload under House Plans or Survey in the Documents tab.', type: 'upload', category: 'houseplans' },
+    { key: 'houseplans',  label: 'Existing House Architectural Plans',        desc: 'If available. Upload in the Documents tab under House Plans.', type: 'upload', category: 'houseplans' }
   ];
 
   function getStageIndex(value) {
@@ -54,7 +53,7 @@
     return idx === -1 ? 0 : idx;
   }
 
-  // ── FONTS
+  // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
   font.rel = 'stylesheet';
   font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap';
@@ -66,6 +65,8 @@
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
     '#dd-portal { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
     '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
+
+    // Login
     '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
     '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
@@ -90,20 +91,43 @@
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
 
+    // Project Selector (contractor view)
+    '#dd-portal .dd-project-selector { display: none; min-height: 100vh; flex-direction: column; }',
+    '#dd-portal .dd-project-selector.visible { display: flex; }',
+    '#dd-portal .dd-selector-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; }',
+    '#dd-portal .dd-selector-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
+    '#dd-portal .dd-selector-content { flex: 1; padding: 48px 32px; max-width: 800px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-selector-title { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
+    '#dd-portal .dd-selector-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 40px; }',
+    '#dd-portal .dd-project-cards { display: flex; flex-direction: column; gap: 12px; }',
+    '#dd-portal .dd-project-card { background: var(--surface); border: 1px solid var(--border); padding: 24px 28px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 20px; }',
+    '#dd-portal .dd-project-card:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-project-card-info { flex: 1; }',
+    '#dd-portal .dd-project-card-name { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; color: var(--gold); margin-bottom: 4px; }',
+    '#dd-portal .dd-project-card-address { font-size: 11px; color: var(--muted); margin-bottom: 8px; }',
+    '#dd-portal .dd-project-card-meta { display: flex; gap: 16px; flex-wrap: wrap; }',
+    '#dd-portal .dd-project-card-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; }',
+    '#dd-portal .dd-project-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; }',
+    '#dd-portal .dd-project-card:hover .dd-project-card-arrow { opacity: 1; }',
+
+    // Dashboard
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
-    '#dd-portal .dd-nav-right { display: flex; align-items: center; gap: 24px; }',
+    '#dd-portal .dd-nav-right { display: flex; align-items: center; gap: 16px; }',
     '#dd-portal .dd-nav-user { font-size: 11px; color: var(--muted); }',
+    '#dd-portal .dd-nav-back { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); cursor: pointer; background: none; border: 1px solid var(--gold); padding: 6px 14px; transition: background 0.2s, color 0.2s; display: none; }',
+    '#dd-portal .dd-nav-back:hover { background: var(--gold); color: var(--bg); }',
+    '#dd-portal .dd-nav-back.visible { display: block; }',
     '#dd-portal .dd-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
     '#dd-portal .dd-nav-logout:hover { color: var(--gold); }',
     '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; }',
     '#dd-portal .dd-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; }',
     '#dd-portal .dd-tab:hover { color: var(--text); }',
     '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
-    '#dd-portal .dd-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
     '#dd-portal .dd-tab-badge { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
+    '#dd-portal .dd-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
     '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
     '#dd-portal .dd-section-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 32px; }',
@@ -137,8 +161,6 @@
     '#dd-portal .dd-timeline-label { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }',
     '#dd-portal .dd-timeline-label.muted { color: var(--muted); }',
     '#dd-portal .dd-timeline-badge { margin-left: auto; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--gold); color: var(--gold); }',
-
-    // Checklist
     '#dd-portal .dd-checklist { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
     '#dd-portal .dd-checklist-header { padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; }',
     '#dd-portal .dd-checklist-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); }',
@@ -150,7 +172,7 @@
     '#dd-portal .dd-checklist-row:hover { background: var(--gold-dim); }',
     '#dd-portal .dd-check-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.2s; }',
     '#dd-portal .dd-check-circle.done { border-color: var(--success); background: var(--success); }',
-    '#dd-portal .dd-check-circle.done::after { content: "✓"; font-size: 11px; color: var(--bg); font-weight: 600; }',
+    '#dd-portal .dd-check-circle.done::after { content: "✓"; font-size: 11px; color: white; font-weight: 600; }',
     '#dd-portal .dd-check-info { flex: 1; }',
     '#dd-portal .dd-check-label { font-size: 13px; color: var(--text); margin-bottom: 3px; font-weight: 400; }',
     '#dd-portal .dd-check-label.done { text-decoration: line-through; color: var(--muted); }',
@@ -165,8 +187,7 @@
     '#dd-portal .dd-note-save:hover { opacity: 0.85; }',
     '#dd-portal .dd-checklist-complete { text-align: center; padding: 24px; background: var(--gold-dim); border-top: 1px solid var(--gold); display: none; }',
     '#dd-portal .dd-checklist-complete.visible { display: block; }',
-    '#dd-portal .dd-checklist-complete p { font-size: 13px; color: var(--gold); letter-spacing: 0.05em; }',
-
+    '#dd-portal .dd-checklist-complete p { font-size: 13px; color: var(--gold); }',
     '#dd-portal .dd-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }',
     '#dd-portal .dd-upload-card { border: 1px solid var(--border); background: var(--surface); overflow: hidden; }',
     '#dd-portal .dd-upload-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
@@ -215,8 +236,8 @@
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
     '  #dd-portal .dd-status-grid { grid-template-columns: 1fr; }',
-    '  #dd-portal .dd-checklist-row { padding: 14px 16px; }',
-    '  #dd-portal .dd-note-area { padding: 0 16px 16px; }',
+    '  #dd-portal .dd-selector-content { padding: 24px 16px; }',
+    '  #dd-portal .dd-project-card { flex-direction: column; align-items: flex-start; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
@@ -227,6 +248,8 @@
 
   wrap.innerHTML = [
     '<div id="ddLoading" class="dd-loading">Loading your portal...</div>',
+
+    // LOGIN
     '<div id="ddLoginWrap" class="dd-login-wrap">',
     '  <div class="dd-login-card">',
     '    <div class="dd-login-header"><div class="dd-login-logo">Daydream</div><div class="dd-login-sub">Design + Build &mdash; Atlanta, Georgia</div></div>',
@@ -239,9 +262,30 @@
     '    </div>',
     '  </div>',
     '</div>',
-    '<div id="ddDashboard" class="dd-dashboard">',
 
-    '  <nav class="dd-nav"><div class="dd-nav-logo">Daydream</div><div class="dd-nav-right"><span class="dd-nav-user" id="ddNavUser"></span><button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button></div></nav>',
+    // PROJECT SELECTOR (contractor view)
+    '<div id="ddProjectSelector" class="dd-project-selector">',
+    '  <nav class="dd-selector-nav">',
+    '    <div class="dd-selector-logo">Daydream</div>',
+    '    <button class="dd-nav-logout" id="ddSelectorLogout">Sign Out</button>',
+    '  </nav>',
+    '  <div class="dd-selector-content">',
+    '    <div class="dd-selector-title" id="ddSelectorTitle">Your Projects</div>',
+    '    <div class="dd-selector-sub" id="ddSelectorSub">Select a project to view its portal</div>',
+    '    <div class="dd-project-cards" id="ddProjectCards"></div>',
+    '  </div>',
+    '</div>',
+
+    // DASHBOARD
+    '<div id="ddDashboard" class="dd-dashboard">',
+    '  <nav class="dd-nav">',
+    '    <div class="dd-nav-logo">Daydream</div>',
+    '    <div class="dd-nav-right">',
+    '      <span class="dd-nav-user" id="ddNavUser"></span>',
+    '      <button class="dd-nav-back" id="ddNavBack">&#8592; All Projects</button>',
+    '      <button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button>',
+    '    </div>',
+    '  </nav>',
     '  <div class="dd-tabs">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
@@ -254,8 +298,8 @@
 
     // OVERVIEW
     '    <div class="dd-tab-content active" id="tab-overview">',
-    '      <div class="dd-section-title">Your Project</div>',
-    '      <div class="dd-section-sub">Welcome to your Daydream client portal</div>',
+    '      <div class="dd-section-title" id="ddProjectTitle">Your Project</div>',
+    '      <div class="dd-section-sub" id="ddProjectAddress">Welcome to your Daydream client portal</div>',
     '      <div class="dd-welcome-card"><div class="dd-welcome-text"><h3>Book Your Discovery Call</h3><p>Schedule a consultation with our design team to discuss your vision, timeline and investment in detail.</p></div><a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a></div>',
     '      <div class="dd-cards">',
     '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
@@ -266,13 +310,17 @@
     '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div></div>',
     '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div></div>',
     '      </div>',
+    '      <div class="dd-services-card" id="ddServicesCard" style="display:none;border:1px solid var(--border);background:var(--surface);margin-bottom:32px">',
+    '        <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Your Project Services</div>',
+    '        <div id="ddServicesList"></div>',
+    '      </div>',
     '      <div class="dd-timeline"><div class="dd-timeline-header">Project Timeline</div><div id="ddTimeline"></div></div>',
     '    </div>',
 
     // CHECKLIST
     '    <div class="dd-tab-content" id="tab-checklist">',
     '      <div class="dd-section-title">Getting Started</div>',
-    '      <div class="dd-section-sub">Complete these items to help us get started on your project. The more detail you provide the better we can serve you.</div>',
+    '      <div class="dd-section-sub">Complete these items to help us get started on your project.</div>',
     '      <div class="dd-checklist" id="ddChecklist">',
     '        <div class="dd-checklist-header"><div class="dd-checklist-title">Onboarding Checklist</div><div class="dd-checklist-progress"><span id="ddCheckCount">0</span> of ' + CHECKLIST_ITEMS.length + ' complete</div></div>',
     '        <div id="ddChecklistItems"></div>',
@@ -283,13 +331,13 @@
     // UPLOADS
     '    <div class="dd-tab-content" id="tab-uploads">',
     '      <div class="dd-section-title">Document Uploads</div>',
-    '      <div class="dd-section-sub">Upload your project documents below. Files are automatically organised into your project folder. You can upload HOA Bylaws under House Plans or Survey.</div>',
+    '      <div class="dd-section-sub">Upload your project documents below. You can upload HOA Bylaws under House Plans or Survey.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Straight-on shots of the house and full project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage of the project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, Google saves, reference photos</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans & HOA Bylaws</div><div class="dd-upload-card-desc">Architectural plans, drawings, HOA rules and covenants</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Straight-on shots of the house and project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, reference photos</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans & HOA Bylaws</div><div class="dd-upload-card-desc">Architectural plans, drawings, HOA rules</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Plans</div><div class="dd-upload-card-desc">Existing site plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-siteplans"></div></div></div>',
     '      </div>',
     '    </div>',
@@ -328,24 +376,41 @@
 
   // ── STATE ─────────────────────────────────────────────────────────
   var currentUser = null;
-  var currentClient = null;
-  var currentProject = null;
+  var currentClient = null;      // The client record we're viewing
+  var allClientProjects = [];    // All projects for a contractor
+  var currentProject = null;     // The DB project record
+  var isContractor = false;
   var checklistState = {};
   var notesState = {};
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
   function showLogin() { hideLoading(); document.getElementById('ddLoginWrap').classList.add('visible'); }
+
+  function showProjectSelector() {
+    hideLoading();
+    document.getElementById('ddLoginWrap').classList.remove('visible');
+    document.getElementById('ddDashboard').classList.remove('visible');
+    document.getElementById('ddProjectSelector').classList.add('visible');
+  }
+
   function showDashboard() {
     hideLoading();
     document.getElementById('ddLoginWrap').classList.remove('visible');
+    document.getElementById('ddProjectSelector').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
-    if (currentUser) {
-      var name = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
-      document.getElementById('ddNavUser').textContent = name;
+    // Show back button for contractors
+    var backBtn = document.getElementById('ddNavBack');
+    if (isContractor && backBtn) backBtn.classList.add('visible');
+    // Show client/project name
+    var navUser = document.getElementById('ddNavUser');
+    if (navUser) {
+      if (isContractor && currentClient) navUser.textContent = currentClient.full_name || currentUser.email;
+      else if (currentClient) navUser.textContent = currentClient.full_name || currentUser.email;
+      else navUser.textContent = currentUser.email;
     }
-
   }
+
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
   function serviceLabel(key) {
@@ -361,7 +426,7 @@
     return fetch(SUPABASE_URL + path, opts);
   }
 
-  // ── RENDER TIMELINE ───────────────────────────────────────────────
+  // ── RENDER FUNCTIONS ──────────────────────────────────────────────
   function renderTimeline(clientStage) {
     var currentIdx = getStageIndex(clientStage || 'inquiry_submitted');
     document.getElementById('ddTimeline').innerHTML = TIMELINE.map(function(stage, idx) {
@@ -395,156 +460,6 @@
     }).join('') + '</div>';
   }
 
-  // ── CHECKLIST ─────────────────────────────────────────────────────
-  function renderChecklist() {
-    var container = document.getElementById('ddChecklistItems');
-    var doneCount = 0;
-
-    container.innerHTML = CHECKLIST_ITEMS.map(function(item) {
-      var isDone = checklistState[item.key] === true;
-      if (isDone) doneCount++;
-      var noteContent = notesState[item.key] || '';
-      var noteArea = item.type === 'note'
-        ? '<div class="dd-note-area" id="note-area-' + item.key + '">'
-          + '<textarea class="dd-note-textarea" id="note-' + item.key + '" placeholder="Share your project goals, must-have features, style preferences, budget considerations..." rows="5">' + noteContent + '</textarea>'
-          + '<button class="dd-note-save" onclick="window._saveNote(\'' + item.key + '\')">Save</button>'
-          + '</div>'
-        : '';
-
-      return '<div class="dd-checklist-item">'
-        + '<div class="dd-checklist-row" onclick="window._toggleCheckItem(\'' + item.key + '\')">'
-        + '  <div class="dd-check-circle' + (isDone ? ' done' : '') + '" id="check-circle-' + item.key + '"></div>'
-        + '  <div class="dd-check-info">'
-        + '    <div class="dd-check-label' + (isDone ? ' done' : '') + '" id="check-label-' + item.key + '">' + item.label + '</div>'
-        + '    <div class="dd-check-desc">' + item.desc + '</div>'
-        + (item.type === 'upload' ? '<div class="dd-check-tag">Upload in Documents tab</div>' : '<div class="dd-check-tag">Fill in below</div>')
-        + '  </div>'
-        + '</div>'
-        + noteArea
-        + '</div>';
-    }).join('');
-
-    document.getElementById('ddCheckCount').textContent = doneCount;
-
-    // Show complete banner if all done
-    var completeBanner = document.getElementById('ddChecklistComplete');
-    if (doneCount === CHECKLIST_ITEMS.length) completeBanner.classList.add('visible');
-    else completeBanner.classList.remove('visible');
-
-    // Show note areas for note-type items that are not done
-    CHECKLIST_ITEMS.forEach(function(item) {
-      if (item.type === 'note') {
-        var area = document.getElementById('note-area-' + item.key);
-        if (area) area.classList.add('visible');
-      }
-    });
-
-    // Update checklist tab badge
-    var remaining = CHECKLIST_ITEMS.length - doneCount;
-    var tab = document.querySelector('[data-tab="checklist"]');
-    if (tab) {
-      var badge = tab.querySelector('.dd-tab-badge');
-      if (remaining > 0) {
-        if (!badge) { badge = document.createElement('span'); badge.className = 'dd-tab-badge'; tab.appendChild(badge); }
-        badge.textContent = remaining;
-      } else if (badge) {
-        badge.remove();
-      }
-    }
-  }
-
-  window._toggleCheckItem = async function(key) {
-    var item = CHECKLIST_ITEMS.find(function(i) { return i.key === key; });
-    if (!item || !currentClient) return;
-
-    // For note items — toggle note area open/close instead
-    if (item.type === 'note') {
-      var area = document.getElementById('note-area-' + key);
-      if (area) { area.classList.toggle('visible'); return; }
-    }
-
-    var newState = !checklistState[key];
-    checklistState[key] = newState;
-
-    // Update UI immediately
-    var circle = document.getElementById('check-circle-' + key);
-    var label = document.getElementById('check-label-' + key);
-    if (circle) { circle.classList.toggle('done', newState); }
-    if (label) { label.classList.toggle('done', newState); }
-
-    // Save to Supabase
-    try {
-      var existing = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
-      var data = await existing.json();
-      if (data && data.length > 0) {
-        await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, {
-          method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ completed: newState, completed_at: newState ? new Date().toISOString() : null })
-        });
-      } else {
-        await apiFetch('/rest/v1/checklist_items', {
-          method: 'POST', headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: newState, completed_at: newState ? new Date().toISOString() : null })
-        });
-      }
-    } catch(e) {}
-
-    // Re-render to update count and badge
-    renderChecklist();
-  };
-
-  window._saveNote = async function(key) {
-    if (!currentClient) return;
-    var textarea = document.getElementById('note-' + key);
-    var content = textarea ? textarea.value.trim() : '';
-    notesState[key] = content;
-
-    // Mark checklist item as done if note has content
-    if (content && !checklistState[key]) {
-      checklistState[key] = true;
-    }
-
-    try {
-      var existing = await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key);
-      var data = await existing.json();
-      if (data && data.length > 0) {
-        await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key, {
-          method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ content: content, updated_at: new Date().toISOString() })
-        });
-      } else {
-        await apiFetch('/rest/v1/client_notes', {
-          method: 'POST', headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ client_id: currentClient.id, note_key: key, content: content })
-        });
-      }
-      // Also save checklist state
-      var existing2 = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
-      var data2 = await existing2.json();
-      if (data2 && data2.length > 0) {
-        await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, {
-          method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ completed: !!content, completed_at: content ? new Date().toISOString() : null })
-        });
-      } else {
-        await apiFetch('/rest/v1/checklist_items', {
-          method: 'POST', headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: !!content, completed_at: content ? new Date().toISOString() : null })
-        });
-      }
-      var btn = document.querySelector('[onclick="_saveNote(\'' + key + '\')"]') || document.querySelector('[onclick*="saveNote"][onclick*="' + key + '"]');
-      var saveBtn = document.querySelector('#note-area-' + key + ' .dd-note-save');
-      if (saveBtn) { saveBtn.textContent = 'Saved!'; saveBtn.style.background = 'var(--success)'; setTimeout(function() { saveBtn.textContent = 'Save'; saveBtn.style.background = 'var(--gold)'; }, 2000); }
-      renderChecklist();
-      // Restore note textarea value after re-render
-      var ta = document.getElementById('note-' + key);
-      if (ta) ta.value = content;
-      var area = document.getElementById('note-area-' + key);
-      if (area) area.classList.add('visible');
-    } catch(e) {}
-  };
-
-  // ── RENDER SERVICES ──────────────────────────────────────────────
   function renderServices(services) {
     var card = document.getElementById('ddServicesCard');
     var list = document.getElementById('ddServicesList');
@@ -555,12 +470,187 @@
     var STATUS_LABELS = { 'pending': 'Pending', 'in_progress': 'In Progress', 'complete': 'Complete' };
     list.innerHTML = services.map(function(s) {
       var color = STATUS_COLORS[s.status] || '#8a8680';
-      var label = STATUS_LABELS[s.status] || s.status;
-      return '<div class="dd-service-row">'
-        + '<div class="dd-service-row-name">' + s.service_name + '</div>'
-        + '<div class="dd-service-status-pill" style="color:' + color + ';border-color:' + color + ';background:' + color + '18">' + label + '</div>'
-        + '</div>';
+      return '<div class="dd-service-row"><div class="dd-service-row-name">' + s.service_name + '</div><div class="dd-service-status-pill" style="color:' + color + ';border-color:' + color + ';background:' + color + '18">' + (STATUS_LABELS[s.status] || s.status) + '</div></div>';
     }).join('');
+  }
+
+  function renderChecklist() {
+    var container = document.getElementById('ddChecklistItems');
+    var doneCount = 0;
+    container.innerHTML = CHECKLIST_ITEMS.map(function(item) {
+      var isDone = checklistState[item.key] === true;
+      if (isDone) doneCount++;
+      var noteContent = notesState[item.key] || '';
+      var noteArea = item.type === 'note'
+        ? '<div class="dd-note-area" id="note-area-' + item.key + '"><textarea class="dd-note-textarea" id="note-' + item.key + '" placeholder="Share your project goals, must-have features, style preferences...">' + noteContent + '</textarea><button class="dd-note-save" onclick="window._saveNote(\'' + item.key + '\')">Save</button></div>'
+        : '';
+      return '<div class="dd-checklist-item"><div class="dd-checklist-row" onclick="window._toggleCheckItem(\'' + item.key + '\')"><div class="dd-check-circle' + (isDone ? ' done' : '') + '" id="check-circle-' + item.key + '"></div><div class="dd-check-info"><div class="dd-check-label' + (isDone ? ' done' : '') + '" id="check-label-' + item.key + '">' + item.label + '</div><div class="dd-check-desc">' + item.desc + '</div>' + (item.type === 'upload' ? '<div class="dd-check-tag">Upload in Documents tab</div>' : '<div class="dd-check-tag">Fill in below</div>') + '</div></div>' + noteArea + '</div>';
+    }).join('');
+    document.getElementById('ddCheckCount').textContent = doneCount;
+    var completeBanner = document.getElementById('ddChecklistComplete');
+    if (doneCount === CHECKLIST_ITEMS.length) completeBanner.classList.add('visible');
+    else completeBanner.classList.remove('visible');
+    CHECKLIST_ITEMS.forEach(function(item) {
+      if (item.type === 'note') { var area = document.getElementById('note-area-' + item.key); if (area) area.classList.add('visible'); }
+    });
+    // Update checklist tab badge
+    var remaining = CHECKLIST_ITEMS.length - doneCount;
+    var tab = document.querySelector('[data-tab="checklist"]');
+    if (tab) {
+      var badge = tab.querySelector('.dd-tab-badge');
+      if (remaining > 0) { if (!badge) { badge = document.createElement('span'); badge.className = 'dd-tab-badge'; tab.appendChild(badge); } badge.textContent = remaining; }
+      else if (badge) badge.remove();
+    }
+  }
+
+  // ── PROJECT SELECTOR ──────────────────────────────────────────────
+  async function loadContractorProjects() {
+    try {
+      // Get all clients with this email (contractor has multiple client records — one per project)
+      var res = await apiFetch('/rest/v1/clients?email=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
+      var clients = await res.json();
+      allClientProjects = clients || [];
+
+      if (!allClientProjects.length) {
+        // No projects yet — show empty state
+        document.getElementById('ddProjectCards').innerHTML = '<div class="dd-empty" style="padding:40px 0">No active projects yet. Your Daydream team will set these up for you.</div>';
+        showProjectSelector();
+        return;
+      }
+
+      if (allClientProjects.length === 1 && !isContractor) {
+        // Single project — go straight to dashboard
+        await loadProjectDashboard(allClientProjects[0]);
+        return;
+      }
+
+      // Multiple projects — show selector
+      var name = allClientProjects[0].full_name || currentUser.email;
+      var company = allClientProjects[0].company_name;
+      document.getElementById('ddSelectorTitle').textContent = company ? company : name + '\'s Projects';
+      document.getElementById('ddSelectorSub').textContent = 'Select a project to view its full portal';
+
+      document.getElementById('ddProjectCards').innerHTML = allClientProjects.map(function(c) {
+        var address = [c.street, c.city, c.state].filter(Boolean).join(', ') || 'Address not set';
+        var service = serviceLabel(c.project_type);
+        var stageLabel = c.client_stage ? c.client_stage.replace(/_/g, ' ') : 'New Inquiry';
+        return '<div class="dd-project-card" onclick="window._selectProject(\'' + c.id + '\')">'
+          + '<div class="dd-project-card-info">'
+          + '  <div class="dd-project-card-name">' + (c.full_name || 'Project') + '</div>'
+          + '  <div class="dd-project-card-address">&#128205; ' + address + '</div>'
+          + '  <div class="dd-project-card-meta">'
+          + '    <div class="dd-project-card-tag">' + service + '</div>'
+          + '    <div class="dd-project-card-tag">' + stageLabel + '</div>'
+          + (c.investment ? '<div class="dd-project-card-tag">' + c.investment + '</div>' : '')
+          + '  </div>'
+          + '</div>'
+          + '<div class="dd-project-card-arrow">&#8594;</div>'
+          + '</div>';
+      }).join('');
+
+      showProjectSelector();
+    } catch(e) { console.error('Load projects error:', e); showLogin(); }
+  }
+
+  window._selectProject = async function(clientId) {
+    var client = allClientProjects.find(function(c) { return c.id === clientId; });
+    if (!client) return;
+    await loadProjectDashboard(client);
+  };
+
+  document.getElementById('ddNavBack').addEventListener('click', function() {
+    // Reset dashboard tabs
+    document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
+    document.querySelector('[data-tab="overview"]').classList.add('active');
+    document.getElementById('tab-overview').classList.add('active');
+    document.getElementById('ddDashboard').classList.remove('visible');
+    showProjectSelector();
+  });
+
+  // ── LOAD PROJECT DASHBOARD ────────────────────────────────────────
+  async function loadProjectDashboard(client) {
+    currentClient = client;
+    try {
+      // Update overview
+      var title = document.getElementById('ddProjectTitle');
+      var addrEl = document.getElementById('ddProjectAddress');
+      if (title) title.textContent = client.full_name || 'Your Project';
+      if (addrEl) {
+        var addr = [client.street, client.city, client.state].filter(Boolean).join(', ');
+        addrEl.textContent = addr || 'Welcome to your Daydream client portal';
+      }
+      document.getElementById('ddStatus').textContent = client.status || 'New Inquiry';
+      document.getElementById('ddService').textContent = serviceLabel(client.project_type);
+      document.getElementById('ddSince').textContent = formatDate(client.created_at);
+      renderTimeline(client.client_stage || 'inquiry_submitted');
+      renderStatusBadges(client);
+      renderDriveLinks(client);
+
+      // Load services
+      try {
+        var svcRes = await apiFetch('/rest/v1/client_services?client_id=eq.' + client.id + '&order=created_at.asc');
+        var svcs = await svcRes.json();
+        renderServices(svcs || []);
+      } catch(e) {}
+
+      // Load checklist
+      await loadChecklistData();
+
+      // Load project
+      var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + client.id + '&limit=1');
+      var projData = await projRes.json();
+      if (projData && projData[0]) currentProject = projData[0];
+
+      // Load messages
+      loadMessages();
+
+      showDashboard();
+    } catch(e) { console.error('Project load error:', e); }
+  }
+
+  async function loadChecklistData() {
+    if (!currentClient) return;
+    try {
+      var [checkRes, noteRes] = await Promise.all([
+        apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id),
+        apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id)
+      ]);
+      var checks = await checkRes.json();
+      var notes = await noteRes.json();
+      checklistState = {};
+      notesState = {};
+      if (checks) checks.forEach(function(c) { checklistState[c.item_key] = c.completed; });
+      if (notes) notes.forEach(function(n) { notesState[n.note_key] = n.content; });
+      renderChecklist();
+    } catch(e) { renderChecklist(); }
+  }
+
+  async function loadMessages() {
+    try {
+      var url = currentClient
+        ? '/rest/v1/messages?client_id=eq.' + currentClient.id + '&order=created_at.asc'
+        : '/rest/v1/messages?sender=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.asc';
+      var res = await apiFetch(url);
+      var msgs = await res.json();
+      var list = document.getElementById('ddMessagesList');
+      if (!msgs || !msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>'; return; }
+      list.innerHTML = msgs.map(function(m) {
+        var isMe = m.sender !== 'daydream_team';
+        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
+      }).join('');
+      list.scrollTop = list.scrollHeight;
+      // Notification dot
+      var lastRead = 0;
+      try { lastRead = parseInt(sessionStorage.getItem('dd_msgs_last_read') || '0'); } catch(e) {}
+      var unread = msgs.filter(function(m) { return m.sender === 'daydream_team' && new Date(m.created_at).getTime() > lastRead; }).length;
+      var tab = document.querySelector('[data-tab="messages"]');
+      if (tab) {
+        var dot = tab.querySelector('.dd-msg-dot');
+        if (unread > 0) { if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; tab.appendChild(dot); } dot.textContent = unread; }
+        else if (dot) dot.remove();
+      }
+    } catch(e) {}
   }
 
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
@@ -615,99 +705,27 @@
     return false;
   }
 
-  // ── LOAD DATA ─────────────────────────────────────────────────────
-  async function loadClientData() {
-    try {
-      var res = await apiFetch('/rest/v1/clients?email=eq.' + encodeURIComponent(currentUser.email) + '&limit=1');
-      var data = await res.json();
-      if (data && data[0]) {
-        currentClient = data[0];
-        document.getElementById('ddStatus').textContent = currentClient.status || 'New Inquiry';
-        document.getElementById('ddService').textContent = serviceLabel(currentClient.project_type);
-        document.getElementById('ddSince').textContent = formatDate(currentClient.created_at);
-        renderTimeline(currentClient.client_stage || 'inquiry_submitted');
-        renderStatusBadges(currentClient);
-        renderDriveLinks(currentClient);
-        await loadChecklistData();
-      } else {
-        renderTimeline('inquiry_submitted');
-        renderStatusBadges(null);
-        renderDriveLinks(null);
-        renderChecklist();
-      }
-      // Load client services
-      if (currentClient) {
-        try {
-          var svcRes = await apiFetch('/rest/v1/client_services?client_id=eq.' + currentClient.id + '&order=created_at.asc');
-          var svcs = await svcRes.json();
-          renderServices(svcs || []);
-        } catch(e) {}
-      }
-
-      var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + (currentClient ? currentClient.id : 'none') + '&limit=1');
-      var projData = await projRes.json();
-      if (projData && projData[0]) currentProject = projData[0];
-      loadMessages();
-    } catch(e) { console.error('Load error:', e); }
-  }
-
-  async function loadChecklistData() {
-    if (!currentClient) return;
-    try {
-      var [checkRes, noteRes] = await Promise.all([
-        apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id),
-        apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id)
-      ]);
-      var checks = await checkRes.json();
-      var notes = await noteRes.json();
-      checklistState = {};
-      notesState = {};
-      if (checks) checks.forEach(function(c) { checklistState[c.item_key] = c.completed; });
-      if (notes) notes.forEach(function(n) { notesState[n.note_key] = n.content; });
-      renderChecklist();
-    } catch(e) { renderChecklist(); }
-  }
-
-  async function loadMessages() {
-    try {
-      var url = currentClient
-        ? '/rest/v1/messages?client_id=eq.' + currentClient.id + '&order=created_at.asc'
-        : '/rest/v1/messages?sender=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.asc';
-      var res = await apiFetch(url);
-      var msgs = await res.json();
-      var list = document.getElementById('ddMessagesList');
-      if (!msgs || !msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>'; return; }
-      list.innerHTML = msgs.map(function(m) {
-        var isMe = m.sender !== 'daydream_team';
-        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
-      }).join('');
-      list.scrollTop = list.scrollHeight;
-
-      // Show notification dot for unread team messages
-      var lastRead = 0;
-      try { lastRead = parseInt(sessionStorage.getItem('dd_msgs_last_read') || '0'); } catch(e) {}
-      var unread = msgs.filter(function(m) {
-        return m.sender === 'daydream_team' && new Date(m.created_at).getTime() > lastRead;
-      }).length;
-      var tab = document.querySelector('[data-tab="messages"]');
-      if (tab) {
-        var dot = tab.querySelector('.dd-msg-dot');
-        if (unread > 0) {
-          if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; tab.appendChild(dot); }
-          dot.textContent = unread;
-        } else if (dot) { dot.remove(); }
-      }
-    } catch(e) {}
-  }
-
   // ── INIT ──────────────────────────────────────────────────────────
   async function init() {
     var fromUrl = await tryTokenFromUrl();
-    if (fromUrl) { await loadClientData(); showDashboard(); return; }
-    var fromSession = await tryTokenFromSession();
-    if (fromSession) { await loadClientData(); showDashboard(); return; }
-    showLogin();
+    if (!fromUrl) { var fromSession = await tryTokenFromSession(); if (!fromSession) { showLogin(); return; } }
+
+    // Check if contractor (multiple projects) or regular client
+    var res = await apiFetch('/rest/v1/clients?email=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
+    var clients = await res.json();
+    allClientProjects = clients || [];
+
+    if (!allClientProjects.length) { showLogin(); return; }
+
+    isContractor = allClientProjects.length > 1 || (allClientProjects[0] && allClientProjects[0].is_contractor);
+
+    if (isContractor || allClientProjects.length > 1) {
+      await loadContractorProjects();
+    } else {
+      await loadProjectDashboard(allClientProjects[0]);
+    }
   }
+
   init();
 
   // ── LOGIN ─────────────────────────────────────────────────────────
@@ -728,12 +746,15 @@
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
 
   // ── LOGOUT ────────────────────────────────────────────────────────
-  document.getElementById('ddLogoutBtn').addEventListener('click', function() {
+  function doLogout() {
     try { sessionStorage.removeItem('dd_token'); } catch(e) {}
-    currentUser = null; currentClient = null; currentProject = null;
+    currentUser = null; currentClient = null; currentProject = null; isContractor = false;
     document.getElementById('ddDashboard').classList.remove('visible');
+    document.getElementById('ddProjectSelector').classList.remove('visible');
     showLogin();
-  });
+  }
+  document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
+  document.getElementById('ddSelectorLogout').addEventListener('click', doLogout);
 
   // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-portal .dd-tab').forEach(function(tab) {
@@ -743,7 +764,6 @@
       tab.classList.add('active');
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
-      // Mark messages as read when client opens the messages tab
       if (tab.dataset.tab === 'messages') {
         try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
         var dot = tab.querySelector('.dd-msg-dot');
@@ -751,6 +771,53 @@
       }
     });
   });
+
+  // ── CHECKLIST ─────────────────────────────────────────────────────
+  window._toggleCheckItem = async function(key) {
+    var item = CHECKLIST_ITEMS.find(function(i) { return i.key === key; });
+    if (!item || !currentClient) return;
+    if (item.type === 'note') { var area = document.getElementById('note-area-' + key); if (area) { area.classList.toggle('visible'); return; } }
+    var newState = !checklistState[key];
+    checklistState[key] = newState;
+    var circle = document.getElementById('check-circle-' + key);
+    var label = document.getElementById('check-label-' + key);
+    if (circle) circle.classList.toggle('done', newState);
+    if (label) label.classList.toggle('done', newState);
+    try {
+      var existing = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
+      var data = await existing.json();
+      if (data && data.length > 0) {
+        await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
+      } else {
+        await apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
+      }
+    } catch(e) {}
+    renderChecklist();
+  };
+
+  window._saveNote = async function(key) {
+    if (!currentClient) return;
+    var textarea = document.getElementById('note-' + key);
+    var content = textarea ? textarea.value.trim() : '';
+    notesState[key] = content;
+    if (content && !checklistState[key]) checklistState[key] = true;
+    try {
+      var existing = await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key);
+      var data = await existing.json();
+      if (data && data.length > 0) {
+        await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ content: content, updated_at: new Date().toISOString() }) });
+      } else {
+        await apiFetch('/rest/v1/client_notes', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, note_key: key, content: content }) });
+      }
+      var saveBtn = document.querySelector('#note-area-' + key + ' .dd-note-save');
+      if (saveBtn) { saveBtn.textContent = 'Saved!'; saveBtn.style.background = 'var(--success)'; setTimeout(function() { saveBtn.textContent = 'Save'; saveBtn.style.background = 'var(--gold)'; }, 2000); }
+      renderChecklist();
+      var ta = document.getElementById('note-' + key);
+      if (ta) ta.value = content;
+      var area = document.getElementById('note-area-' + key);
+      if (area) area.classList.add('visible');
+    } catch(e) {}
+  };
 
   // ── FILE UPLOADS ──────────────────────────────────────────────────
   document.querySelectorAll('#dd-portal .dd-file-input').forEach(function(input) {
@@ -773,11 +840,10 @@
           if (res.ok) {
             uploaded++;
             await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
-            // Auto-mark checklist item complete for this category
             var checkItem = CHECKLIST_ITEMS.find(function(ci) { return ci.category === category; });
             if (checkItem && currentClient && !checklistState[checkItem.key]) {
               checklistState[checkItem.key] = true;
-              await apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: checkItem.key, completed: true, completed_at: new Date().toISOString() }) }).catch(function() {
+              apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: checkItem.key, completed: true, completed_at: new Date().toISOString() }) }).catch(function() {
                 return apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + checkItem.key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: true, completed_at: new Date().toISOString() }) });
               });
               renderChecklist();
