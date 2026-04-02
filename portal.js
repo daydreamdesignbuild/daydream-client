@@ -147,10 +147,12 @@
     '#dd-portal .dd-status-card { background: var(--surface); padding: 20px 24px; }',
     '#dd-portal .dd-status-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
     '#dd-portal .dd-status-badge { font-size: 11px; letter-spacing: 0.08em; padding: 6px 12px; display: inline-block; border: 1px solid; }',
-    '#dd-portal .dd-service-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-bottom: 1px solid var(--border); }',
-    '#dd-portal .dd-service-row:last-child { border-bottom: none; }',
-    '#dd-portal .dd-service-row-name { font-size: 12px; color: var(--text); }',
-    '#dd-portal .dd-service-status-pill { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid; }',
+    '#dd-portal .dd-services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1px; background: var(--border); }',
+    '#dd-portal .dd-service-tile { background: var(--surface); padding: 20px; display: flex; flex-direction: column; gap: 10px; }',
+    '#dd-portal .dd-service-tile-name { font-size: 12px; color: var(--text); font-weight: 400; line-height: 1.4; flex: 1; }',
+    '#dd-portal .dd-service-tile-status { display: flex; align-items: center; gap: 6px; }',
+    '#dd-portal .dd-service-tile-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }',
+    '#dd-portal .dd-service-tile-label { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }',
     '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
     '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
     '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); }',
@@ -468,10 +470,19 @@
     card.style.display = 'block';
     var STATUS_COLORS = { 'pending': '#8a8680', 'in_progress': '#eeb24a', 'complete': '#6a9e7a' };
     var STATUS_LABELS = { 'pending': 'Pending', 'in_progress': 'In Progress', 'complete': 'Complete' };
-    list.innerHTML = services.map(function(s) {
-      var color = STATUS_COLORS[s.status] || '#8a8680';
-      return '<div class="dd-service-row"><div class="dd-service-row-name">' + s.service_name + '</div><div class="dd-service-status-pill" style="color:' + color + ';border-color:' + color + ';background:' + color + '18">' + (STATUS_LABELS[s.status] || s.status) + '</div></div>';
-    }).join('');
+    list.innerHTML = '<div class="dd-services-grid">'
+      + services.map(function(s) {
+          var color = STATUS_COLORS[s.status] || '#8a8680';
+          var label = STATUS_LABELS[s.status] || s.status;
+          return '<div class="dd-service-tile">'
+            + '<div class="dd-service-tile-name">' + s.service_name + '</div>'
+            + '<div class="dd-service-tile-status">'
+            + '<div class="dd-service-tile-dot" style="background:' + color + '"></div>'
+            + '<div class="dd-service-tile-label" style="color:' + color + '">' + label + '</div>'
+            + '</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
   }
 
   function renderChecklist() {
