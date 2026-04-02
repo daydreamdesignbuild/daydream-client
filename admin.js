@@ -238,9 +238,9 @@
     '#dd-admin .da-note-textarea::placeholder { color: var(--muted); }',
 
     // Add Client Modal
-    '#dd-admin .da-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }',
+    '#dd-admin .da-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999999; display: none; align-items: flex-start; justify-content: center; padding: 80px 20px 20px; overflow-y: auto; }',
     '#dd-admin .da-modal-overlay.visible { display: flex; }',
-    '#dd-admin .da-modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; }',
+    '#dd-admin .da-modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 640px; }',    
     '#dd-admin .da-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); position: sticky; top: 0; }',
     '#dd-admin .da-modal-title { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 300; color: var(--gold); }',
     '#dd-admin .da-modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }',
@@ -524,7 +524,7 @@
         + '</div>'
         + '<div class="da-card-details" id="det-' + c.id + '">'
         + '  <div class="da-details-grid">'
-        + '    <div class="da-detail-item"><div class="da-detail-label">Service</div><div class="da-detail-value">' + serviceLabel(c.project_type) + '</div></div>'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Project Type</div><div class="da-detail-value">' + serviceLabel(c.project_type) + '</div></div>'
         + '    <div class="da-detail-item"><div class="da-detail-label">Investment</div><div class="da-detail-value">' + (inv || '—') + '</div></div>'
         + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + [c.street, c.city, c.state, c.zip].filter(Boolean).join(', ') + '</div></div>'
         + '    <div class="da-detail-item"><div class="da-detail-label">Referral</div><div class="da-detail-value">' + (c.referral || '—') + '</div></div>'
@@ -544,7 +544,7 @@
         + '    <div class="da-action-row"><div class="da-action-label">Permit Folder</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_permit_link || '') + '" /></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Paste Google Drive link..." value="' + (c.drive_construction_link || '') + '" /></div>'
         + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
-        + '    <div class="da-section-divider">Project Services</div>'
+        + '    <div class="da-section-divider">Scope of Work</div>'
         + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
         + '    <div class="da-section-divider">Admin Notes</div>'
         + '    <div class="da-notes-tabs"><button class="da-note-tab active" data-note="general" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">General</button><button class="da-note-tab" data-note="discussion" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Discussion</button><button class="da-note-tab" data-note="design" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Design</button><button class="da-note-tab" data-note="construction" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Construction</button></div>'
@@ -610,12 +610,16 @@
   async function loadClientServices(clientId) {
     var wrap = document.getElementById('services-' + clientId);
     if (!wrap) return;
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Loading...</div>';
     try {
       var res = await apiFetch('/rest/v1/client_services?client_id=eq.' + clientId + '&order=created_at.asc');
       var services = await res.json();
       renderClientServices(clientId, services || []);
-    } catch(e) {}
+    } catch(e) {
+      wrap.innerHTML = '<div style="font-size:11px;color:var(--error);padding:8px 0">Error loading services.</div>';
+    }
   }
+  window.loadClientServices = loadClientServices;
 
   function renderClientServices(clientId, services) {
     var wrap = document.getElementById('services-' + clientId);
