@@ -28,9 +28,9 @@
   function safeName(name) { return name.replace(/[^a-zA-Z0-9._\-]/g, '_'); }
 
   // Design & Permit Phase Timeline
+  // Design & Permit Phase Timeline — per spec
   var TIMELINE = [
     { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
-    { value: 'in_progress',                  label: 'In Progress' },
     { value: 'discovery_call',               label: 'Discovery Call' },
     { value: 'design_proposal',              label: 'Design Proposal' },
     { value: 'contract_signed',              label: 'Contract Signed' },
@@ -346,7 +346,7 @@
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
     '    <button class="dd-tab" data-tab="uploads">Documents</button>',
     '    <button class="dd-tab" data-tab="messages">Messages</button>',
-    '    <button class="dd-tab" data-tab="site-photos">Job Site Photos</button>',
+
     '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '  </div>',
@@ -399,9 +399,11 @@
     '        <div class="dd-timeline-header">Design &amp; Permit Phase</div>',
     '        <div id="ddTimeline"></div>',
     '      </div>',
-    '      <div class="dd-timeline" id="ddConstructionTimeline" style="margin-top:16px;display:none">',
-    '        <div class="dd-timeline-header" style="color:var(--success);border-bottom-color:var(--success)">Construction Phase</div>',
-    '        <div id="ddConstructionTimelineItems"></div>',
+    '      <div id="ddConstructionTimeline" style="margin-top:24px;display:none">',
+    '        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--success);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--success)">Construction Phase</div>',
+    '        <div class="dd-timeline" style="margin-bottom:0">',
+    '          <div id="ddConstructionTimelineItems"></div>',
+    '        </div>',
     '      </div>',
     '    </div>',
 
@@ -1064,7 +1066,7 @@
       tab.classList.add('active');
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
-      if (tab.dataset.tab === 'site-photos') { loadClientSitePhotos(); }
+
       if (tab.dataset.tab === 'messages') {
         try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
         var dot = tab.querySelector('.dd-msg-dot'); if (dot) dot.remove();
