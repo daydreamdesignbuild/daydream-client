@@ -480,16 +480,7 @@
 
     '        <div class="dd-create-field dd-create-full">',
     '          <div class="dd-create-label">What Level of Investment Are You Preparing for This Project? *</div>',
-    '          <select class="dd-create-input" id="cpBudget">',
-    '            <option value="">Select investment range...</option>',
-    '            <option value="Under $25,000">Under $25,000</option>',
-    '            <option value="$25,000 – $50,000">$25,000 – $50,000</option>',
-    '            <option value="$50,000 – $75,000">$50,000 – $75,000</option>',
-    '            <option value="$75,000 – $100,000">$75,000 – $100,000</option>',
-    '            <option value="$100,000 – $150,000">$100,000 – $150,000</option>',
-    '            <option value="$150,000 – $250,000">$150,000 – $250,000</option>',
-    '            <option value="$250,000+">$250,000+</option>',
-    '          </select>',
+    '          <input class="dd-create-input" id="cpBudget" type="text" placeholder="e.g. $75,000 or $100k–$150k" />',
     '        </div>',
 
     '      </div>',
