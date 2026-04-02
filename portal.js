@@ -305,7 +305,7 @@
     '      <div class="dd-welcome-card"><div class="dd-welcome-text"><h3>Book Your Discovery Call</h3><p>Schedule a consultation with our design team to discuss your vision, timeline and investment in detail.</p></div><a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a></div>',
     '      <div class="dd-cards">',
     '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
-    '        <div class="dd-card"><div class="dd-card-label">Service</div><div class="dd-card-value" id="ddService" style="font-size:14px">—</div></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Primary Service</div><div class="dd-card-value" id="ddService" style="font-size:14px">—</div></div>',
     '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
     '      </div>',
     '      <div class="dd-status-grid">',
