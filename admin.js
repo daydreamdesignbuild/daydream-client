@@ -157,8 +157,7 @@
     '#dd-admin .da-search::placeholder { color: var(--muted); }',
     '#dd-admin .da-filter { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 16px; outline: none; cursor: pointer; appearance: none; min-width: 200px; }',
     '#dd-admin .da-count { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; white-space: nowrap; }',
-    '#dd-admin .da-add-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }',
-    '#dd-admin .da-add-btn:hover { opacity: 0.85; }',
+
     '#dd-admin .da-cards-wrap { padding: 24px 32px; display: flex; flex-direction: column; gap: 12px; }',
     '#dd-admin .da-client-card { background: var(--surface); border: 1px solid var(--border); transition: border-color 0.2s; }',
     '#dd-admin .da-client-card:hover { border-color: var(--gold); }',
@@ -348,12 +347,51 @@
     '  </div>',
     '  <div class="da-tabs">',
     '    <button class="da-tab active" data-tab="clients">Clients</button>',
+    '    <button class="da-tab" data-tab="add">+ Add Client</button>',
     '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div>',
     '  <div class="da-tab-content active" id="tab-clients">',
     '    <div class="da-toolbar"><input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." /><select class="da-filter" id="daFilter">' + filterOptions + '</select><div class="da-count" id="daCount"></div><button class="da-add-btn" id="daAddClientBtn">+ Add Client</button></div>',
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
+    '  </div>',
+    '  <div class="da-tab-content" id="tab-add">',
+    '    <div class="da-add-wrap">',
+    '      <div class="da-section-title">Add New Client</div>',
+    '      <div class="da-add-form">',
+    '        <div class="da-add-row">',
+    '          <div class="da-add-field"><label class="da-field-label">Full Name *</label><input class="da-field-input" type="text" id="acName" placeholder="Jesse House" /></div>',
+    '          <div class="da-add-field"><label class="da-field-label">Email *</label><input class="da-field-input" type="email" id="acEmail" placeholder="client@email.com" /></div>',
+    '        </div>',
+    '        <div class="da-add-row">',
+    '          <div class="da-add-field"><label class="da-field-label">Phone</label><input class="da-field-input" type="text" id="acPhone" placeholder="404-555-0123" /></div>',
+    '          <div class="da-add-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
+    '        </div>',
+    '        <div class="da-add-row">',
+    '          <div class="da-add-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
+    '          <div class="da-add-field"><label class="da-field-label">How Did They Hear About Us?</label><select class="da-field-input" id="acReferral"><option value="">Select...</option><option>Google Search</option><option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>YouTube</option><option>Houzz</option><option>Nextdoor</option><option>Referral — Friend or Family</option><option>Referral — Past Client</option><option>Yard Sign / Drove By</option><option>Home Show / Event</option><option>Other</option></select></div>',
+    '        </div>',
+    '        <div class="da-add-row">',
+    '          <div class="da-add-field" style="flex:1"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
+    '        </div>',
+    '        <div class="da-add-row">',
+    '          <div class="da-add-field" style="flex:1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
+    '        </div>',
+    '        <div class="da-add-row">',
+    '          <div class="da-add-field" style="flex:1">',
+    '            <label class="da-field-label">Project Services <span style="color:var(--muted);font-size:9px;text-transform:none;letter-spacing:0">(hold Ctrl / Cmd to select multiple)</span></label>',
+    '            <select class="da-field-input" id="acServicesSelect" multiple size="8" style="padding:0">' + ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '" data-label="' + s.label + '">' + s.label + '</option>'; }).join('') + '</select>',
+    '            <input class="da-field-input" id="acCustomService" type="text" placeholder="Custom service (optional)..." style="margin-top:8px" />',
+    '          </div>',
+    '        </div>',
+    '        <div class="da-add-checks">',
+    '          <label class="da-add-check-label"><input type="checkbox" id="acContractor" /><span>This is a contractor (will have multiple projects)</span></label>',
+    '          <label class="da-add-check-label"><input type="checkbox" id="acSendEmail" checked /><span>Send welcome email with portal access link</span></label>',
+    '        </div>',
+    '        <div class="da-add-msg" id="acMsg"></div>',
+    '        <button class="da-add-submit" id="acSubmit">Add Client</button>',
+    '      </div>',
+    '    </div>',
     '  </div>',
     '  <div class="da-tab-content" id="tab-checklist">',
     '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
@@ -380,8 +418,11 @@
     '        <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
     '      </div>',
     '      <div class="da-modal-field" style="margin-bottom:16px;grid-column:1/-1">',
-    '        <label class="da-field-label" style="margin-bottom:8px;display:block">Project Services <span style="color:var(--muted);font-size:9px;letter-spacing:0.1em;text-transform:none">(hold Ctrl / Cmd to select multiple)</span></label>',
-    '        <select class="da-field-input" id="acServicesSelect" multiple size="7" style="height:auto;padding:0">' + ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '" data-label="' + s.label + '">' + s.label + '</option>'; }).join('') + '</select>',
+    '        <label class="da-field-label" style="margin-bottom:8px;display:block">Project Services</label>',
+    '        <div class="da-msdd" id="acMsdd">',
+    '          <div class="da-msdd-trigger" id="acMsddTrigger"><span id="acMsddLabel">Select services...</span><span style="color:var(--muted);font-size:11px">&#9660;</span></div>',
+    '          <div class="da-msdd-list" id="acMsddList"></div>',
+    '        </div>',
     '        <input class="da-field-input" id="acCustomService" type="text" placeholder="Custom service (optional)..." style="margin-top:8px" />',
     '      </div>',
     '      <div class="da-modal-check"><input type="checkbox" id="acContractor" /><label for="acContractor">This is a contractor (will have multiple projects)</label></div>',
@@ -736,11 +777,8 @@
   document.getElementById('daFilter').addEventListener('change', applyFilters);
 
   // ── ADD CLIENT MODAL ──────────────────────────────────────────────
-  document.getElementById('daAddClientBtn').addEventListener('click', function() {
-    document.getElementById('daAddClientModal').classList.add('visible');
-  });
-  document.getElementById('daAddClientClose').addEventListener('click', function() { document.getElementById('daAddClientModal').classList.remove('visible'); });
-  document.getElementById('daAddClientModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('visible'); });
+  // Add Client tab switching via toolbar button removed — now a tab
+
 
   document.getElementById('acSubmit').addEventListener('click', async function() {
     var name = document.getElementById('acName').value.trim();
@@ -804,7 +842,21 @@
         var svcSel = document.getElementById('acServicesSelect');
         if (svcSel) Array.from(svcSel.options).forEach(function(o) { o.selected = false; });
         await loadClients();
-        setTimeout(function() { document.getElementById('daAddClientModal').classList.remove('visible'); msg.textContent = ''; }, 2500);
+        setTimeout(function() {
+          // Switch to clients tab
+          document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
+          document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(c) { c.classList.remove('active'); });
+          document.querySelector('[data-tab="clients"]').classList.add('active');
+          document.getElementById('tab-clients').classList.add('active');
+          msg.textContent = '';
+          // Clear form
+          ['acName','acEmail','acPhone','acCompany','acInvestment','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+          if (document.getElementById('acCustomService')) document.getElementById('acCustomService').value = '';
+          if (document.getElementById('acContractor')) document.getElementById('acContractor').checked = false;
+          if (document.getElementById('acReferral')) document.getElementById('acReferral').value = '';
+          var svcSel = document.getElementById('acServicesSelect');
+          if (svcSel) Array.from(svcSel.options).forEach(function(o) { o.selected = false; });
+        }, 2000);
       } else { msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error'; }
     } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
     this.disabled = false; this.textContent = 'Add Client';
