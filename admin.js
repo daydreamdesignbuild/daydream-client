@@ -113,6 +113,21 @@
     { key: 'site_consultation',     label: 'Site Consultation' }
   ];
 
+  // Client relationship status
+  var CLIENT_STATUSES = [
+    { value: 'active_client',    label: 'Active Client',        color: '#6a9e7a' },
+    { value: 'lead',             label: 'Lead / Not Converted', color: '#eeb24a' },
+    { value: 'archived',         label: 'Archived',             color: '#8a8680' }
+  ];
+
+  // Work categories
+  var WORK_CATEGORIES = [
+    { value: 'design_only',      label: 'Design Only' },
+    { value: 'build',            label: 'Build / Construction' },
+    { value: 'full_service',     label: 'Full Service' },
+    { value: 'consultation',     label: 'Consultation' }
+  ];
+
   var PROJECT_TYPES = [
     { key: 'full_yard',              label: 'Full Yard' },
     { key: 'front_yard',             label: 'Front Yard' },
@@ -201,6 +216,12 @@
     '#dd-admin .da-cards-wrap { padding: 24px 32px; display: flex; flex-direction: column; gap: 12px; }',
     '#dd-admin .da-client-card { background: var(--surface); border: 1px solid var(--border); transition: border-color 0.2s; }',
     '#dd-admin .da-client-card:hover { border-color: var(--gold); }',
+    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
+    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
+    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
+    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
+    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
+    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
     '#dd-admin .da-card-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; gap: 16px; cursor: pointer; }',
     '#dd-admin .da-card-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }',
     '#dd-admin .da-card-avatar { width: 36px; height: 36px; background: var(--gold-dim); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: "Cormorant Garamond", serif; font-size: 16px; color: var(--gold); flex-shrink: 0; }',
@@ -371,7 +392,13 @@
 
     // CLIENTS TAB
     '  <div class="da-tab-content active" id="tab-clients">',
-    '    <div class="da-toolbar"><input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." /><select class="da-filter" id="daFilter">' + filterOptions + '</select><div class="da-count" id="daCount"></div></div>',
+    '    <div class="da-toolbar">',
+    '      <input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." />',
+    '      <select class="da-filter" id="daFilter">' + filterOptions + '</select>',
+    '      <select class="da-filter" id="daStatusFilter" style="min-width:180px"><option value="">All Statuses</option><option value="active_client">Active Clients</option><option value="lead">Leads / Not Converted</option><option value="archived">Archived</option></select>',
+    '      <select class="da-filter" id="daCategoryFilter" style="min-width:180px"><option value="">All Categories</option><option value="design_only">Design Only</option><option value="build">Build / Construction</option><option value="full_service">Full Service</option><option value="consultation">Consultation</option></select>',
+    '      <div class="da-count" id="daCount"></div>',
+    '    </div>',
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
     '  </div>',
 
@@ -509,12 +536,16 @@
   // FIX 6: Debounced search ──────────────────────────────────────────
   var searchTimeout;
   function applyFilters() {
-    var q = (document.getElementById('daSearch').value || '').toLowerCase();
-    var stage = document.getElementById('daFilter').value;
+    var q        = (document.getElementById('daSearch').value || '').toLowerCase();
+    var stage    = document.getElementById('daFilter').value;
+    var cStatus  = (document.getElementById('daStatusFilter') || {}).value || '';
+    var cCat     = (document.getElementById('daCategoryFilter') || {}).value || '';
     renderCards(allClients.filter(function(c) {
-      var mq = !q || (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q) || (c.company_name||'').toLowerCase().includes(q);
-      var ms = !stage || c.status === stage;
-      return mq && ms;
+      var mq   = !q       || (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q) || (c.company_name||'').toLowerCase().includes(q);
+      var ms   = !stage   || c.status === stage;
+      var mcs  = !cStatus || c.client_status === cStatus;
+      var mcat = !cCat    || c.work_category === cCat;
+      return mq && ms && mcs && mcat;
     }));
   }
   document.getElementById('daSearch').addEventListener('input', function() {
@@ -522,6 +553,8 @@
     searchTimeout = setTimeout(applyFilters, 300);
   });
   document.getElementById('daFilter').addEventListener('change', applyFilters);
+  document.getElementById('daStatusFilter').addEventListener('change', applyFilters);
+  document.getElementById('daCategoryFilter').addEventListener('change', applyFilters);
 
   // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
@@ -672,7 +705,7 @@
       return '<div class="da-client-card" id="card-' + c.id + '">'
         + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
         + '  <div class="da-card-left"><div class="da-card-avatar">' + s(initials(c.full_name)) + '</div>'
-        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span></div>'
+        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>','archived':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
         + '  <div class="da-card-sub">' + s(c.email || '') + (c.phone ? ' · ' + s(c.phone) : '') + (isContr && g.projects.length > 1 ? ' · ' + g.projects.length + ' projects' : '') + '</div></div></div>'
         + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + s(stage.label) + '</div><div class="da-card-investment">' + s(inv) + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
         + '</div>'
@@ -703,6 +736,9 @@
         + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Construction Phase <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none">(set to not_started to hide from client)</span></div>'
         + '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-section-divider">Client Status</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Relationship</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Category</div><select class="da-select" id="catsel-' + c.id + '"><option value="">— Not Set —</option><option value="design_only"' + (c.work_category==='design_only'?' selected':'') + '>Design Only</option><option value="build"' + (c.work_category==='build'?' selected':'') + '>Build / Construction</option><option value="full_service"' + (c.work_category==='full_service'?' selected':'') + '>Full Service</option><option value="consultation"' + (c.work_category==='consultation'?' selected':'') + '>Consultation</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'work_category\', \'catsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Contract &amp; Payment</div>'
         + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'contract_status\', \'contractsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'payment_status\', \'paymentsel-' + c.id + '\')">Update</button></div>'
