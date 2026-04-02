@@ -326,6 +326,7 @@
     '    </div>',
     '    <div class="dd-nav-right">',
     '      <span class="dd-nav-user" id="ddNavUser"></span>',
+    '      <button class="dd-nav-logout" id="ddRefreshBtn" title="Refresh project data" style="border:1px solid var(--border);padding:6px 12px;font-size:9px">&#8635; Refresh</button>',
     '      <button class="dd-nav-back" id="ddNavBack">&#8592; All Projects</button>',
     '      <button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button>',
     '    </div>',
@@ -355,6 +356,17 @@
     '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
     '        <div class="dd-card"><div class="dd-card-label">Project Type</div><div class="dd-card-value" id="ddProjectType" style="font-size:14px">—</div></div>',
     '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
+    '      </div>',
+    '      <div id="ddContactCard" style="display:none;margin-bottom:32px">',
+    '        <div style="border:1px solid var(--border)">',
+    '          <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Contact Info</div>',
+    '          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)">',
+    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Name</div><div style="font-size:13px;color:var(--text)" id="ddContactName">—</div></div>',
+    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Email</div><div style="font-size:13px;color:var(--text)" id="ddContactEmail">—</div></div>',
+    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Phone</div><div style="font-size:13px;color:var(--text)" id="ddContactPhone">—</div></div>',
+    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Address</div><div style="font-size:13px;color:var(--text)" id="ddContactAddress">—</div></div>',
+    '          </div>',
+    '        </div>',
     '      </div>',
     '      <div class="dd-status-grid">',
     '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div></div>',
@@ -541,6 +553,8 @@
     document.getElementById('ddProjectSelector').classList.remove('visible');
     document.getElementById('ddCreateProject').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
+    // Start live WebSocket subscriptions
+    startRealtime();
     var backBtn = document.getElementById('ddNavBack');
     if (isContractor && backBtn) backBtn.classList.add('visible');
     var navUser = document.getElementById('ddNavUser');
@@ -722,6 +736,7 @@
   };
 
   document.getElementById('ddNavBack').addEventListener('click', function() {
+    stopRealtime(); // Stop subscriptions for this project before switching
     document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
     document.querySelector('[data-tab="overview"]').classList.add('active');
@@ -760,8 +775,41 @@
       var addrEl = document.getElementById('ddProjectAddress');
       if (title) title.textContent = client.full_name || 'Your Project';
       if (addrEl) { var addr = [client.street, client.city, client.state].filter(Boolean).join(', '); addrEl.textContent = addr || 'Welcome to your Daydream client portal'; }
-      document.getElementById('ddStatus').textContent = client.status || 'New Inquiry';
+      // Map raw DB pipeline key to human-readable label
+      var PIPELINE_LABELS = {
+        'client_inquiry_made': 'New Inquiry', 'client_qualified': 'Qualified',
+        'discovery_call_booked': 'Discovery Call Booked', 'discovery_call_completed': 'Discovery Call Complete',
+        'design_proposal_drafting': 'Proposal Drafting', 'design_proposal_presented': 'Proposal Presented',
+        'design_proposal_accepted': 'Proposal Accepted', 'site_consultation_scheduled': 'Site Consultation Scheduled',
+        'site_consultation_completed': 'Site Consultation Complete', 'design_phase_started': 'Design Phase Started',
+        'base_map_complete': 'Base Map Complete', 'base_map_discussion_call': 'Base Map Discussion',
+        'base_map_approved': 'Base Map Approved', '3d_model_completed': '3D Model Complete',
+        '3d_model_discussion_call': '3D Model Discussion', '3d_model_approved': '3D Model Approved',
+        'visualizations_started': 'Visualizations Started', 'visualizations_completed': 'Visualizations Complete',
+        'visualizations_approved': 'Visualizations Approved',
+        'construction_document_phase_started': 'Construction Documents Started',
+        'construction_document_phase_complete': 'Construction Documents Complete',
+        'permit_plans_submitted': 'Permit Plans Submitted', 'permit_plan_revisions': 'Permit Plan Revisions',
+        'permit_plans_approved': 'Permit Plans Approved', 'construction_started': 'Construction Started',
+        'construction_finished': 'Construction Finished', 'site_photos_to_be_made': 'Site Photos Pending',
+        'site_photos_finished': 'Site Photos Complete', 'project_complete': 'Project Complete'
+      };
+      var statusEl = document.getElementById('ddStatus');
+      if (statusEl) statusEl.textContent = PIPELINE_LABELS[client.status] || client.status || 'New Inquiry';
       document.getElementById('ddSince').textContent = formatDate(client.created_at);
+      // Populate contact info card
+      var contactCard = document.getElementById('ddContactCard');
+      var cName  = document.getElementById('ddContactName');
+      var cEmail = document.getElementById('ddContactEmail');
+      var cPhone = document.getElementById('ddContactPhone');
+      var cAddr  = document.getElementById('ddContactAddress');
+      if (contactCard && (client.full_name || client.email || client.phone)) {
+        if (cName)  cName.textContent  = client.full_name || '—';
+        if (cEmail) cEmail.textContent = client.email     || '—';
+        if (cPhone) cPhone.textContent = client.phone     || '—';
+        if (cAddr)  cAddr.textContent  = [client.street, client.city, client.state, client.zip].filter(Boolean).join(', ') || '—';
+        contactCard.style.display = 'block';
+      }
       var ptEl = document.getElementById('ddProjectType');
       if (ptEl) ptEl.textContent = PROJECT_TYPE_LABELS[client.project_type_category] || client.project_type_category || '—';
       renderTimeline(client.client_stage || 'inquiry_submitted');
@@ -896,6 +944,7 @@
 
   // ── LOGOUT ────────────────────────────────────────────────────────
   function doLogout() {
+    stopRealtime(); // Clean up WebSocket connections
     try { sessionStorage.removeItem('dd_token'); } catch(e) {}
     currentUser = null; currentClient = null; currentProject = null; isContractor = false;
     document.getElementById('ddDashboard').classList.remove('visible');
@@ -904,6 +953,13 @@
     showLogin();
   }
   document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
+  document.getElementById('ddRefreshBtn').addEventListener('click', async function() {
+    if (!currentClient) return;
+    var btn = this;
+    btn.textContent = '⟳ Refreshing...'; btn.disabled = true;
+    await loadProjectDashboard(currentClient);
+    btn.textContent = '⟳ Refresh'; btn.disabled = false;
+  });
   document.getElementById('ddSelectorLogout').addEventListener('click', doLogout);
 
   // ── TABS ──────────────────────────────────────────────────────────
@@ -1080,6 +1136,125 @@
     } catch(e) { console.error('Send message:', e); }
   });
   document.getElementById('ddMessageInput').addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); } });
+
+  // ── SUPABASE REALTIME — Live updates without refresh ─────────────
+  var realtimeChannels = [];
+
+  function startRealtime() {
+    // Clean up any existing subscriptions first
+    stopRealtime();
+    if (!currentClient) return;
+
+    // ── 1. LIVE MESSAGES ─────────────────────────────────────────
+    // Fires instantly when admin sends a reply
+    var msgChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    msgChannel.onopen = function() {
+      // Join the messages channel filtered to this client
+      msgChannel.send(JSON.stringify({
+        topic: 'realtime:public:messages:client_id=eq.' + currentClient.id,
+        event: 'phx_join',
+        payload: {},
+        ref: '1'
+      }));
+    };
+
+    msgChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        // New message inserted
+        if (data.event === 'INSERT' || data.payload && data.payload.data) {
+          loadMessages();
+          // Flash the messages tab if not active
+          var msgTab = document.querySelector('[data-tab="messages"]');
+          var activeTab = document.querySelector('#dd-portal .dd-tab.active');
+          if (msgTab && activeTab && activeTab.dataset.tab !== 'messages') {
+            var dot = msgTab.querySelector('.dd-msg-dot');
+            if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; msgTab.appendChild(dot); }
+            dot.textContent = '●';
+          }
+        }
+      } catch(e) {}
+    };
+
+    msgChannel.onerror = function(e) { console.error('Realtime messages error:', e); };
+    realtimeChannels.push(msgChannel);
+
+    // ── 2. LIVE CLIENT STATUS (contract, payment, pipeline) ───────
+    // Fires when admin updates any field on the client record
+    var clientChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    clientChannel.onopen = function() {
+      clientChannel.send(JSON.stringify({
+        topic: 'realtime:public:clients:id=eq.' + currentClient.id,
+        event: 'phx_join',
+        payload: {},
+        ref: '2'
+      }));
+    };
+
+    clientChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        if (data.event === 'UPDATE' && data.payload && data.payload.record) {
+          var updated = data.payload.record;
+          // Merge into currentClient
+          currentClient = Object.assign({}, currentClient, updated);
+          // Re-render status badges live
+          renderStatusBadges(currentClient);
+          renderTimeline(currentClient.client_stage || 'inquiry_submitted');
+          // Update pipeline status card
+          var PIPELINE_LABELS = {
+            'client_inquiry_made': 'New Inquiry', 'client_qualified': 'Qualified',
+            'discovery_call_booked': 'Discovery Call Booked', 'discovery_call_completed': 'Discovery Call Complete',
+            'design_proposal_drafting': 'Proposal Drafting', 'design_proposal_presented': 'Proposal Presented',
+            'design_proposal_accepted': 'Proposal Accepted', 'site_consultation_scheduled': 'Site Consultation Scheduled',
+            'site_consultation_completed': 'Site Consultation Complete', 'design_phase_started': 'Design Phase Started',
+            'base_map_complete': 'Base Map Complete', 'base_map_approved': 'Base Map Approved',
+            '3d_model_completed': '3D Model Complete', '3d_model_approved': '3D Model Approved',
+            'visualizations_completed': 'Visualizations Complete', 'visualizations_approved': 'Visualizations Approved',
+            'construction_document_phase_complete': 'Construction Documents Complete',
+            'permit_plans_submitted': 'Permit Plans Submitted', 'permit_plans_approved': 'Permit Plans Approved',
+            'construction_started': 'Construction Started', 'construction_finished': 'Construction Finished',
+            'project_complete': 'Project Complete'
+          };
+          var statusEl = document.getElementById('ddStatus');
+          if (statusEl) statusEl.textContent = PIPELINE_LABELS[updated.status] || updated.status || 'New Inquiry';
+          // Update project type
+          var ptEl = document.getElementById('ddProjectType');
+          if (ptEl && updated.project_type_category) ptEl.textContent = PROJECT_TYPE_LABELS[updated.project_type_category] || updated.project_type_category;
+          // Show a subtle toast notification
+          showRealtimeToast('Your project has been updated');
+        }
+      } catch(e) { console.error('Realtime client update:', e); }
+    };
+
+    clientChannel.onerror = function(e) { console.error('Realtime client error:', e); };
+    realtimeChannels.push(clientChannel);
+  }
+
+  function stopRealtime() {
+    realtimeChannels.forEach(function(ch) {
+      try { ch.close(); } catch(e) {}
+    });
+    realtimeChannels = [];
+  }
+
+  // ── TOAST NOTIFICATION ────────────────────────────────────────
+  function showRealtimeToast(message) {
+    var existing = document.getElementById('ddRealtimeToast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = 'ddRealtimeToast';
+    toast.textContent = message;
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--bg);font-family:Jost,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 20px;z-index:9999;animation:ddFadeUp 0.3s ease both;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
+    document.body.appendChild(toast);
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3000);
+  }
 
   // ── CREATE PROJECT PANEL ──────────────────────────────────────────
   window._showCreateProject = function() {
