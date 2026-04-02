@@ -948,17 +948,43 @@
 
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
   async function tryTokenFromUrl() {
-    var hash = window.location.hash;
-    if (!hash) return false;
-    var params = new URLSearchParams(hash.replace('#', ''));
-    var accessToken = params.get('access_token');
-    if (accessToken && accessToken.length > 100) {
+    // Check both hash fragment (#access_token=) and query params (?access_token=)
+    // Supabase delivers the token in the hash after verifying the magic link
+    var hash   = window.location.hash   || '';
+    var search = window.location.search || '';
+    var hashParams  = new URLSearchParams(hash.replace('#', ''));
+    var queryParams = new URLSearchParams(search.replace('?', ''));
+    var accessToken = hashParams.get('access_token') || queryParams.get('access_token');
+
+    // Also handle Supabase PKCE flow — token_hash in query params
+    var tokenHash = queryParams.get('token_hash') || queryParams.get('token');
+    var tokenType = queryParams.get('type');
+
+    // If we have a token_hash (confirmation flow), exchange it for a session
+    if (tokenHash && tokenType) {
       try {
-        var res = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken } });
+        var verifyRes = await fetch(SUPABASE_URL + '/auth/v1/verify', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token_hash: tokenHash, type: tokenType })
+        });
+        var verifyData = await verifyRes.json();
+        if (verifyData.access_token) {
+          accessToken = verifyData.access_token;
+        }
+      } catch(e) { console.error('tryTokenFromUrl verify:', e); }
+    }
+
+    if (accessToken && accessToken.length > 20) {
+      try {
+        var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
+        });
         var user = await res.json();
         if (user && user.email) {
           currentUser = { access_token: accessToken, email: user.email, id: user.id };
           try { sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
+          // Clean URL — remove token params
           history.replaceState(null, '', window.location.pathname);
           return true;
         }
