@@ -347,13 +347,39 @@
     '  </div>',
     '  <div class="da-tabs">',
     '    <button class="da-tab active" data-tab="clients">Clients</button>',
-    '    <button class="da-tab" data-tab="add">+ Add Client</button>',
+
     '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div>',
     '  <div class="da-tab-content active" id="tab-clients">',
-    '    <div class="da-toolbar"><input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." /><select class="da-filter" id="daFilter">' + filterOptions + '</select><div class="da-count" id="daCount"></div><button class="da-add-btn" id="daAddClientBtn">+ Add Client</button></div>',
+    '    <div class="da-toolbar"><input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." /><select class="da-filter" id="daFilter">' + filterOptions + '</select><div class="da-count" id="daCount"></div></div>',
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
+    '  </div>',
+    '  <div class="da-tab-content" id="tab-add-client">',
+    '    <div class="da-add-client-wrap">',
+    '      <div class="da-section-title">Add New Client</div>',
+    '      <div class="da-add-client-form">',
+    '        <div class="da-modal-grid">',
+    '          <div class="da-modal-field"><label class="da-field-label">Full Name *</label><input class="da-field-input" type="text" id="acName" placeholder="Jesse House" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Email *</label><input class="da-field-input" type="email" id="acEmail" placeholder="client@email.com" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Phone</label><input class="da-field-input" type="text" id="acPhone" placeholder="404-555-0123" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">How Did They Hear About Us?</label><select class="da-field-input" id="acReferral"><option value="">Select...</option><option>Google Search</option><option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>YouTube</option><option>Houzz</option><option>Nextdoor</option><option>Referral — Friend or Family</option><option>Referral — Past Client</option><option>Yard Sign / Drove By</option><option>Home Show / Event</option><option>Other</option></select></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1">',
+    '            <label class="da-field-label" style="margin-bottom:8px;display:block">Project Services <span style="color:var(--muted);font-size:9px;letter-spacing:0.1em;text-transform:none">(hold Ctrl / Cmd to select multiple)</span></label>',
+    '            <select class="da-field-input" id="acServicesSelect" multiple size="7" style="height:auto;padding:0">' + ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '" data-label="' + s.label + '">' + s.label + '</option>'; }).join('') + '</select>',
+    '            <input class="da-field-input" id="acCustomService" type="text" placeholder="Custom service (optional)..." style="margin-top:8px" />',
+    '          </div>',
+    '        </div>',
+    '        <div class="da-modal-check"><input type="checkbox" id="acContractor" /><label for="acContractor">This is a contractor (will have multiple projects)</label></div>',
+    '        <div class="da-modal-check"><input type="checkbox" id="acSendEmail" checked /><label for="acSendEmail">Send welcome email with portal access link</label></div>',
+    '        <div class="da-modal-msg" id="acMsg"></div>',
+    '        <button class="da-modal-submit" id="acSubmit">Add Client</button>',
+    '      </div>',
+    '    </div>',
     '  </div>',
     '  <div class="da-tab-content" id="tab-add">',
     '    <div class="da-add-wrap">',
@@ -602,7 +628,10 @@
         + '    <div class="da-notes-tabs"><button class="da-note-tab active" data-note="general" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">General</button><button class="da-note-tab" data-note="discussion" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Discussion</button><button class="da-note-tab" data-note="design" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Design</button><button class="da-note-tab" data-note="construction" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Construction</button></div>'
         + '    <div class="da-note-panels"><div class="da-note-panel active" id="note-panel-general-' + c.id + '"><textarea class="da-note-textarea" id="note-general-' + c.id + '" placeholder="General notes...">' + (c.admin_notes_general || '') + '</textarea></div><div class="da-note-panel" id="note-panel-discussion-' + c.id + '"><textarea class="da-note-textarea" id="note-discussion-' + c.id + '" placeholder="Discussion and call notes...">' + (c.admin_notes_discussion || '') + '</textarea></div><div class="da-note-panel" id="note-panel-design-' + c.id + '"><textarea class="da-note-textarea" id="note-design-' + c.id + '" placeholder="Design phase notes...">' + (c.admin_notes_design || '') + '</textarea></div><div class="da-note-panel" id="note-panel-construction-' + c.id + '"><textarea class="da-note-textarea" id="note-construction-' + c.id + '" placeholder="Construction phase notes...">' + (c.admin_notes_construction || '') + '</textarea></div></div>'
         + '    <button class="da-update-btn" style="margin-top:8px" onclick="window._saveAdminNotes(\'' + c.id + '\')">Save Notes</button>'
-        + '    <div class="da-action-row" style="margin-top:4px"><a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a></div>'
+        + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
+        + '      <a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a>'
+        + (function() { var isC = !!c.is_contractor; return '<button class="da-email-link" style="cursor:pointer;border:1px solid ' + (isC ? 'var(--success)' : 'var(--border)') + ';color:' + (isC ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + isC + ')" id="contractor-btn-' + c.id + '">' + (isC ? '\u2713 Contractor' : 'Mark as Contractor') + '</button>'; })()
+        + '    </div>'
         + '  </div>'
         + '</div>'
         + '</div>';
@@ -935,6 +964,47 @@
   }
 
   window._toggleThread = function(id) { var t = document.getElementById('thread-' + id); if (t) t.classList.toggle('visible'); };
+  window._toggleContractor = async function(id, currentState) {
+    var newState = !currentState;
+    try {
+      await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ is_contractor: newState })
+      });
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.is_contractor = newState;
+      var btn = document.getElementById('contractor-btn-' + id);
+      if (btn) {
+        btn.textContent = newState ? '✓ Contractor' : 'Mark as Contractor';
+        btn.style.borderColor = newState ? 'var(--success)' : 'var(--border)';
+        btn.style.color = newState ? 'var(--success)' : 'var(--muted)';
+        btn.setAttribute('onclick', 'window._toggleContractor("' + id + '", ' + newState + ')');
+      }
+      // Also update card name badge
+      var card = document.getElementById('card-' + id);
+      if (card) {
+        var badge = card.querySelector('.da-contractor-badge');
+        if (newState && !badge) {
+          var nameEl = card.querySelector('.da-card-name');
+          if (nameEl) nameEl.insertAdjacentHTML('beforeend', '<span class="da-contractor-badge">Contractor</span>');
+        } else if (!newState && badge) { badge.remove(); }
+      }
+    } catch(e) { console.error('Toggle contractor error:', e); }
+  };
+
+  window._toggleContractor = async function(id, checked) {
+    try {
+      await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ is_contractor: checked })
+      });
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.is_contractor = checked;
+    } catch(e) {}
+  };
+
   window._sendReply = async function(clientId, projectId) {
     var textarea = document.getElementById('reply-' + clientId);
     var content = textarea ? textarea.value.trim() : '';
