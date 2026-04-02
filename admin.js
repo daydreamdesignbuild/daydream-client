@@ -194,7 +194,9 @@
     '#dd-admin .da-card-avatar { width: 36px; height: 36px; background: var(--gold-dim); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: "Cormorant Garamond", serif; font-size: 16px; color: var(--gold); flex-shrink: 0; }',
     '#dd-admin .da-card-name { font-size: 14px; color: var(--text); font-weight: 400; margin-bottom: 2px; }',
     '#dd-admin .da-card-sub { font-size: 10px; color: var(--muted); }',
-    '#dd-admin .da-contractor-badge { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; padding: 2px 8px; background: var(--gold-dim); border: 1px solid var(--gold); color: var(--gold); margin-left: 8px; vertical-align: middle; }',
+    '#dd-admin .da-role-badge { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; padding: 2px 8px; border: 1px solid; margin-left: 8px; vertical-align: middle; }',
+    '#dd-admin .da-role-badge.contractor { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
+    '#dd-admin .da-role-badge.client { background: rgba(106,158,122,0.1); border-color: var(--success); color: var(--success); }',
     '#dd-admin .da-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }',
     '#dd-admin .da-card-investment { font-size: 13px; color: var(--gold); font-family: "Cormorant Garamond", serif; }',
     '#dd-admin .da-card-date { font-size: 10px; color: var(--muted); }',
@@ -606,6 +608,7 @@
         + '    </div>'
         + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
         + '      <a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a>'
+        + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + (c.email || '') + '\', \'' + (c.full_name || '') + '\')">Resend Portal Link</button>'
         + (function() { var isC = !!c.is_contractor; return '<button class="da-email-link" style="cursor:pointer;border:1px solid ' + (isC ? 'var(--success)' : 'var(--border)') + ';color:' + (isC ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + isC + ')" id="contractor-btn-' + c.id + '">' + (isC ? '\u2713 Contractor' : 'Mark as Contractor') + '</button>'; })()
         + '    </div>'
         + '  </div>'
@@ -1003,6 +1006,27 @@
       var btn = document.getElementById('ptypebtn-' + id);
       if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { btn.textContent = 'Update'; btn.style.background = 'var(--gold)'; }, 2000); }
     } catch(e) { console.error('Project type update error:', e); }
+  };
+
+  window._resendPortalAccess = async function(id, email, name) {
+    if (!email) return;
+    var btn = event.target;
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+      var res = await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/functions/v1/invite-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU' },
+        body: JSON.stringify({ email: email, full_name: name })
+      });
+      var data = await res.json();
+      btn.textContent = data.success ? 'Link Sent!' : 'Error';
+      btn.style.color = data.success ? 'var(--success)' : 'var(--error)';
+    } catch(e) {
+      btn.textContent = 'Error';
+      btn.style.color = 'var(--error)';
+    }
+    setTimeout(function() { btn.textContent = 'Resend Portal Link'; btn.style.color = 'var(--gold)'; btn.disabled = false; }, 3000);
   };
 
   window._toggleContractor = async function(id, checked) {
