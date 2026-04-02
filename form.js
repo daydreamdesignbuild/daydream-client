@@ -19,7 +19,7 @@
     '}',
 
     /* Header */
-    '#dd-form-wrap header { text-align: center; margin-bottom: 48px; animation: ddFadeUp 0.9s ease both; }',
+    '#dd-form-wrap header { text-align: center; margin-bottom: 48px; animation: ddFadeUp 0.9s ease both; background: #0d0d0b; padding: 32px 24px; }',
     '#dd-form-wrap .dd-logo { font-family: "Cormorant Garamond", serif; font-weight: 400; font-size: clamp(28px,5vw,40px); letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; line-height: 1; margin-bottom: 8px; }',
     '#dd-form-wrap .dd-logo-sub { font-size: 9px; letter-spacing: 0.45em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }',
     '#dd-form-wrap .dd-rule { display: flex; align-items: center; gap: 16px; justify-content: center; margin-bottom: 18px; }',
@@ -134,6 +134,8 @@
     '  <div class="dd-row">',
     '    <div class="dd-field"><label>Email Address</label><input type="email" id="ddEmail" placeholder="youremail@email.com" required /></div>',
     '    <div class="dd-field"><label>Phone Number</label><input type="tel" id="ddPhone" placeholder="+1 (404) 000-0000" /></div>',
+    '  </div>',
+    '  <div class="dd-row">',
     '    <div class="dd-field"><label>Are You a Contractor?</label><div class="dd-select-wrap"><select id="ddIsContractor"><option value="">Select an option</option><option value="no">No — I am the homeowner</option><option value="yes">Yes — I am a contractor</option></select><span class="dd-arrow">&#9662;</span></div></div>',
     '    <div class="dd-field" id="ddCompanyWrap" style="display:none"><label>Company Name</label><input type="text" id="ddCompany" placeholder="e.g. Smith Contracting LLC" /></div>',
     '  </div>',
