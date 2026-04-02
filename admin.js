@@ -409,7 +409,7 @@
     '          <div class="da-modal-field"><label class="da-field-label">Project Type</label><select class="da-field-input" id="apProjectType"><option value="">Select type...</option>' + PROJECT_TYPES.map(function(t) { return '<option value="' + t.key + '">' + t.label + '</option>'; }).join('') + '</select></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Anything Else We Need to Know?</label><textarea class="da-field-input" id="apAnything" rows="2" placeholder="Constraints, HOA rules, access details, or important context..."></textarea></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Goals and Notes</label><textarea class="da-field-input" id="apGoals" rows="3" placeholder="Goals, must-have features, vision..."></textarea></div>',
-    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">What Level of Investment Are You Preparing for This Project? *</label><select class="da-field-input" id="apInvestment"><option value="">Select investment range...</option><option value="Under $25,000">Under $25,000</option><option value="$25,000 – $50,000">$25,000 – $50,000</option><option value="$50,000 – $75,000">$50,000 – $75,000</option><option value="$75,000 – $100,000">$75,000 – $100,000</option><option value="$100,000 – $150,000">$100,000 – $150,000</option><option value="$150,000 – $250,000">$150,000 – $250,000</option><option value="$250,000+">$250,000+</option></select></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">What Level of Investment Are You Preparing for This Project? *</label><input class="da-field-input" type="text" id="apInvestment" placeholder="e.g. $75,000 or $100k–$150k" /></div>',
     '        </div>',
     '        <div class="da-modal-msg" id="apMsg"></div>',
     '        <div style="display:flex;gap:12px;margin-top:16px">',
@@ -1047,9 +1047,10 @@
         ['apClientName','apAddress','apProjectName','apAnything','apGoals'].forEach(function(fid) {
           var el = document.getElementById(fid); if (el) el.value = '';
         });
-        ['apProjectType','apInvestment','apClientId'].forEach(function(fid) {
+        ['apProjectType','apClientId'].forEach(function(fid) {
           var el = document.getElementById(fid); if (el) el.value = '';
         });
+        var inv = document.getElementById('apInvestment'); if (inv) inv.value = '';
         setTimeout(function() { window._hideAddProjectForm(); msg.textContent = ''; loadProjects(); }, 1500);
       } else {
         var et = await res.text();
