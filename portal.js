@@ -6,6 +6,27 @@
   var CONSULT_URL  = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
   var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
 
+  // ── FIX 4: XSS sanitization ──────────────────────────────────────
+  function s(str) {
+    return (str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // ── FIX 3: File validation ────────────────────────────────────────
+  var ALLOWED_EXTS = ['jpg','jpeg','png','webp','heic','gif','pdf','mp4','mov','avi','mkv','dwg','dxf','txt','doc','docx'];
+  var MAX_FILE_MB  = 100;
+  function validateFile(file) {
+    if (file.size > MAX_FILE_MB * 1024 * 1024) return '"' + file.name + '" is too large (max ' + MAX_FILE_MB + 'MB)';
+    var ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (!ALLOWED_EXTS.includes(ext)) return '"' + file.name + '" — file type not allowed (' + ext + ')';
+    return null;
+  }
+  function safeName(name) { return name.replace(/[^a-zA-Z0-9._\-]/g, '_'); }
+
   var TIMELINE = [
     { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
     { value: 'discovery_call',               label: 'Discovery Call' },
@@ -39,19 +60,22 @@
     'payment_complete': { label: 'Payment Complete ✓',             color: '#6a9e7a' }
   };
 
+  var PROJECT_TYPE_LABELS = {
+    'full_yard': 'Full Yard', 'front_yard': 'Front Yard', 'backyard': 'Backyard',
+    'outdoor_living': 'Outdoor Living', 'landscape_construction': 'Landscape Construction',
+    'pool_and_spa': 'Pool & Spa', 'custom': 'Custom / Other'
+  };
+
   var CHECKLIST_ITEMS = [
     { key: 'goals',       label: 'Project Goals & Must-Have Features',        desc: 'Tell us the main purpose of the space and any non-negotiable features.', type: 'note', noteKey: 'goals' },
-    { key: 'inspo',       label: 'Inspiration Photos or Boards',              desc: 'Upload your Pinterest boards, AI images, Google saves or any reference images. Upload in the Documents tab.', type: 'upload', category: 'inspo' },
-    { key: 'photos',      label: 'Detailed Site Photos & Walkthrough Video',  desc: 'Show the entire project area with straight-on shots of the house. Upload in the Documents tab.', type: 'upload', category: 'photos' },
-    { key: 'survey',      label: 'Property Survey / Site Plat',               desc: 'Crucial for accuracy. Should show topography, property lines and trees. Upload in the Documents tab.', type: 'upload', category: 'survey' },
-    { key: 'bylaws',      label: 'HOA Bylaws & Neighborhood Covenants',       desc: 'All construction rules and regulations. Upload under House Plans or Survey in the Documents tab.', type: 'upload', category: 'houseplans' },
-    { key: 'houseplans',  label: 'Existing House Architectural Plans',        desc: 'If available. Upload in the Documents tab under House Plans.', type: 'upload', category: 'houseplans' }
+    { key: 'inspo',       label: 'Inspiration Photos or Boards',              desc: 'Upload your Pinterest boards, AI images, Google saves or any reference images.', type: 'upload', category: 'inspo' },
+    { key: 'photos',      label: 'Detailed Site Photos & Walkthrough Video',  desc: 'Show the entire project area with straight-on shots of the house.', type: 'upload', category: 'photos' },
+    { key: 'survey',      label: 'Property Survey / Site Plat',               desc: 'Crucial for accuracy. Should show topography, property lines and trees.', type: 'upload', category: 'survey' },
+    { key: 'bylaws',      label: 'HOA Bylaws & Neighborhood Covenants',       desc: 'All construction rules and regulations.', type: 'upload', category: 'houseplans' },
+    { key: 'houseplans',  label: 'Existing House Architectural Plans',        desc: 'If available.', type: 'upload', category: 'houseplans' }
   ];
 
-  function getStageIndex(value) {
-    var idx = TIMELINE.findIndex(function(s) { return s.value === value; });
-    return idx === -1 ? 0 : idx;
-  }
+  function getStageIndex(value) { var i = TIMELINE.findIndex(function(t) { return t.value === value; }); return i === -1 ? 0 : i; }
 
   // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
@@ -65,8 +89,6 @@
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
     '#dd-portal { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
     '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
-
-    // Login
     '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
     '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
@@ -82,7 +104,6 @@
     '#dd-portal .dd-input-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 4px; display: block; }',
     '#dd-portal .dd-input-wrap:focus-within .dd-input-label { color: var(--gold); }',
     '#dd-portal .dd-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 14px; font-weight: 300; padding: 4px 16px 12px; }',
-    '#dd-portal .dd-input:-webkit-autofill { -webkit-box-shadow: 0 0 0 60px #131310 inset !important; -webkit-text-fill-color: #f0ebe0 !important; }',
     '#dd-portal .dd-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
     '#dd-portal .dd-btn:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
@@ -90,8 +111,6 @@
     '#dd-portal .dd-msg.visible { display: block; }',
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
-
-    // Project Selector (contractor view)
     '#dd-portal .dd-project-selector { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-project-selector.visible { display: flex; }',
     '#dd-portal .dd-selector-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; }',
@@ -109,8 +128,6 @@
     '#dd-portal .dd-project-card-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; }',
     '#dd-portal .dd-project-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; }',
     '#dd-portal .dd-project-card:hover .dd-project-card-arrow { opacity: 1; }',
-
-    // Dashboard
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
@@ -137,9 +154,9 @@
     '#dd-portal .dd-welcome-card { border: 1px solid var(--gold); background: var(--gold-dim); padding: 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }',
     '#dd-portal .dd-welcome-text h3 { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; color: var(--gold); margin-bottom: 8px; }',
     '#dd-portal .dd-welcome-text p { font-size: 12px; color: var(--muted); line-height: 1.8; max-width: 400px; }',
-    '#dd-portal .dd-cal-btn { display: inline-block; background: var(--gold); color: var(--bg); text-decoration: none; font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px 28px; font-weight: 500; white-space: nowrap; transition: opacity 0.2s; }',
+    '#dd-portal .dd-cal-btn { display: inline-block; background: var(--gold); color: var(--bg); text-decoration: none; font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px 28px; font-weight: 500; white-space: nowrap; transition: opacity 0.2s; border: 1px solid var(--gold); cursor: pointer; font-family: Jost, sans-serif; }',
     '#dd-portal .dd-cal-btn:hover { opacity: 0.85; }',
-    '#dd-portal .dd-cal-btn.outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }',
+    '#dd-portal .dd-cal-btn.outline { background: transparent; color: var(--gold); }',
     '#dd-portal .dd-cal-btn.outline:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 32px; }',
     '#dd-portal .dd-card { background: var(--surface); padding: 24px; }',
@@ -192,7 +209,6 @@
     '#dd-portal .dd-note-save:hover { opacity: 0.85; }',
     '#dd-portal .dd-checklist-complete { text-align: center; padding: 24px; background: var(--gold-dim); border-top: 1px solid var(--gold); display: none; }',
     '#dd-portal .dd-checklist-complete.visible { display: block; }',
-    '#dd-portal .dd-checklist-complete p { font-size: 13px; color: var(--gold); }',
     '#dd-portal .dd-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }',
     '#dd-portal .dd-upload-card { border: 1px solid var(--border); background: var(--surface); overflow: hidden; }',
     '#dd-portal .dd-upload-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
@@ -232,8 +248,6 @@
     '#dd-portal .dd-tab-content { display: none; }',
     '#dd-portal .dd-tab-content.active { display: block; }',
     '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
-    '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
-    // Create project panel styles
     '#dd-portal .dd-create-project { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); }',
     '#dd-portal .dd-create-project.visible { display: flex; }',
     '#dd-portal .dd-create-project-body { flex: 1; padding: 40px 32px; max-width: 860px; width: 100%; margin: 0 auto; }',
@@ -248,10 +262,8 @@
     '#dd-portal .dd-create-input:focus { border-color: var(--gold); }',
     '#dd-portal .dd-create-input::placeholder { color: var(--muted); }',
     '#dd-portal .dd-create-textarea { resize: vertical; min-height: 120px; line-height: 1.7; }',
-    '#dd-portal .dd-create-select-wrap { position: relative; }',
-    '#dd-portal .dd-create-select-wrap::after { content: "▾"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }',
     '#dd-portal .dd-create-msg { font-size: 12px; min-height: 20px; margin-bottom: 12px; }',
-
+    '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 600px) {',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
@@ -262,6 +274,8 @@
     '  #dd-portal .dd-status-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-selector-content { padding: 24px 16px; }',
     '  #dd-portal .dd-project-card { flex-direction: column; align-items: flex-start; }',
+    '  #dd-portal .dd-create-grid { grid-template-columns: 1fr; }',
+    '  #dd-portal .dd-create-project-body { padding: 24px 16px; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
@@ -279,7 +293,7 @@
     '    <div class="dd-login-header"><div class="dd-login-logo">Daydream</div><div class="dd-login-sub">Design + Build &mdash; Atlanta, Georgia</div></div>',
     '    <div class="dd-login-body">',
     '      <div class="dd-login-title">Access Your Portal</div>',
-    '      <div class="dd-login-desc">Enter your email address and we will send you a secure one-click link to sign in to your project portal.</div>',
+    '      <div class="dd-login-desc">Enter your email address and we will send you a secure one-click link to sign in.</div>',
     '      <div class="dd-input-wrap"><label class="dd-input-label">Email Address</label><input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" /></div>',
     '      <button class="dd-btn" id="ddLoginBtn">Send Login Link</button>',
     '      <div class="dd-msg" id="ddLoginMsg"></div>',
@@ -287,14 +301,17 @@
     '  </div>',
     '</div>',
 
-    // PROJECT SELECTOR (contractor view)
+    // PROJECT SELECTOR
     '<div id="ddProjectSelector" class="dd-project-selector">',
     '  <nav class="dd-selector-nav">',
     '    <div class="dd-selector-logo">Daydream</div>',
     '    <button class="dd-nav-logout" id="ddSelectorLogout">Sign Out</button>',
     '  </nav>',
     '  <div class="dd-selector-content">',
-    '    <div class="dd-selector-title" id="ddSelectorTitle">Your Projects</div>',
+    '    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">',
+    '      <div class="dd-selector-title" id="ddSelectorTitle" style="margin-bottom:0">Your Projects</div>',
+    '      <button class="dd-cal-btn" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px">+ New Project</button>',
+    '    </div>',
     '    <div class="dd-selector-sub" id="ddSelectorSub">Select a project to view its portal</div>',
     '    <div class="dd-project-cards" id="ddProjectCards"></div>',
     '  </div>',
@@ -303,7 +320,10 @@
     // DASHBOARD
     '<div id="ddDashboard" class="dd-dashboard">',
     '  <nav class="dd-nav">',
-    '    <div class="dd-nav-logo">Daydream</div>',
+    '    <div class="dd-nav-left">',
+    '      <div class="dd-nav-logo">Daydream</div>',
+    '      <div class="dd-nav-project-name" id="ddNavProjectName"></div>',
+    '    </div>',
     '    <div class="dd-nav-right">',
     '      <span class="dd-nav-user" id="ddNavUser"></span>',
     '      <button class="dd-nav-back" id="ddNavBack">&#8592; All Projects</button>',
@@ -324,19 +344,27 @@
     '    <div class="dd-tab-content active" id="tab-overview">',
     '      <div class="dd-section-title" id="ddProjectTitle">Your Project</div>',
     '      <div class="dd-section-sub" id="ddProjectAddress">Welcome to your Daydream client portal</div>',
-    '      <div class="dd-welcome-card"><div class="dd-welcome-text"><h3>Book Your Discovery Call</h3><p>Schedule a consultation with our design team to discuss your vision, timeline and investment in detail.</p></div><a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a></div>',
+    '      <div class="dd-welcome-card">',
+    '        <div class="dd-welcome-text"><h3>Book Your Discovery Call</h3><p>Schedule a consultation with our design team to discuss your vision, timeline and investment.</p></div>',
+    '        <div style="display:flex;flex-direction:column;gap:8px">',
+    '          <a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a>',
+    '          <button class="dd-cal-btn outline" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px">+ New Project</button>',
+    '        </div>',
+    '      </div>',
     '      <div class="dd-cards">',
     '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
-    '        <div class="dd-card"><div class="dd-card-label">Primary Service</div><div class="dd-card-value" id="ddService" style="font-size:14px">—</div></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Project Type</div><div class="dd-card-value" id="ddProjectType" style="font-size:14px">—</div></div>',
     '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
     '      </div>',
     '      <div class="dd-status-grid">',
     '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div></div>',
     '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div></div>',
     '      </div>',
-    '      <div class="dd-services-card" id="ddServicesCard" style="display:none;border:1px solid var(--border);background:var(--surface);margin-bottom:32px">',
-    '        <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Your Project Services</div>',
-    '        <div id="ddServicesList"></div>',
+    '      <div id="ddServicesCard" style="display:none;margin-bottom:32px">',
+    '        <div style="border:1px solid var(--border);">',
+    '          <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Services</div>',
+    '          <div id="ddServicesList"></div>',
+    '        </div>',
     '      </div>',
     '      <div class="dd-timeline"><div class="dd-timeline-header">Project Timeline</div><div id="ddTimeline"></div></div>',
     '    </div>',
@@ -355,7 +383,7 @@
     // UPLOADS
     '    <div class="dd-tab-content" id="tab-uploads">',
     '      <div class="dd-section-title">Document Uploads</div>',
-    '      <div class="dd-section-sub">Upload your project documents below. You can upload HOA Bylaws under House Plans or Survey.</div>',
+    '      <div class="dd-section-sub">Upload your project documents below. Max file size: 100MB each.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Straight-on shots of the house and project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
@@ -382,93 +410,84 @@
     '      <div class="dd-section-title">Schedule a Meeting</div>',
     '      <div class="dd-section-sub">Book time with the Daydream team</div>',
     '      <div class="dd-cards">',
-    '        <div class="dd-card"><div class="dd-card-label">Discovery Consultation</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion and vision alignment</div><a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a></div>',
-    '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review designs and discuss feedback and changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Discovery Consultation</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion</div><a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a></div>',
+    '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review and discuss design changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
     '      </div>',
     '    </div>',
 
-    // DRIVE
+    // PROJECT FILES
     '    <div class="dd-tab-content" id="tab-drive">',
     '      <div class="dd-section-title">Project Files</div>',
-    '      <div class="dd-section-sub">Access your shared project folders below</div>',
+    '      <div class="dd-section-sub">Access your shared project folders</div>',
     '      <div id="ddDriveList"></div>',
     '    </div>',
 
     '  </div>',
     '</div>',
 
-    // ── CREATE PROJECT PANEL ──────────────────────────────────────
+    // CREATE PROJECT PANEL
     '<div id="ddCreateProject" class="dd-create-project">',
     '  <nav class="dd-nav">',
     '    <div class="dd-nav-left"><div class="dd-nav-logo">Daydream</div></div>',
-    '    <div class="dd-nav-right">',
-    '      <button class="dd-nav-logout" onclick="window._hideCreateProject()">&#8592; Back</button>',
-    '    </div>',
+    '    <div class="dd-nav-right"><button class="dd-nav-logout" onclick="window._hideCreateProject()">&#8592; Back</button></div>',
     '  </nav>',
     '  <div class="dd-create-project-body">',
     '    <div class="dd-section-title">Create New Project</div>',
-    '    <div class="dd-section-sub">Fill in the details below to create a new project.</div>',
-
+    '    <div class="dd-section-sub">Fill in the details below. Required fields are marked *.</div>',
     '    <div class="dd-create-section">',
     '      <div class="dd-create-section-title">Project Details</div>',
     '      <div class="dd-create-grid">',
     '        <div class="dd-create-field dd-create-full"><div class="dd-create-label">Project Name *</div><input class="dd-create-input" id="cpName" type="text" placeholder="e.g. Backyard Renovation" /></div>',
-    '        <div class="dd-create-field"><div class="dd-create-label">Project Type *</div><div class="dd-create-select-wrap"><select class="dd-create-input" id="cpType"><option value="">Select type...</option><option value="full_yard">Full Yard</option><option value="front_yard">Front Yard</option><option value="backyard">Backyard</option><option value="custom">Custom / Other</option></select></div></div>',
+    '        <div class="dd-create-field"><div class="dd-create-label">Project Type *</div><select class="dd-create-input" id="cpType"><option value="">Select type...</option><option value="full_yard">Full Yard</option><option value="front_yard">Front Yard</option><option value="backyard">Backyard</option><option value="custom">Custom / Other</option></select></div>',
     '        <div class="dd-create-field"><div class="dd-create-label">Investment / Budget *</div><input class="dd-create-input" id="cpBudget" type="text" placeholder="e.g. $75,000" /></div>',
     '        <div class="dd-create-field dd-create-full"><div class="dd-create-label">Project Address *</div><input class="dd-create-input" id="cpAddress" type="text" placeholder="123 Main St, Atlanta GA" /></div>',
     '        <div class="dd-create-field"><div class="dd-create-label">Start Date</div><input class="dd-create-input" id="cpStartDate" type="date" /></div>',
     '        <div class="dd-create-field"><div class="dd-create-label">End Date</div><input class="dd-create-input" id="cpEndDate" type="date" /></div>',
     '      </div>',
     '    </div>',
-
     '    <div class="dd-create-section">',
     '      <div class="dd-create-section-title">Goals & Notes</div>',
     '      <textarea class="dd-create-input dd-create-textarea" id="cpGoals" placeholder="Describe your project goals, must-have features, vision, and any important details..."></textarea>',
     '    </div>',
-
     '    <div class="dd-create-section">',
     '      <div class="dd-create-section-title">File Uploads</div>',
-    '      <div class="dd-create-section-sub">Upload any relevant files for this project. You can add more after the project is created.</div>',
+    '      <div class="dd-create-section-sub">Optional — you can upload more files after the project is created. Max 100MB per file.</div>',
     '      <div class="dd-upload-grid">',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-survey"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos & Videos</div><div class="dd-upload-card-desc">Current site conditions and walkthrough</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.mp4,.mov,.heic" data-category="photos" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-photos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Existing Plans</div><div class="dd-upload-card-desc">Architectural drawings, house plans</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-houseplans"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, references</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-inspo"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-survey"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos & Videos</div><div class="dd-upload-card-desc">Current site conditions</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.mp4,.mov,.heic" data-category="photos" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Existing Plans</div><div class="dd-upload-card-desc">Architectural drawings, house plans</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-houseplans"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest, AI images, references</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-inspo"></div></div></div>',
     '      </div>',
     '    </div>',
-
-    '    <div class="dd-create-section" id="cpSuccessMsg" style="display:none">',
-    '      <div style="background:var(--gold-dim);border:1px solid var(--gold);padding:24px;text-align:center">',
-    '        <div style="font-size:20px;color:var(--gold);margin-bottom:8px">&#10003; Project Created!</div>',
-    '        <div style="font-size:13px;color:var(--muted)">Your project has been created successfully. Redirecting to your projects...</div>',
-    '      </div>',
+    '    <div id="cpSuccessMsg" style="display:none;background:var(--gold-dim);border:1px solid var(--gold);padding:24px;text-align:center;margin-bottom:24px">',
+    '      <div style="font-size:20px;color:var(--gold);margin-bottom:8px">&#10003; Project Created!</div>',
+    '      <div style="font-size:13px;color:var(--muted)">Redirecting to your projects...</div>',
     '    </div>',
-
     '    <div class="dd-create-msg" id="cpMsg"></div>',
     '    <button class="dd-btn" id="cpSubmit" onclick="window._submitCreateProject()">Create Project</button>',
     '    <div style="height:60px"></div>',
     '  </div>',
     '</div>'
-
   ].join('\n');
 
   // ── STATE ─────────────────────────────────────────────────────────
-  var currentUser = null;
-  var currentClient = null;      // The client record we're viewing
-  var allClientProjects = [];    // All projects for a contractor
-  var currentProject = null;     // The DB project record
-  var isContractor = false;
+  var currentUser    = null;
+  var currentClient  = null;
+  var allClientProjects = [];
+  var currentProject = null;
+  var isContractor   = false;
   var checklistState = {};
-  var notesState = {};
+  var notesState     = {};
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
-  function showLogin() { hideLoading(); document.getElementById('ddLoginWrap').classList.add('visible'); }
+  function showLogin()   { hideLoading(); document.getElementById('ddLoginWrap').classList.add('visible'); }
 
   function showProjectSelector() {
     hideLoading();
     document.getElementById('ddLoginWrap').classList.remove('visible');
     document.getElementById('ddDashboard').classList.remove('visible');
+    document.getElementById('ddCreateProject').classList.remove('visible');
     document.getElementById('ddProjectSelector').classList.add('visible');
   }
 
@@ -476,25 +495,23 @@
     hideLoading();
     document.getElementById('ddLoginWrap').classList.remove('visible');
     document.getElementById('ddProjectSelector').classList.remove('visible');
+    document.getElementById('ddCreateProject').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
-    // Show back button for contractors
     var backBtn = document.getElementById('ddNavBack');
     if (isContractor && backBtn) backBtn.classList.add('visible');
-    // Show client/project name
     var navUser = document.getElementById('ddNavUser');
-    if (navUser) {
-      if (isContractor && currentClient) navUser.textContent = currentClient.full_name || currentUser.email;
-      else if (currentClient) navUser.textContent = currentClient.full_name || currentUser.email;
-      else navUser.textContent = currentUser.email;
+    if (navUser) navUser.textContent = currentClient ? (currentClient.full_name || currentUser.email) : currentUser.email;
+    var navProject = document.getElementById('ddNavProjectName');
+    if (navProject && isContractor && allClientProjects.length > 1) {
+      navProject.textContent = currentClient ? (currentClient.full_name || '') : '';
+      navProject.classList.add('visible');
     }
   }
 
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
-  function serviceLabel(key) {
-    var map = { '2d_concept': '2D Concept', '3d_concept': '3D Concept', '2d_3d_concept': '2D + 3D Concept', 'permit_plan': 'Permit Plan', '2d_3d_permit': '2D + 3D + Permit' };
-    return map[key] || key || '—';
-  }
+  function serviceLabel(key) { return key || '—'; }
+
   function apiFetch(path, options) {
     var opts = options || {};
     opts.headers = opts.headers || {};
@@ -504,7 +521,7 @@
     return fetch(SUPABASE_URL + path, opts);
   }
 
-  // ── RENDER FUNCTIONS ──────────────────────────────────────────────
+  // ── RENDER ────────────────────────────────────────────────────────
   function renderTimeline(clientStage) {
     var currentIdx = getStageIndex(clientStage || 'inquiry_submitted');
     document.getElementById('ddTimeline').innerHTML = TIMELINE.map(function(stage, idx) {
@@ -512,17 +529,17 @@
       var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
       var labelClass = (isDone || isActive) ? '' : 'muted';
       var badge = isActive ? '<div class="dd-timeline-badge">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
-      return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + dotClass + '"></div><div class="dd-timeline-label ' + labelClass + '">' + stage.label + '</div>' + badge + '</div>';
+      return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + dotClass + '"></div><div class="dd-timeline-label ' + labelClass + '">' + s(stage.label) + '</div>' + badge + '</div>';
     }).join('');
   }
 
   function renderStatusBadges(client) {
-    var contractKey = (client && client.contract_status) || 'not_sent';
-    var paymentKey = (client && client.payment_status) || 'not_sent';
-    var contract = CONTRACT_LABELS[contractKey] || CONTRACT_LABELS['not_sent'];
-    var payment = PAYMENT_LABELS[paymentKey] || PAYMENT_LABELS['not_sent'];
-    document.getElementById('ddContractStatus').innerHTML = '<span class="dd-status-badge" style="color:' + contract.color + ';border-color:' + contract.color + ';background:' + contract.color + '18">' + contract.label + '</span>';
-    document.getElementById('ddPaymentStatus').innerHTML = '<span class="dd-status-badge" style="color:' + payment.color + ';border-color:' + payment.color + ';background:' + payment.color + '18">' + payment.label + '</span>';
+    var ck = (client && client.contract_status) || 'not_sent';
+    var pk = (client && client.payment_status) || 'not_sent';
+    var contract = CONTRACT_LABELS[ck] || CONTRACT_LABELS['not_sent'];
+    var payment  = PAYMENT_LABELS[pk] || PAYMENT_LABELS['not_sent'];
+    document.getElementById('ddContractStatus').innerHTML = '<span class="dd-status-badge" style="color:' + contract.color + ';border-color:' + contract.color + ';background:' + contract.color + '18">' + s(contract.label) + '</span>';
+    document.getElementById('ddPaymentStatus').innerHTML  = '<span class="dd-status-badge" style="color:' + payment.color + ';border-color:' + payment.color + ';background:' + payment.color + '18">' + s(payment.label) + '</span>';
   }
 
   function renderDriveLinks(client) {
@@ -534,7 +551,7 @@
     ].filter(function(l) { return client && client[l.key]; });
     if (!links.length) { container.innerHTML = '<div class="dd-drive-empty">Your project files will appear here once your project is active.</div>'; return; }
     container.innerHTML = '<div class="dd-drive-list">' + links.map(function(l) {
-      return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + l.label + '</div><div class="dd-drive-item-sub">' + l.sub + '</div></div><a href="' + client[l.key] + '" target="_blank" class="dd-drive-link">Open Folder</a></div>';
+      return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + s(l.label) + '</div><div class="dd-drive-item-sub">' + s(l.sub) + '</div></div><a href="' + s(client[l.key]) + '" target="_blank" class="dd-drive-link">Open Folder</a></div>';
     }).join('') + '</div>';
   }
 
@@ -546,19 +563,10 @@
     card.style.display = 'block';
     var STATUS_COLORS = { 'pending': '#8a8680', 'in_progress': '#eeb24a', 'complete': '#6a9e7a' };
     var STATUS_LABELS = { 'pending': 'Pending', 'in_progress': 'In Progress', 'complete': 'Complete' };
-    list.innerHTML = '<div class="dd-services-grid">'
-      + services.map(function(s) {
-          var color = STATUS_COLORS[s.status] || '#8a8680';
-          var label = STATUS_LABELS[s.status] || s.status;
-          return '<div class="dd-service-tile">'
-            + '<div class="dd-service-tile-name">' + s.service_name + '</div>'
-            + '<div class="dd-service-tile-status">'
-            + '<div class="dd-service-tile-dot" style="background:' + color + '"></div>'
-            + '<div class="dd-service-tile-label" style="color:' + color + '">' + label + '</div>'
-            + '</div>'
-            + '</div>';
-        }).join('')
-      + '</div>';
+    list.innerHTML = '<div class="dd-services-grid">' + services.map(function(sv) {
+      var color = STATUS_COLORS[sv.status] || '#8a8680';
+      return '<div class="dd-service-tile"><div class="dd-service-tile-name">' + s(sv.service_name) + '</div><div class="dd-service-tile-status"><div class="dd-service-tile-dot" style="background:' + color + '"></div><div class="dd-service-tile-label" style="color:' + color + '">' + s(STATUS_LABELS[sv.status] || sv.status) + '</div></div></div>';
+    }).join('') + '</div>';
   }
 
   function renderChecklist() {
@@ -567,218 +575,77 @@
     container.innerHTML = CHECKLIST_ITEMS.map(function(item) {
       var isDone = checklistState[item.key] === true;
       if (isDone) doneCount++;
-      var noteContent = notesState[item.key] || '';
+      var noteContent = s(notesState[item.key] || '');
       var noteArea = item.type === 'note'
-        ? '<div class="dd-note-area" id="note-area-' + item.key + '"><textarea class="dd-note-textarea" id="note-' + item.key + '" placeholder="Share your project goals, must-have features, style preferences...">' + noteContent + '</textarea><button class="dd-note-save" onclick="window._saveNote(\'' + item.key + '\')">Save</button></div>'
+        ? '<div class="dd-note-area" id="note-area-' + item.key + '"><textarea class="dd-note-textarea" id="note-' + item.key + '" placeholder="Share your project goals...">' + noteContent + '</textarea><button class="dd-note-save" onclick="window._saveNote(\'' + item.key + '\')">Save</button></div>'
         : '';
-      return '<div class="dd-checklist-item"><div class="dd-checklist-row" onclick="window._toggleCheckItem(\'' + item.key + '\')"><div class="dd-check-circle' + (isDone ? ' done' : '') + '" id="check-circle-' + item.key + '"></div><div class="dd-check-info"><div class="dd-check-label' + (isDone ? ' done' : '') + '" id="check-label-' + item.key + '">' + item.label + '</div><div class="dd-check-desc">' + item.desc + '</div>' + (item.type === 'upload' ? '<div class="dd-check-tag">Upload in Documents tab</div>' : '<div class="dd-check-tag">Fill in below</div>') + '</div></div>' + noteArea + '</div>';
+      return '<div class="dd-checklist-item"><div class="dd-checklist-row" onclick="window._toggleCheckItem(\'' + item.key + '\')"><div class="dd-check-circle' + (isDone ? ' done' : '') + '" id="check-circle-' + item.key + '"></div><div class="dd-check-info"><div class="dd-check-label' + (isDone ? ' done' : '') + '" id="check-label-' + item.key + '">' + s(item.label) + '</div><div class="dd-check-desc">' + s(item.desc) + '</div>' + (item.type === 'upload' ? '<div class="dd-check-tag">Upload in Documents tab</div>' : '<div class="dd-check-tag">Fill in below</div>') + '</div></div>' + noteArea + '</div>';
     }).join('');
     document.getElementById('ddCheckCount').textContent = doneCount;
-    var completeBanner = document.getElementById('ddChecklistComplete');
-    if (doneCount === CHECKLIST_ITEMS.length) completeBanner.classList.add('visible');
-    else completeBanner.classList.remove('visible');
+    if (doneCount === CHECKLIST_ITEMS.length) document.getElementById('ddChecklistComplete').classList.add('visible');
+    else document.getElementById('ddChecklistComplete').classList.remove('visible');
     CHECKLIST_ITEMS.forEach(function(item) {
       if (item.type === 'note') { var area = document.getElementById('note-area-' + item.key); if (area) area.classList.add('visible'); }
     });
-    // Update checklist tab badge
     var remaining = CHECKLIST_ITEMS.length - doneCount;
     var tab = document.querySelector('[data-tab="checklist"]');
-    if (tab) {
-      var badge = tab.querySelector('.dd-tab-badge');
-      if (remaining > 0) { if (!badge) { badge = document.createElement('span'); badge.className = 'dd-tab-badge'; tab.appendChild(badge); } badge.textContent = remaining; }
-      else if (badge) badge.remove();
-    }
+    if (tab) { var badge = tab.querySelector('.dd-tab-badge'); if (remaining > 0) { if (!badge) { badge = document.createElement('span'); badge.className = 'dd-tab-badge'; tab.appendChild(badge); } badge.textContent = remaining; } else if (badge) badge.remove(); }
   }
 
   // ── PROJECT SELECTOR ──────────────────────────────────────────────
   async function loadContractorProjects() {
     try {
-      // Get all clients with this email (contractor has multiple client records — one per project)
-      var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
-      var clients = await res.json();
-      allClientProjects = clients || [];
+      // FIX: case-insensitive email lookup
+      var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email.toLowerCase()) + '&order=created_at.desc');
+      var clients = await res.json() || [];
+      allClientProjects = clients;
 
       if (!allClientProjects.length) {
-        // No projects yet — show empty state
         document.getElementById('ddProjectCards').innerHTML = '<div class="dd-empty" style="padding:40px 0">No active projects yet. Your Daydream team will set these up for you.</div>';
-        showProjectSelector();
-        return;
+        showProjectSelector(); return;
       }
 
-      if (allClientProjects.length === 1 && !isContractor) {
-        // Single project — go straight to dashboard
-        await loadProjectDashboard(allClientProjects[0]);
-        return;
+      // Also load from projects table
+      var allProjects = [];
+      for (var i = 0; i < allClientProjects.length; i++) {
+        try {
+          var pRes = await apiFetch('/rest/v1/projects?client_id=eq.' + allClientProjects[i].id + '&order=created_at.desc');
+          var projs = await pRes.json() || [];
+          projs.forEach(function(p) { p._clientRecord = allClientProjects[i]; p._isProjectRecord = true; allProjects.push(p); });
+        } catch(e) { console.error('Load projects for client:', e); }
       }
 
-      // Multiple projects — show selector
+      if (allClientProjects.length === 1 && !isContractor && !allProjects.length) {
+        await loadProjectDashboard(allClientProjects[0]); return;
+      }
+
       var name = allClientProjects[0].full_name || currentUser.email;
       var company = allClientProjects[0].company_name;
       document.getElementById('ddSelectorTitle').textContent = company ? company : name + '\'s Projects';
       document.getElementById('ddSelectorSub').textContent = 'Select a project to view its full portal';
 
-      document.getElementById('ddProjectCards').innerHTML = allClientProjects.map(function(c) {
-        var address = [c.street, c.city, c.state].filter(Boolean).join(', ') || 'Address not set';
-        var service = serviceLabel(c.project_type);
-        var stageLabel = c.client_stage ? c.client_stage.replace(/_/g, ' ') : 'New Inquiry';
-        return '<div class="dd-project-card" onclick="window._selectProject(\'' + c.id + '\')">'
-          + '<div class="dd-project-card-info">'
-          + '  <div class="dd-project-card-name">' + (c.full_name || 'Project') + '</div>'
-          + '  <div class="dd-project-card-address">&#128205; ' + address + '</div>'
-          + '  <div class="dd-project-card-meta">'
-          + '    <div class="dd-project-card-tag">' + service + '</div>'
-          + '    <div class="dd-project-card-tag">' + stageLabel + '</div>'
-          + (c.investment ? '<div class="dd-project-card-tag">' + c.investment + '</div>' : '')
-          + '  </div>'
-          + '</div>'
-          + '<div class="dd-project-card-arrow">&#8594;</div>'
-          + '</div>';
-      }).join('');
-
-      showProjectSelector();
-    } catch(e) { console.error('Load projects error:', e); showLogin(); }
-  }
-
-  // ── CREATE PROJECT PANEL ─────────────────────────────────────────
-  window._showCreateProject = function() {
-    var panel = document.getElementById('ddCreateProject');
-    if (panel) panel.classList.add('visible');
-    // Hide other panels
-    document.getElementById('ddProjectSelector').classList.remove('visible');
-    document.getElementById('ddDashboard').classList.remove('visible');
-  };
-
-  window._hideCreateProject = function() {
-    var panel = document.getElementById('ddCreateProject');
-    if (panel) panel.classList.remove('visible');
-    // Reset form
-    ['cpName','cpBudget','cpAddress','cpGoals'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
-    var type = document.getElementById('cpType'); if (type) type.value = '';
-    var start = document.getElementById('cpStartDate'); if (start) start.value = '';
-    var end = document.getElementById('cpEndDate'); if (end) end.value = '';
-    var msg = document.getElementById('cpMsg'); if (msg) msg.textContent = '';
-    var success = document.getElementById('cpSuccessMsg'); if (success) success.style.display = 'none';
-    // Reset upload statuses
-    ['survey','photos','houseplans','inspo'].forEach(function(cat) {
-      var el = document.getElementById('cp-status-' + cat); if (el) el.textContent = '';
-    });
-    // Go back to project selector
-    if (allClientProjects.length > 1 || isContractor) showProjectSelector();
-    else if (currentClient) showDashboard();
-    else showLogin();
-  };
-
-  // Legacy alias
-  window._showPortalAddProject = window._showCreateProject;
-  window._hidePortalAddProject = window._hideCreateProject;
-
-  window._submitCreateProject = async function() {
-    var name = document.getElementById('cpName').value.trim();
-    var type = document.getElementById('cpType').value;
-    var budget = document.getElementById('cpBudget').value.trim();
-    var address = document.getElementById('cpAddress').value.trim();
-    var goals = document.getElementById('cpGoals').value.trim();
-    var startDate = document.getElementById('cpStartDate').value;
-    var endDate = document.getElementById('cpEndDate').value;
-    var msg = document.getElementById('cpMsg');
-    var btn = document.getElementById('cpSubmit');
-
-    // Validation
-    if (!name) { msg.textContent = 'Project name is required.'; msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
-    if (!address) { msg.textContent = 'Project address is required.'; msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
-    if (!budget) { msg.textContent = 'Investment / budget is required.'; msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
-
-    if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
-    var clientId = (currentClient || allClientProjects[0]).id;
-
-    btn.textContent = 'Creating Project...'; btn.disabled = true;
-    msg.textContent = '';
-
-    try {
-      var res = await apiFetch('/rest/v1/projects', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify({
-          client_id: clientId,
-          project_name: name,
-          project_type: type || null,
-          project_address: address || null,
-          description: goals || null,
-          start_date: startDate || null,
-          end_date: endDate || null,
-          status: 'active'
-        })
+      var cards = '';
+      allProjects.forEach(function(p) {
+        var typeLabel = PROJECT_TYPE_LABELS[p.project_type] || p.project_type || '—';
+        cards += '<div class="dd-project-card" onclick="window._selectProjectRecord(\'' + p.id + '\')">'
+          + '<div class="dd-project-card-info"><div class="dd-project-card-name">' + s(p.project_name || 'Project') + '</div>'
+          + (p.project_address ? '<div class="dd-project-card-address">&#128205; ' + s(p.project_address) + '</div>' : '')
+          + '<div class="dd-project-card-meta"><div class="dd-project-card-tag">' + s(typeLabel) + '</div>' + (p.status ? '<div class="dd-project-card-tag">' + s(p.status) + '</div>' : '') + '</div></div>'
+          + '<div class="dd-project-card-arrow">&#8594;</div></div>';
+      });
+      allClientProjects.forEach(function(c) {
+        var address = [c.street, c.city, c.state].filter(Boolean).join(', ') || '';
+        cards += '<div class="dd-project-card" onclick="window._selectProject(\'' + c.id + '\')">'
+          + '<div class="dd-project-card-info"><div class="dd-project-card-name">' + s(c.full_name || 'Project') + '</div>'
+          + (address ? '<div class="dd-project-card-address">&#128205; ' + s(address) + '</div>' : '')
+          + '<div class="dd-project-card-meta"><div class="dd-project-card-tag">' + s(serviceLabel(c.project_type)) + '</div>' + (c.investment ? '<div class="dd-project-card-tag">' + s(c.investment) + '</div>' : '') + '</div></div>'
+          + '<div class="dd-project-card-arrow">&#8594;</div></div>';
       });
 
-      if (res.ok) {
-        var projData = await res.json();
-        var newProjectId = projData && projData[0] ? projData[0].id : null;
-
-        // Upload any pending files
-        if (newProjectId) {
-          await window._uploadCreateProjectFiles(clientId, newProjectId);
-        }
-
-        // Show success
-        var successMsg = document.getElementById('cpSuccessMsg');
-        if (successMsg) successMsg.style.display = 'block';
-        btn.textContent = 'Project Created!'; btn.style.background = 'var(--success)';
-
-        // Refresh and navigate after delay
-        setTimeout(function() {
-          window._hideCreateProject();
-          loadContractorProjects();
-        }, 2000);
-      } else {
-        var errText = await res.text();
-        console.error('Create project error:', errText);
-        msg.textContent = 'Error creating project. Please try again.'; msg.style.color = 'var(--error)';
-        btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
-      }
-    } catch(e) {
-      console.error('Create project exception:', e);
-      msg.textContent = 'Something went wrong. Please try again.'; msg.style.color = 'var(--error)';
-      btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
-    }
-  };
-
-  // Upload files for new project
-  window._uploadCreateProjectFiles = async function(clientId, projectId) {
-    var inputs = document.querySelectorAll('.dd-cp-file-input');
-    var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : (currentUser ? currentUser.email : 'unknown');
-    for (var i = 0; i < inputs.length; i++) {
-      var input = inputs[i];
-      var files = Array.from(input.files || []);
-      var category = input.dataset.category;
-      var statusEl = document.getElementById('cp-status-' + category);
-      if (!files.length) continue;
-      if (statusEl) statusEl.textContent = 'Uploading ' + files.length + ' file(s)...';
-      var uploaded = 0;
-      for (var j = 0; j < files.length; j++) {
-        var file = files[j];
-        var path = clientName + '/' + category + '/' + Date.now() + '_' + file.name;
-        try {
-          var upRes = await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/client-documents/' + path, {
-            method: 'POST',
-            headers: { 'apikey': 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Authorization': 'Bearer ' + (currentUser ? currentUser.access_token : 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU'), 'Content-Type': file.type },
-            body: file
-          });
-          if (upRes.ok) {
-            uploaded++;
-            await apiFetch('/rest/v1/documents', {
-              method: 'POST',
-              headers: { 'Prefer': 'return=minimal' },
-              body: JSON.stringify({ project_id: projectId, file_name: file.name, file_url: path, uploaded_by: currentUser ? currentUser.email : 'client' })
-            });
-          }
-        } catch(e) { console.error('File upload error:', e); }
-      }
-      if (statusEl) statusEl.textContent = uploaded === files.length ? uploaded + ' file(s) uploaded' : uploaded + '/' + files.length + ' uploaded';
-    }
-  };
-
-  // Legacy submit alias
-  window._submitPortalProject = window._submitCreateProject;
+      document.getElementById('ddProjectCards').innerHTML = cards || '<div class="dd-empty" style="padding:40px 0">No projects found.</div>';
+      showProjectSelector();
+    } catch(e) { console.error('loadContractorProjects:', e); showLogin(); }
+  }
 
   window._selectProject = async function(clientId) {
     var client = allClientProjects.find(function(c) { return c.id === clientId; });
@@ -786,8 +653,31 @@
     await loadProjectDashboard(client);
   };
 
+  window._selectProjectRecord = async function(projectId) {
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/projects?id=eq.' + projectId + '&select=*,clients(*)', {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (currentUser.access_token || SUPABASE_KEY) }
+      });
+      var data = await res.json() || [];
+      if (data[0]) {
+        var proj = data[0];
+        var client = proj.clients;
+        var merged = Object.assign({}, client, {
+          full_name: proj.project_name || client.full_name,
+          street: proj.project_address || client.street,
+          project_type_category: proj.project_type,
+          drive_design_link: proj.drive_design_link || client.drive_design_link,
+          drive_permit_link: proj.drive_permit_link || client.drive_permit_link,
+          drive_construction_link: proj.drive_construction_link || client.drive_construction_link,
+          _projectId: proj.id
+        });
+        currentProject = proj;
+        await loadProjectDashboard(merged);
+      }
+    } catch(e) { console.error('_selectProjectRecord:', e); }
+  };
+
   document.getElementById('ddNavBack').addEventListener('click', function() {
-    // Reset dashboard tabs
     document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
     document.querySelector('[data-tab="overview"]').classList.add('active');
@@ -800,58 +690,41 @@
   async function loadProjectDashboard(client) {
     currentClient = client;
     try {
-      // Always fetch fresh client data to reflect admin changes
+      // Always fetch fresh data to reflect admin changes
       var freshRes = await apiFetch('/rest/v1/clients?id=eq.' + client.id);
-      var freshData = await freshRes.json();
-      if (freshData && freshData[0]) {
-        // Merge fresh data preserving any portal-specific overrides
-        client = Object.assign({}, freshData[0], {
-          _projectId: client._projectId,
-          _projectGoals: client._projectGoals
-        });
+      var freshData = await freshRes.json() || [];
+      if (freshData[0]) {
+        client = Object.assign({}, freshData[0], { _projectId: client._projectId });
         currentClient = client;
-        // Update cached version too
         var idx = allClientProjects.findIndex(function(c) { return c.id === client.id; });
         if (idx > -1) allClientProjects[idx] = client;
       }
-    } catch(e) {}
+    } catch(e) { console.error('Fresh client fetch:', e); }
+
     try {
-      // Update overview
       var title = document.getElementById('ddProjectTitle');
       var addrEl = document.getElementById('ddProjectAddress');
       if (title) title.textContent = client.full_name || 'Your Project';
-      if (addrEl) {
-        var addr = [client.street, client.city, client.state].filter(Boolean).join(', ');
-        addrEl.textContent = addr || 'Welcome to your Daydream client portal';
-      }
+      if (addrEl) { var addr = [client.street, client.city, client.state].filter(Boolean).join(', '); addrEl.textContent = addr || 'Welcome to your Daydream client portal'; }
       document.getElementById('ddStatus').textContent = client.status || 'New Inquiry';
-      document.getElementById('ddService').textContent = serviceLabel(client.project_type);
       document.getElementById('ddSince').textContent = formatDate(client.created_at);
+      var ptEl = document.getElementById('ddProjectType');
+      if (ptEl) ptEl.textContent = PROJECT_TYPE_LABELS[client.project_type_category] || client.project_type_category || '—';
       renderTimeline(client.client_stage || 'inquiry_submitted');
       renderStatusBadges(client);
       renderDriveLinks(client);
-
-      // Load services
       try {
         var svcRes = await apiFetch('/rest/v1/client_services?client_id=eq.' + client.id + '&order=created_at.asc');
-        var svcs = await svcRes.json();
-        renderServices(svcs || []);
-      } catch(e) {}
-
-      // Load checklist
+        renderServices(await svcRes.json() || []);
+      } catch(e) { console.error('Load services:', e); }
       await loadChecklistData();
-
-      // Load project
       var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + client.id + '&limit=1');
-      var projData = await projRes.json();
-      if (projData && projData[0]) currentProject = projData[0];
-
-      // Load messages
+      var projData = await projRes.json() || [];
+      if (projData[0]) currentProject = projData[0];
       loadMessages();
-
       showDashboard();
-    } catch(e) { console.error('Project load error:', e); }
-  }  // end loadProjectDashboard
+    } catch(e) { console.error('loadProjectDashboard:', e); }
+  }
 
   async function loadChecklistData() {
     if (!currentClient) return;
@@ -860,41 +733,33 @@
         apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id),
         apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id)
       ]);
-      var checks = await checkRes.json();
-      var notes = await noteRes.json();
-      checklistState = {};
-      notesState = {};
-      if (checks) checks.forEach(function(c) { checklistState[c.item_key] = c.completed; });
-      if (notes) notes.forEach(function(n) { notesState[n.note_key] = n.content; });
+      var checks = await checkRes.json() || [];
+      var notes  = await noteRes.json() || [];
+      checklistState = {}; notesState = {};
+      checks.forEach(function(c) { checklistState[c.item_key] = c.completed; });
+      notes.forEach(function(n)  { notesState[n.note_key] = n.content; });
       renderChecklist();
     } catch(e) { renderChecklist(); }
   }
 
   async function loadMessages() {
     try {
-      var url = currentClient
-        ? '/rest/v1/messages?client_id=eq.' + currentClient.id + '&order=created_at.asc'
-        : '/rest/v1/messages?sender=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.asc';
+      var url = '/rest/v1/messages?client_id=eq.' + (currentClient ? currentClient.id : '') + '&order=created_at.asc';
       var res = await apiFetch(url);
-      var msgs = await res.json();
+      var msgs = await res.json() || [];
       var list = document.getElementById('ddMessagesList');
-      if (!msgs || !msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>'; return; }
+      if (!msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>'; return; }
       list.innerHTML = msgs.map(function(m) {
         var isMe = m.sender !== 'daydream_team';
-        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + m.content + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
+        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + s(m.content) + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
       }).join('');
       list.scrollTop = list.scrollHeight;
-      // Notification dot
       var lastRead = 0;
       try { lastRead = parseInt(sessionStorage.getItem('dd_msgs_last_read') || '0'); } catch(e) {}
       var unread = msgs.filter(function(m) { return m.sender === 'daydream_team' && new Date(m.created_at).getTime() > lastRead; }).length;
       var tab = document.querySelector('[data-tab="messages"]');
-      if (tab) {
-        var dot = tab.querySelector('.dd-msg-dot');
-        if (unread > 0) { if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; tab.appendChild(dot); } dot.textContent = unread; }
-        else if (dot) dot.remove();
-      }
-    } catch(e) {}
+      if (tab) { var dot = tab.querySelector('.dd-msg-dot'); if (unread > 0) { if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; tab.appendChild(dot); } dot.textContent = unread; } else if (dot) dot.remove(); }
+    } catch(e) { console.error('loadMessages:', e); }
   }
 
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
@@ -908,30 +773,12 @@
         var res = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken } });
         var user = await res.json();
         if (user && user.email) {
-          currentUser = { access_token: accessToken, email: (user.email || '').toLowerCase(), id: user.id };
+          currentUser = { access_token: accessToken, email: user.email, id: user.id };
           try { sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
           history.replaceState(null, '', window.location.pathname);
           return true;
         }
-      } catch(e) {}
-      return false;
-    }
-    var otpToken = params.get('token');
-    var type = params.get('type');
-    if (otpToken && type === 'magiclink') {
-      try {
-        history.replaceState(null, '', window.location.pathname);
-        var verifyRes = await fetch(SUPABASE_URL + '/auth/v1/verify', {
-          method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: otpToken, type: 'magiclink' })
-        });
-        var verifyData = await verifyRes.json();
-        if (verifyData.access_token) {
-          currentUser = { access_token: verifyData.access_token, email: verifyData.user.email, id: verifyData.user.id };
-          try { sessionStorage.setItem('dd_token', verifyData.access_token); } catch(e) {}
-          return true;
-        }
-      } catch(e) {}
+      } catch(e) { console.error('tryTokenFromUrl:', e); }
     }
     return false;
   }
@@ -953,23 +800,14 @@
   async function init() {
     var fromUrl = await tryTokenFromUrl();
     if (!fromUrl) { var fromSession = await tryTokenFromSession(); if (!fromSession) { showLogin(); return; } }
-
-    // Check if contractor (multiple projects) or regular client
-    var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
-    var clients = await res.json();
-    allClientProjects = clients || [];
-
+    var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email.toLowerCase()) + '&order=created_at.desc');
+    var clients = await res.json() || [];
+    allClientProjects = clients;
     if (!allClientProjects.length) { showLogin(); return; }
-
     isContractor = allClientProjects.length > 1 || (allClientProjects[0] && allClientProjects[0].is_contractor);
-
-    if (isContractor || allClientProjects.length > 1) {
-      await loadContractorProjects();
-    } else {
-      await loadProjectDashboard(allClientProjects[0]);
-    }
+    if (isContractor || allClientProjects.length > 1) await loadContractorProjects();
+    else await loadProjectDashboard(allClientProjects[0]);
   }
-
   init();
 
   // ── LOGIN ─────────────────────────────────────────────────────────
@@ -990,15 +828,12 @@
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
 
   // ── LOGOUT ────────────────────────────────────────────────────────
-  window._goToAddProject = function() {
-    window._showCreateProject();
-  };
-
   function doLogout() {
     try { sessionStorage.removeItem('dd_token'); } catch(e) {}
     currentUser = null; currentClient = null; currentProject = null; isContractor = false;
     document.getElementById('ddDashboard').classList.remove('visible');
     document.getElementById('ddProjectSelector').classList.remove('visible');
+    document.getElementById('ddCreateProject').classList.remove('visible');
     showLogin();
   }
   document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
@@ -1014,8 +849,7 @@
       if (target) target.classList.add('active');
       if (tab.dataset.tab === 'messages') {
         try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
-        var dot = tab.querySelector('.dd-msg-dot');
-        if (dot) dot.remove();
+        var dot = tab.querySelector('.dd-msg-dot'); if (dot) dot.remove();
       }
     });
   });
@@ -1027,19 +861,15 @@
     if (item.type === 'note') { var area = document.getElementById('note-area-' + key); if (area) { area.classList.toggle('visible'); return; } }
     var newState = !checklistState[key];
     checklistState[key] = newState;
-    var circle = document.getElementById('check-circle-' + key);
-    var label = document.getElementById('check-label-' + key);
-    if (circle) circle.classList.toggle('done', newState);
-    if (label) label.classList.toggle('done', newState);
     try {
       var existing = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
-      var data = await existing.json();
-      if (data && data.length > 0) {
+      var data = await existing.json() || [];
+      if (data.length > 0) {
         await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
       } else {
         await apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
       }
-    } catch(e) {}
+    } catch(e) { console.error('_toggleCheckItem:', e); }
     renderChecklist();
   };
 
@@ -1051,43 +881,48 @@
     if (content && !checklistState[key]) checklistState[key] = true;
     try {
       var existing = await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key);
-      var data = await existing.json();
-      if (data && data.length > 0) {
+      var data = await existing.json() || [];
+      if (data.length > 0) {
         await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ content: content, updated_at: new Date().toISOString() }) });
       } else {
         await apiFetch('/rest/v1/client_notes', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, note_key: key, content: content }) });
       }
       var saveBtn = document.querySelector('#note-area-' + key + ' .dd-note-save');
-      if (saveBtn) { saveBtn.textContent = 'Saved!'; saveBtn.style.background = 'var(--success)'; setTimeout(function() { saveBtn.textContent = 'Save'; saveBtn.style.background = 'var(--gold)'; }, 2000); }
+      if (saveBtn) { saveBtn.textContent = 'Saved!'; saveBtn.style.background = 'var(--success)'; setTimeout(function() { if(saveBtn){saveBtn.textContent='Save'; saveBtn.style.background='var(--gold)';} }, 2000); }
       renderChecklist();
-      var ta = document.getElementById('note-' + key);
-      if (ta) ta.value = content;
-      var area = document.getElementById('note-area-' + key);
-      if (area) area.classList.add('visible');
-    } catch(e) {}
+      var ta = document.getElementById('note-' + key); if (ta) ta.value = content;
+      var area = document.getElementById('note-area-' + key); if (area) area.classList.add('visible');
+    } catch(e) { console.error('_saveNote:', e); }
   };
 
-  // ── FILE UPLOADS ──────────────────────────────────────────────────
+  // ── FILE UPLOADS — FIX 3: Validation + FIX 7: Parallel uploads ───
   document.querySelectorAll('#dd-portal .dd-file-input').forEach(function(input) {
     input.addEventListener('change', async function() {
       var files = Array.from(this.files);
       var category = this.dataset.category;
       var statusEl = document.getElementById('status-' + category);
       if (!files.length || !currentUser) return;
+      // Validate all files first
+      for (var vi = 0; vi < files.length; vi++) {
+        var err = validateFile(files[vi]);
+        if (err) { statusEl.textContent = err; statusEl.style.color = 'var(--error)'; return; }
+      }
       statusEl.textContent = 'Uploading ' + files.length + ' file(s)...';
       statusEl.style.color = 'var(--muted)';
       var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
-      var uploaded = 0;
-      for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        var path = clientName + '/' + category + '/' + Date.now() + '_' + file.name;
+
+      // FIX 7: Parallel uploads using Promise.all
+      var uploadResults = await Promise.all(files.map(async function(file) {
+        var path = clientName + '/' + category + '/' + Date.now() + '_' + safeName(file.name);
         try {
           var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
-            method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type }, body: file
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
+            body: file
           });
           if (res.ok) {
-            uploaded++;
             await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
+            // Auto-complete checklist item
             var checkItem = CHECKLIST_ITEMS.find(function(ci) { return ci.category === category; });
             if (checkItem && currentClient && !checklistState[checkItem.key]) {
               checklistState[checkItem.key] = true;
@@ -1096,9 +931,13 @@
               });
               renderChecklist();
             }
+            return true;
           }
-        } catch(e) {}
-      }
+          return false;
+        } catch(e) { console.error('Upload error:', e); return false; }
+      }));
+
+      var uploaded = uploadResults.filter(Boolean).length;
       statusEl.textContent = uploaded === files.length ? uploaded + ' file(s) uploaded successfully' : uploaded + ' of ' + files.length + ' uploaded';
       statusEl.style.color = uploaded === files.length ? 'var(--success)' : 'var(--error)';
     });
@@ -1113,8 +952,108 @@
     try {
       await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, sender: currentUser.email, content: content, is_read: false }) });
       await loadMessages();
-    } catch(e) {}
+    } catch(e) { console.error('Send message:', e); }
   });
   document.getElementById('ddMessageInput').addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); } });
+
+  // ── CREATE PROJECT PANEL ──────────────────────────────────────────
+  window._showCreateProject = function() {
+    var panel = document.getElementById('ddCreateProject');
+    if (panel) panel.classList.add('visible');
+    document.getElementById('ddProjectSelector').classList.remove('visible');
+    document.getElementById('ddDashboard').classList.remove('visible');
+  };
+
+  window._hideCreateProject = function() {
+    var panel = document.getElementById('ddCreateProject');
+    if (panel) panel.classList.remove('visible');
+    ['cpName','cpBudget','cpAddress','cpGoals'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    var type = document.getElementById('cpType'); if (type) type.value = '';
+    var start = document.getElementById('cpStartDate'); if (start) start.value = '';
+    var end   = document.getElementById('cpEndDate');   if (end)   end.value = '';
+    var msg   = document.getElementById('cpMsg');       if (msg)   msg.textContent = '';
+    var succ  = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'none';
+    var btn   = document.getElementById('cpSubmit');    if (btn) { btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = ''; }
+    if (allClientProjects.length > 1 || isContractor) showProjectSelector();
+    else if (currentClient) showDashboard();
+    else showLogin();
+  };
+
+  window._submitCreateProject = async function() {
+    var name    = document.getElementById('cpName').value.trim();
+    var type    = document.getElementById('cpType').value;
+    var budget  = document.getElementById('cpBudget').value.trim();
+    var address = document.getElementById('cpAddress').value.trim();
+    var goals   = document.getElementById('cpGoals').value.trim();
+    var startDate = document.getElementById('cpStartDate').value;
+    var endDate   = document.getElementById('cpEndDate').value;
+    var msg = document.getElementById('cpMsg');
+    var btn = document.getElementById('cpSubmit');
+    if (!name)    { msg.textContent = 'Project name is required.';         msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
+    if (!address) { msg.textContent = 'Project address is required.';      msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
+    if (!budget)  { msg.textContent = 'Investment / budget is required.';  msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
+    if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
+    var clientId = (currentClient || allClientProjects[0]).id;
+    btn.textContent = 'Creating Project...'; btn.disabled = true; msg.textContent = '';
+    try {
+      var res = await apiFetch('/rest/v1/projects', {
+        method: 'POST', headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({ client_id: clientId, project_name: name, project_type: type||null, project_address: address||null, description: goals||null, start_date: startDate||null, end_date: endDate||null, status: 'active' })
+      });
+      if (res.ok) {
+        var projData = await res.json() || [];
+        var newProjectId = projData[0] ? projData[0].id : null;
+        // FIX 7: Parallel file uploads for new project
+        if (newProjectId) {
+          var inputs = document.querySelectorAll('.dd-cp-file-input');
+          var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
+          var allUploadPromises = [];
+          inputs.forEach(function(input) {
+            var files = Array.from(input.files || []);
+            var category = input.dataset.category;
+            var statusEl = document.getElementById('cp-status-' + category);
+            if (!files.length) return;
+            // Validate
+            for (var vi = 0; vi < files.length; vi++) {
+              var verr = validateFile(files[vi]);
+              if (verr) { if (statusEl) { statusEl.textContent = verr; statusEl.style.color = 'var(--error)'; } return; }
+            }
+            if (statusEl) statusEl.textContent = 'Uploading...';
+            files.forEach(function(file) {
+              var path = clientName + '/' + category + '/' + Date.now() + '_' + safeName(file.name);
+              allUploadPromises.push(
+                fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
+                  method: 'POST',
+                  headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
+                  body: file
+                }).then(function(r) {
+                  if (r.ok) return apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: newProjectId, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
+                }).catch(function(e) { console.error('cp upload error:', e); })
+              );
+            });
+          });
+          await Promise.all(allUploadPromises);
+          // Update upload status labels
+          inputs.forEach(function(input) {
+            var cat = input.dataset.category;
+            var st = document.getElementById('cp-status-' + cat);
+            if (st && input.files && input.files.length > 0) { st.textContent = input.files.length + ' file(s) uploaded'; st.style.color = 'var(--success)'; }
+          });
+        }
+        var succ = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'block';
+        btn.textContent = 'Project Created!'; btn.style.background = 'var(--success)';
+        setTimeout(function() { window._hideCreateProject(); loadContractorProjects(); }, 2000);
+      } else {
+        var errText = await res.text();
+        console.error('Create project error:', errText);
+        msg.textContent = 'Error creating project. Please try again.'; msg.style.color = 'var(--error)';
+        btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
+      }
+    } catch(e) {
+      console.error('_submitCreateProject:', e);
+      msg.textContent = 'Something went wrong.'; msg.style.color = 'var(--error)';
+      btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
+    }
+  };
 
 })();
