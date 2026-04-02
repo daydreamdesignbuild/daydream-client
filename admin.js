@@ -1012,7 +1012,7 @@
     if (!clientId)  { msg.textContent = 'Please select a client.';         msg.className = 'da-modal-msg error'; return; }
     if (!address)   { msg.textContent = 'Project address is required.';    msg.className = 'da-modal-msg error'; document.getElementById('apAddress').focus(); return; }
     if (!name)      { msg.textContent = 'Project name is required.';       msg.className = 'da-modal-msg error'; document.getElementById('apProjectName').focus(); return; }
-    if (!investment){ msg.textContent = 'Please select an investment level.'; msg.className = 'da-modal-msg error'; document.getElementById('apInvestment').focus(); return; }
+    if (!investment){ msg.textContent = 'Please enter an investment / budget level.'; msg.className = 'da-modal-msg error'; document.getElementById('apInvestment').focus(); return; }
 
     var btn = document.getElementById('apSubmit');
     btn.disabled = true; btn.textContent = 'Creating...'; msg.textContent = '';
