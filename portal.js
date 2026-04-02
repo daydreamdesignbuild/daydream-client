@@ -114,7 +114,10 @@
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }',
+    '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 20px; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
+    '#dd-portal .dd-nav-project-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 4px 12px; border: 1px solid var(--border); display: none; }',
+    '#dd-portal .dd-nav-project-name.visible { display: block; }',
     '#dd-portal .dd-nav-right { display: flex; align-items: center; gap: 16px; }',
     '#dd-portal .dd-nav-user { font-size: 11px; color: var(--muted); }',
     '#dd-portal .dd-nav-back { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); cursor: pointer; background: none; border: 1px solid var(--gold); padding: 6px 14px; transition: background 0.2s, color 0.2s; display: none; }',
@@ -518,7 +521,7 @@
   async function loadContractorProjects() {
     try {
       // Get all clients with this email (contractor has multiple client records — one per project)
-      var res = await apiFetch('/rest/v1/clients?email=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
+      var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
       var clients = await res.json();
       allClientProjects = clients || [];
 
@@ -675,7 +678,7 @@
         var res = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken } });
         var user = await res.json();
         if (user && user.email) {
-          currentUser = { access_token: accessToken, email: user.email, id: user.id };
+          currentUser = { access_token: accessToken, email: (user.email || '').toLowerCase(), id: user.id };
           try { sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
           history.replaceState(null, '', window.location.pathname);
           return true;
@@ -722,7 +725,7 @@
     if (!fromUrl) { var fromSession = await tryTokenFromSession(); if (!fromSession) { showLogin(); return; } }
 
     // Check if contractor (multiple projects) or regular client
-    var res = await apiFetch('/rest/v1/clients?email=eq.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
+    var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email) + '&order=created_at.desc');
     var clients = await res.json();
     allClientProjects = clients || [];
 
