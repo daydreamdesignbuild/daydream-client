@@ -261,10 +261,15 @@
     '#dd-admin .da-modal-submit { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity 0.2s; }',
     '#dd-admin .da-modal-submit:hover { opacity: 0.85; }',
     '#dd-admin .da-modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }',
-    '#dd-admin .da-modal-svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }',
-    '#dd-admin .da-modal-svc-label { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text); cursor: pointer; padding: 7px 10px; border: 1px solid var(--border); transition: background 0.15s, border-color 0.15s; }',
-    '#dd-admin .da-modal-svc-label:hover { border-color: var(--gold); background: var(--gold-dim); }',
-    '#dd-admin .da-modal-svc-label input { accent-color: var(--gold); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }',
+    '#dd-admin .da-multiselect { position: relative; width: 100%; }',
+    '#dd-admin .da-multiselect-trigger { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: border-color 0.2s; user-select: none; }',
+    '#dd-admin .da-multiselect-trigger:hover { border-color: var(--gold); }',
+    '#dd-admin .da-multiselect-menu { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--gold); border-top: none; z-index: 500; max-height: 240px; overflow-y: auto; }',
+    '#dd-admin .da-multiselect-option { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; font-size: 12px; color: var(--text); transition: background 0.15s; }',
+    '#dd-admin .da-multiselect-option:hover { background: var(--gold-dim); }',
+    '#dd-admin .da-multiselect-option.selected { background: var(--gold-dim); color: var(--gold); }',
+    '#dd-admin .da-multiselect-option input { accent-color: var(--gold); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }',
+
 
     // Checklist tab
     '#dd-admin .da-checklist-wrap { padding: 24px 32px; }',
@@ -364,15 +369,23 @@
     '        <div class="da-modal-field"><label class="da-field-label">Email *</label><input class="da-field-input" type="email" id="acEmail" placeholder="client@email.com" /></div>',
     '        <div class="da-modal-field"><label class="da-field-label">Phone</label><input class="da-field-input" type="text" id="acPhone" placeholder="404-555-0123" /></div>',
     '        <div class="da-modal-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
-    '        <div class="da-modal-field"><label class="da-field-label">Service</label><select class="da-field-input" id="acService"><option value="">Select service...</option>' + ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('') + '</select></div>',
+
     '        <div class="da-modal-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
     '        <div class="da-modal-field"><label class="da-field-label">How Did They Hear About Us?</label><select class="da-field-input" id="acReferral"><option value="">Select...</option><option>Google Search</option><option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>YouTube</option><option>Houzz</option><option>Nextdoor</option><option>Referral — Friend or Family</option><option>Referral — Past Client</option><option>Yard Sign / Drove By</option><option>Home Show / Event</option><option>Other</option></select></div>',
     '        <div class="da-modal-field"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
     '        <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
     '      </div>',
-    '      <div class="da-modal-field" style="margin-bottom:16px"><label class="da-field-label" style="margin-bottom:8px;display:block">Project Services</label><div class="da-modal-svc-grid" id="acServicesGrid">'
-    + ALL_SERVICES.map(function(s) { return ''; }).join('') // placeholder rendered by JS
-    + '</div><input class="da-field-input" id="acCustomService" type="text" placeholder="Custom service (optional)..." style="margin-top:8px" /></div>',
+    '      <div class="da-modal-field" style="margin-bottom:16px;grid-column:1/-1">',
+    '        <label class="da-field-label" style="margin-bottom:8px;display:block">Project Services</label>',
+    '        <div class="da-multiselect" id="acServicesDropdown">',
+    '          <div class="da-multiselect-trigger" id="acServicesToggle" onclick="window._toggleSvcDropdown()">',
+    '            <span id="acServicesLabel">Select services...</span>',
+    '            <span style="color:var(--muted)">&#9660;</span>',
+    '          </div>',
+    '          <div class="da-multiselect-menu" id="acServicesMenu" style="display:none"></div>',
+    '        </div>',
+    '        <input class="da-field-input" id="acCustomService" type="text" placeholder="Custom service (optional)..." style="margin-top:8px" />',
+    '      </div>',
     '      <div class="da-modal-check"><input type="checkbox" id="acContractor" /><label for="acContractor">This is a contractor (will have multiple projects)</label></div>',
     '      <div class="da-modal-check"><input type="checkbox" id="acSendEmail" checked /><label for="acSendEmail">Send welcome email with portal access link</label></div>',
     '      <div class="da-modal-msg" id="acMsg"></div>',
@@ -746,7 +759,7 @@
     var email = document.getElementById('acEmail').value.trim();
     var phone = document.getElementById('acPhone').value.trim();
     var company = document.getElementById('acCompany').value.trim();
-    var service = document.getElementById('acService').value;
+    var service = '';
     var investment = document.getElementById('acInvestment').value.trim();
     var referral = document.getElementById('acReferral').value;
     var street = document.getElementById('acStreet').value.trim();
@@ -795,11 +808,14 @@
         }
         ['acName','acEmail','acPhone','acCompany','acInvestment','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
         if (document.getElementById('acCustomService')) document.getElementById('acCustomService').value = '';
-        document.getElementById('acService').value = '';
+
         document.getElementById('acContractor').checked = false;
         document.getElementById('acReferral').value = '';
-        // Uncheck all services
+        // Reset services dropdown
         document.querySelectorAll('.ac-svc-check').forEach(function(cb) { cb.checked = false; });
+        document.querySelectorAll('.da-multiselect-option').forEach(function(el) { el.classList.remove('selected'); });
+        var lbl = document.getElementById('acServicesLabel'); if (lbl) lbl.textContent = 'Select services...';
+        var menu = document.getElementById('acServicesMenu'); if (menu) menu.style.display = 'none';
         await loadClients();
         setTimeout(function() { document.getElementById('daAddClientModal').classList.remove('visible'); msg.textContent = ''; }, 2500);
       } else { msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error'; }
