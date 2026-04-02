@@ -418,6 +418,18 @@
 
   // ── STATE ─────────────────────────────────────────────────────────
   var allClients = [];
+
+  // Expose apiFetch globally so onclick handlers can use it
+  window._apiFetch = function(path, options) {
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    var opts = options || {};
+    opts.headers = opts.headers || {};
+    opts.headers['apikey'] = SKEY;
+    opts.headers['Authorization'] = 'Bearer ' + SKEY;
+    opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json';
+    return fetch(SURL + path, opts);
+  };
   var allMessages = [];
   var allChecklists = {};
   var allNotes = {};
@@ -743,11 +755,39 @@
     var d = document.getElementById('note-discussion-' + id);
     var ds = document.getElementById('note-design-' + id);
     var c = document.getElementById('note-construction-' + id);
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
     try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ admin_notes_general: g ? g.value : null, admin_notes_discussion: d ? d.value : null, admin_notes_design: ds ? ds.value : null, admin_notes_construction: c ? c.value : null }) });
+      var res = await fetch(SURL + '/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SKEY,
+          'Authorization': 'Bearer ' + SKEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          admin_notes_general: g ? g.value : null,
+          admin_notes_discussion: d ? d.value : null,
+          admin_notes_design: ds ? ds.value : null,
+          admin_notes_construction: c ? c.value : null
+        })
+      });
       var card = document.getElementById('card-' + id);
-      if (card) { var btn = card.querySelector('[onclick*="_saveAdminNotes"]'); if (btn) { btn.textContent = 'Notes Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Save Notes'; btn.style.background = 'var(--gold)'; }, 2000); } }
-    } catch(e) {}
+      if (card) {
+        var btn = card.querySelector('[onclick*="_saveAdminNotes"]');
+        if (btn) {
+          if (res.ok) {
+            btn.textContent = 'Notes Saved!';
+            btn.style.background = 'var(--success)';
+          } else {
+            btn.textContent = 'Error saving';
+            btn.style.background = 'var(--error)';
+          }
+          setTimeout(function() { btn.textContent = 'Save Notes'; btn.style.background = 'var(--gold)'; }, 2000);
+        }
+      }
+    } catch(e) { console.error('Save notes error:', e); }
   };
 
   // ── SEARCH & FILTER ───────────────────────────────────────────────
