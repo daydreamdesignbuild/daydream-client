@@ -207,6 +207,18 @@
     '#dd-admin .da-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
     '#dd-admin .da-tab-content { display: none; flex: 1; }',
     '#dd-admin .da-tab-content.active { display: block; }',
+    '#dd-admin .da-client-subtabs { display: flex; background: var(--bg); border-bottom: 2px solid var(--border); padding: 0 32px; gap: 0; overflow-x: auto; }',
+    '#dd-admin .da-client-subtab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }',
+    '#dd-admin .da-client-subtab:hover { color: var(--text); }',
+    '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-admin .da-subtab-count { font-size: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }',
+    '#dd-admin .da-client-subtab.active .da-subtab-count { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
+    '#dd-admin .da-client-subtabs { display: flex; background: var(--bg); border-bottom: 2px solid var(--border); padding: 0 32px; gap: 0; overflow-x: auto; }',
+    '#dd-admin .da-client-subtab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }',
+    '#dd-admin .da-client-subtab:hover { color: var(--text); }',
+    '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-admin .da-subtab-count { font-size: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }',
+    '#dd-admin .da-client-subtab.active .da-subtab-count { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
     '#dd-admin .da-toolbar { padding: 20px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }',
     '#dd-admin .da-search { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 16px; outline: none; flex: 1; min-width: 200px; transition: border-color 0.2s; }',
     '#dd-admin .da-search:focus { border-color: var(--gold); }',
@@ -392,11 +404,20 @@
 
     // CLIENTS TAB
     '  <div class="da-tab-content active" id="tab-clients">',
+
+    '    <!-- Client subtabs -->',
+    '    <div class="da-client-subtabs">',
+    '      <button class="da-client-subtab active" data-status="all">All <span class="da-subtab-count" id="cnt-all"></span></button>',
+    '      <button class="da-client-subtab" data-status="active_client">Active <span class="da-subtab-count" id="cnt-active"></span></button>',
+    '      <button class="da-client-subtab" data-status="lead">Leads <span class="da-subtab-count" id="cnt-lead"></span></button>',
+    '      <button class="da-client-subtab" data-status="finished">Finished <span class="da-subtab-count" id="cnt-finished"></span></button>',
+    '      <button class="da-client-subtab" data-status="archived">Archived <span class="da-subtab-count" id="cnt-archived"></span></button>',
+    '    </div>',
+
     '    <div class="da-toolbar">',
     '      <input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." />',
     '      <select class="da-filter" id="daFilter">' + filterOptions + '</select>',
-    '      <select class="da-filter" id="daStatusFilter" style="min-width:180px"><option value="">All Statuses</option><option value="active_client">Active Clients</option><option value="lead">Leads / Not Converted</option><option value="archived">Archived</option></select>',
-    '      <select class="da-filter" id="daCategoryFilter" style="min-width:180px"><option value="">All Categories</option><option value="design_only">Design Only</option><option value="build">Build / Construction</option><option value="full_service">Full Service</option><option value="consultation">Consultation</option></select>',
+    '      <select class="da-filter" id="daCategoryFilter" style="min-width:160px"><option value="">All Categories</option><option value="design_only">Design Only</option><option value="build">Build / Construction</option><option value="full_service">Full Service</option><option value="consultation">Consultation</option></select>',
     '      <div class="da-count" id="daCount"></div>',
     '    </div>',
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
@@ -535,26 +556,56 @@
 
   // FIX 6: Debounced search ──────────────────────────────────────────
   var searchTimeout;
+  var activeSubtab = 'all'; // tracks which subtab is active
+
   function applyFilters() {
-    var q        = (document.getElementById('daSearch').value || '').toLowerCase();
-    var stage    = document.getElementById('daFilter').value;
-    var cStatus  = (document.getElementById('daStatusFilter') || {}).value || '';
-    var cCat     = (document.getElementById('daCategoryFilter') || {}).value || '';
+    var q     = (document.getElementById('daSearch').value || '').toLowerCase();
+    var stage = document.getElementById('daFilter').value;
+    var cCat  = (document.getElementById('daCategoryFilter') || {}).value || '';
     renderCards(allClients.filter(function(c) {
-      var mq   = !q       || (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q) || (c.company_name||'').toLowerCase().includes(q);
-      var ms   = !stage   || c.status === stage;
-      var mcs  = !cStatus || c.client_status === cStatus;
-      var mcat = !cCat    || c.work_category === cCat;
-      return mq && ms && mcs && mcat;
+      var mq  = !q     || (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q) || (c.company_name||'').toLowerCase().includes(q);
+      var ms  = !stage || c.status === stage;
+      var mcat = !cCat || c.work_category === cCat;
+      // Subtab filter
+      var mst = true;
+      if (activeSubtab === 'all') {
+        // "All" hides archived by default — archived must be explicitly selected
+        mst = c.client_status !== 'archived';
+      } else {
+        mst = (c.client_status || 'lead') === activeSubtab;
+      }
+      return mq && ms && mcat && mst;
     }));
+  }
+
+  function updateSubtabCounts() {
+    var counts = { all: 0, active_client: 0, lead: 0, finished: 0, archived: 0 };
+    allClients.forEach(function(c) {
+      var st = c.client_status || 'lead';
+      if (counts[st] !== undefined) counts[st]++;
+      if (st !== 'archived') counts.all++;
+    });
+    Object.keys(counts).forEach(function(key) {
+      var el = document.getElementById('cnt-' + (key === 'active_client' ? 'active' : key));
+      if (el) el.textContent = counts[key] || '';
+    });
   }
   document.getElementById('daSearch').addEventListener('input', function() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(applyFilters, 300);
   });
   document.getElementById('daFilter').addEventListener('change', applyFilters);
-  document.getElementById('daStatusFilter').addEventListener('change', applyFilters);
   document.getElementById('daCategoryFilter').addEventListener('change', applyFilters);
+
+  // Subtab click handlers
+  document.querySelectorAll('#dd-admin .da-client-subtab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('#dd-admin .da-client-subtab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      activeSubtab = tab.dataset.status;
+      applyFilters();
+    });
+  });
 
   // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
@@ -630,6 +681,7 @@
       var res = await apiFetch('/rest/v1/clients?order=created_at.desc');
       allClients = await res.json() || [];
       updateStats();
+      updateSubtabCounts();
       renderCards(allClients);
       checkUnreadMessages();
     } catch(e) { console.error('loadClients error:', e); }
@@ -760,6 +812,8 @@
         + '      <button class="da-email-link" style="cursor:pointer;background:none" id="resend-' + c.id + '" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + s(c.email || '') + '\', \'' + s(c.full_name || '') + '\', this)">Resend Portal Link</button>'
         + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._openAddProjectForClient(\'' + c.id + '\', \'' + s(c.full_name || '') + '\')">+ Add Project</button>'
         + '      <button class="da-email-link" id="contractor-btn-' + c.id + '" style="cursor:pointer;border-color:' + (c.is_contractor ? 'var(--success)' : 'var(--border)') + ';color:' + (c.is_contractor ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + !!c.is_contractor + ')">' + (c.is_contractor ? '✓ Contractor' : 'Mark as Contractor') + '</button>'
+        + (function(){ var cs = c.client_status || 'lead'; var labels = { active_client: '✓ Active', lead: 'Mark Active', archived: '↩ Unarchive', finished: '✓ Finished' }; var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' }; return '<button class="da-email-link" style="cursor:pointer;background:none;color:' + (colors[cs]||'var(--gold)') + ';border-color:' + (colors[cs]||'var(--gold)') + '" id="statusbtn-' + c.id + '" onclick="window._quickStatus(\'' + c.id + '\', \'' + cs + '\')">' + (labels[cs]||'Set Status') + '</button>'; })()
+        + '      <button class="da-email-link" style="cursor:pointer;background:none;color:' + (c.client_status === 'active_client' ? 'var(--success)' : c.client_status === 'archived' ? 'var(--muted)' : 'var(--gold)') + ';border-color:' + (c.client_status === 'active_client' ? 'var(--success)' : c.client_status === 'archived' ? 'var(--border)' : 'var(--gold)') + '" id="statusbtn-' + c.id + '" onclick="window._quickStatus(\'' + c.id + '\', \'' + (c.client_status || 'lead') + '\')">' + (c.client_status === 'active_client' ? '✓ Active Client' : c.client_status === 'archived' ? 'Archived' : c.client_status === 'finished' ? '✓ Finished' : 'Mark Active') + '</button>'
         + '    </div>'
         + '  </div>'
         + '</div>'
@@ -804,6 +858,8 @@
         updateStats();
       }
       if (field === 'client_status') {
+        // Update subtab counts
+        updateSubtabCounts();
         // Update archived dimming
         var card2 = document.getElementById('card-' + id);
         if (card2) { card2.classList.toggle('archived', val === 'archived'); }
@@ -1041,6 +1097,68 @@
       if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; }
     }
     setTimeout(function() { if(btn){ btn.textContent = 'Save Contact Info'; btn.style.background = 'var(--gold)'; btn.disabled = false; } }, 2500);
+  };
+
+  window._quickStatus = async function(id, currentStatus) {
+    // Cycle: lead → active_client → finished → archived → lead
+    var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
+    var newStatus = next[currentStatus] || 'active_client';
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_status: newStatus })
+      });
+      if (!res.ok) { console.error('_quickStatus error:', await res.text()); return; }
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.client_status = newStatus;
+      updateSubtabCounts();
+      // Update button
+      var btn = document.getElementById('statusbtn-' + id);
+      var labels = { active_client: '✓ Active', lead: 'Mark Active', archived: '↩ Unarchive', finished: '✓ Finished' };
+      var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' };
+      if (btn) { btn.textContent = labels[newStatus]||newStatus; btn.style.color = colors[newStatus]||'var(--gold)'; btn.style.borderColor = colors[newStatus]||'var(--gold)'; btn.setAttribute('onclick', 'window._quickStatus(\'' + id + '\', \'' + newStatus + '\')'); }
+      // Update archived dim
+      var card = document.getElementById('card-' + id);
+      if (card) card.classList.toggle('archived', newStatus === 'archived');
+      // If current subtab would hide this card, fade it out
+      if (activeSubtab !== 'all' && activeSubtab !== newStatus) {
+        if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(function() { applyFilters(); }, 300); }
+      }
+      // Show toast
+      var statusNames = { active_client: 'Active Client', lead: 'Lead', archived: 'Archived', finished: 'Finished' };
+      showAdminToast('Status updated → ' + (statusNames[newStatus] || newStatus));
+    } catch(e) { console.error('_quickStatus:', e); }
+  };
+
+  window._quickStatus = async function(id, currentStatus) {
+    var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
+    var newStatus = next[currentStatus] || 'active_client';
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_status: newStatus })
+      });
+      if (!res.ok) { console.error('_quickStatus error:', await res.text()); return; }
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.client_status = newStatus;
+      updateSubtabCounts();
+      var btn = document.getElementById('statusbtn-' + id);
+      var labels = { active_client: '\u2713 Active', lead: 'Mark Active', archived: '\u21a9 Unarchive', finished: '\u2713 Finished' };
+      var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' };
+      if (btn) {
+        btn.textContent = labels[newStatus] || newStatus;
+        btn.style.color = colors[newStatus] || 'var(--gold)';
+        btn.style.borderColor = colors[newStatus] || 'var(--gold)';
+        btn.setAttribute('onclick', "window._quickStatus('" + id + "', '" + newStatus + "')");
+      }
+      var card = document.getElementById('card-' + id);
+      if (card) card.classList.toggle('archived', newStatus === 'archived');
+      if (activeSubtab !== 'all' && activeSubtab !== newStatus) {
+        if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(function() { applyFilters(); }, 300); }
+      }
+      var statusNames = { active_client: 'Active Client', lead: 'Lead', archived: 'Archived', finished: 'Finished' };
+      showAdminToast('Status updated → ' + (statusNames[newStatus] || newStatus));
+    } catch(e) { console.error('_quickStatus:', e); }
   };
 
   window._toggleContractor = async function(id, currentState) {
