@@ -735,13 +735,27 @@
     try {
       var res = await apiFetch('/rest/v1/clients', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ full_name: name, email: email, phone: phone || null, company_name: company || null, project_type: service || null, investment: investment || null, referral: referral || null, street: street || null, notes: notes || null, status: 'client_inquiry_made', client_stage: 'inquiry_submitted', is_contractor: isContractor }) });
       if (res.ok) {
-        msg.textContent = 'Client added successfully!';
+        // If send welcome email is checked — create auth user and send portal invite
+        if (document.getElementById('acSendEmail').checked) {
+          try {
+            await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/functions/v1/invite-client', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+              body: JSON.stringify({ email: email, full_name: name })
+            });
+            msg.textContent = 'Client added and welcome email sent!';
+          } catch(e) {
+            msg.textContent = 'Client added! (Email send failed — check Edge Function logs)';
+          }
+        } else {
+          msg.textContent = 'Client added successfully!';
+        }
         msg.className = 'da-modal-msg success';
         ['acName','acEmail','acPhone','acCompany','acInvestment','acReferral','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
         document.getElementById('acService').value = '';
         document.getElementById('acContractor').checked = false;
         await loadClients();
-        setTimeout(function() { document.getElementById('daAddClientModal').classList.remove('visible'); msg.textContent = ''; }, 2000);
+        setTimeout(function() { document.getElementById('daAddClientModal').classList.remove('visible'); msg.textContent = ''; }, 2500);
       } else { msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error'; }
     } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
     this.disabled = false; this.textContent = 'Add Client';
