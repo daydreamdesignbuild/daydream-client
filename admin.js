@@ -212,6 +212,20 @@
     '#dd-admin .da-service-remove:hover { color: var(--error); border-color: var(--error); }',
     '#dd-admin .da-add-service-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }',
 
+    // Services checklist
+    '#dd-admin .da-svc-checklist-wrap { border: 1px solid var(--border); margin-top: 10px; }',
+    '#dd-admin .da-svc-checklist-header { padding: 10px 14px; background: var(--surface-2); cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); transition: background 0.2s; }',
+    '#dd-admin .da-svc-checklist-header:hover { background: var(--gold-dim); }',
+    '#dd-admin .da-svc-selected-count { font-size: 9px; color: var(--bg); background: var(--gold); padding: 2px 8px; border-radius: 8px; }',
+    '#dd-admin .da-svc-checklist-body { display: none; padding: 12px 14px; border-top: 1px solid var(--border); }',
+    '#dd-admin .da-svc-checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }',
+    '#dd-admin .da-svc-check-label { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text); cursor: pointer; padding: 6px 8px; border: 1px solid var(--border); transition: background 0.15s, border-color 0.15s; }',
+    '#dd-admin .da-svc-check-label:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-admin .da-svc-check-label input { accent-color: var(--gold); width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }',
+    '#dd-admin .da-svc-check-label.da-svc-check-added { opacity: 0.5; cursor: not-allowed; }',
+    '#dd-admin .da-svc-added-tag { margin-left: auto; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--success); }',
+    '#dd-admin .da-svc-custom-row { display: flex; gap: 8px; margin-top: 4px; }',
+
     // Admin Notes
     '#dd-admin .da-notes-tabs { display: flex; gap: 1px; background: var(--border); margin-top: 8px; }',
     '#dd-admin .da-note-tab { flex: 1; background: var(--surface-2); border: none; color: var(--muted); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 10px; cursor: pointer; transition: color 0.2s, background 0.2s; }',
@@ -617,23 +631,41 @@
     }
   }
 
-  window._addService = async function(clientId) {
-    var sel = document.getElementById('svc-select-' + clientId);
+  window._toggleSvcChecklist = function(clientId) {
+    var body = document.getElementById('svc-checklist-body-' + clientId);
+    var label = document.getElementById('svc-checklist-label-' + clientId);
+    if (body) {
+      var isOpen = body.style.display === 'block';
+      body.style.display = isOpen ? 'none' : 'block';
+      if (label) label.textContent = isOpen ? '+ Add Services' : '− Close';
+    }
+  };
+
+  window._addSelectedServices = async function(clientId) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+    var checked = wrap.querySelectorAll('.da-svc-checkbox:not(:disabled):checked');
     var customInput = document.getElementById('svc-custom-input-' + clientId);
-    if (!sel) return;
-    var serviceKey = sel.value;
-    var serviceName = '';
-    if (serviceKey === '__custom__') { serviceName = customInput ? customInput.value.trim() : ''; serviceKey = null; if (!serviceName) return; }
-    else if (serviceKey) { var found = ALL_SERVICES.find(function(s) { return s.key === serviceKey; }); serviceName = found ? found.label : serviceKey; }
-    else { return; }
+    var customName = customInput ? customInput.value.trim() : '';
+    var toAdd = [];
+
+    checked.forEach(function(cb) {
+      toAdd.push({ key: cb.value, label: cb.dataset.label });
+    });
+    if (customName) toAdd.push({ key: null, label: customName });
+    if (!toAdd.length) return;
+
     try {
-      await apiFetch('/rest/v1/client_services', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, service_name: serviceName, service_key: serviceKey, status: 'pending' }) });
+      for (var i = 0; i < toAdd.length; i++) {
+        await apiFetch('/rest/v1/client_services', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ client_id: clientId, service_name: toAdd[i].label, service_key: toAdd[i].key, status: 'pending' })
+        });
+      }
       if (customInput) customInput.value = '';
-      sel.value = '';
-      var d = document.getElementById('svc-custom-' + clientId);
-      if (d) d.style.display = 'none';
       await loadClientServices(clientId);
-    } catch(e) {}
+    } catch(e) { console.error('Add services error:', e); }
   };
 
   window._updateServiceStatus = async function(serviceId, status) {
