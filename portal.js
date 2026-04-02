@@ -239,9 +239,18 @@
     '#dd-portal .dd-message.theirs { align-self: flex-start; }',
     '#dd-portal .dd-message-bubble { padding: 12px 16px; font-size: 13px; line-height: 1.7; }',
     '#dd-portal .dd-message.mine .dd-message-bubble { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); }',
+    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; }',
+    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
     '#dd-portal .dd-message.theirs .dd-message-bubble { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
     '#dd-portal .dd-message-meta { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }',
     '#dd-portal .dd-message.mine .dd-message-meta { text-align: right; }',
+    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 11px; padding: 0 4px; opacity: 0; transition: opacity 0.2s, color 0.2s; vertical-align: middle; }',
+    '#dd-portal .dd-message:hover .dd-msg-del-btn { opacity: 1; }',
+    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
+    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; opacity: 0.6; }',
+    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); opacity: 1; }',
+    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; }',
+    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
     '#dd-portal .dd-messages-input { border-top: 1px solid var(--border); display: flex; }',
     '#dd-portal .dd-messages-input textarea { flex: 1; background: var(--surface-2); border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 16px 20px; resize: none; height: 56px; }',
     '#dd-portal .dd-messages-input textarea::placeholder { color: var(--muted); }',
@@ -277,6 +286,9 @@
     '@media (max-width: 600px) {',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
+    '  #dd-portal .dd-nav-user { display: none; }',
+    '  #dd-portal #ddRefreshBtn { display: none; }',
+    '  #dd-portal .dd-nav-project-name { display: none !important; }',
     '  #dd-portal .dd-tabs { padding: 0 8px; }',
     '  #dd-portal .dd-content { padding: 24px 16px; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
@@ -320,7 +332,7 @@
     '  <div class="dd-selector-content">',
     '    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">',
     '      <div class="dd-selector-title" id="ddSelectorTitle" style="margin-bottom:0">Your Projects</div>',
-    '      <button class="dd-cal-btn" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px">+ New Project</button>',
+    '      <button class="dd-cal-btn" id="ddSelectorNewProjectBtn" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px;display:none">+ New Project</button>',
     '    </div>',
     '    <div class="dd-selector-sub" id="ddSelectorSub">Select a project to view its portal</div>',
     '    <div class="dd-project-cards" id="ddProjectCards"></div>',
@@ -360,7 +372,7 @@
     '        <div class="dd-welcome-text"><h3>Book Your Discovery Call</h3><p>Schedule a consultation with our design team to discuss your vision, timeline and investment.</p></div>',
     '        <div style="display:flex;flex-direction:column;gap:8px">',
     '          <a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a>',
-    '          <button class="dd-cal-btn outline" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px">+ New Project</button>',
+    '          <button class="dd-cal-btn outline" id="ddDashNewProjectBtn" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px;display:none">+ New Project</button>',
     '        </div>',
     '      </div>',
     '      <div class="dd-cards">',
@@ -571,6 +583,9 @@
     document.getElementById('ddDashboard').classList.remove('visible');
     document.getElementById('ddCreateProject').classList.remove('visible');
     document.getElementById('ddProjectSelector').classList.add('visible');
+    // Only show New Project button for contractors
+    var selectorBtn = document.getElementById('ddSelectorNewProjectBtn');
+    if (selectorBtn) selectorBtn.style.display = isContractor ? 'block' : 'none';
   }
 
   function showDashboard() {
@@ -583,6 +598,9 @@
     startRealtime();
     var backBtn = document.getElementById('ddNavBack');
     if (isContractor && backBtn) backBtn.classList.add('visible');
+    // Only show New Project button for contractors
+    var dashBtn = document.getElementById('ddDashNewProjectBtn');
+    if (dashBtn) dashBtn.style.display = isContractor ? 'block' : 'none';
     var navUser = document.getElementById('ddNavUser');
     if (navUser) navUser.textContent = currentClient ? (currentClient.full_name || currentUser.email) : currentUser.email;
     var navProject = document.getElementById('ddNavProjectName');
@@ -803,6 +821,8 @@
         client = Object.assign({}, freshData[0], {
           _projectId: client._projectId,
           _projectGoals: client._projectGoals,
+          // Always use fresh construction_stage from database
+          construction_stage: freshData[0].construction_stage || client.construction_stage,
           // Keep project-table values if they were set
           full_name: client._projectId ? client.full_name : (freshData[0].full_name || client.full_name),
           street: client._projectId ? client.street : (freshData[0].street || client.street),
@@ -911,7 +931,11 @@
       if (!msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>'; return; }
       list.innerHTML = msgs.map(function(m) {
         var isMe = m.sender !== 'daydream_team';
-        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '"><div class="dd-message-bubble">' + s(m.content) + '</div><div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div></div>';
+        var deleteBtn = isMe ? '<button onclick="window._deleteMessage(\'' + m.id + '\')" class="dd-msg-del-btn" title="Delete this message">&#10005;</button>' : '';
+        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '" id="msg-' + m.id + '">'
+          + '<div class="dd-message-bubble">' + s(m.content) + (isMe ? '<span style="margin-left:8px">' + deleteBtn + '</span>' : '') + '</div>'
+          + '<div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div>'
+          + '</div>';
       }).join('');
       list.scrollTop = list.scrollHeight;
       var lastRead = 0;
@@ -1222,6 +1246,28 @@
   });
 
   // ── MESSAGES ──────────────────────────────────────────────────────
+  window._deleteMessage = async function(id) {
+    if (!confirm('Delete this message?')) return;
+    try {
+      var res = await apiFetch('/rest/v1/messages?id=eq.' + id, { method: 'DELETE' });
+      if (res.ok) {
+        var el = document.getElementById('msg-' + id);
+        if (el) { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(function() { if(el.parentNode) el.remove(); }, 300); }
+      } else { console.error('Delete message error:', await res.text()); }
+    } catch(e) { console.error('_deleteMessage:', e); }
+  };
+
+  window._deleteMessage = async function(id) {
+    if (!confirm('Delete this message?')) return;
+    try {
+      var res = await apiFetch('/rest/v1/messages?id=eq.' + id, { method: 'DELETE' });
+      if (res.ok) {
+        var el = document.getElementById('msg-' + id);
+        if (el) el.remove();
+      } else { console.error('Delete message error:', await res.text()); }
+    } catch(e) { console.error('_deleteMessage:', e); }
+  };
+
   document.getElementById('ddSendBtn').addEventListener('click', async function() {
     var input = document.getElementById('ddMessageInput');
     var content = input.value.trim();
