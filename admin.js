@@ -103,7 +103,16 @@
     'houseplans': 'Existing House Architectural Plans'
   };
 
-  // Expose PROJECT_TYPES globally
+  // Project types per spec
+  var PROJECT_TYPES = [
+    { key: 'full_yard',              label: 'Full Yard' },
+    { key: 'front_yard',             label: 'Front Yard' },
+    { key: 'backyard',               label: 'Backyard' },
+    { key: 'outdoor_living',         label: 'Outdoor Living' },
+    { key: 'landscape_construction', label: 'Landscape Construction' },
+    { key: 'pool_and_spa',           label: 'Pool & Spa' },
+    { key: 'custom',                 label: 'Custom / Other' }
+  ];
   window._PROJECT_TYPES = PROJECT_TYPES;
 
   // Expose ALL_SERVICES globally so renderClientServices can access it
@@ -604,11 +613,11 @@
         + '    <div class="da-notes-log" id="notes-log-' + c.id + '"><div class="da-notes-log-empty">No notes yet</div></div>'
         + '    <div class="da-notes-new">'
         + '      <textarea class="da-note-textarea" id="note-new-' + c.id + '" placeholder="Write a note..."></textarea>'
-        + '      <button class="da-update-btn" style="margin-top:8px;width:100%" onclick="window._saveNewNote(\'' + c.id + '\')">Add Note</button>'
+        + '      <button class="da-update-btn" style="margin-top:8px;width:100%" id="note-add-btn-' + c.id + '" onclick="window._saveNewNote(\'' + c.id + '\')">Add Note</button>'
         + '    </div>'
         + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
         + '      <a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a>'
-        + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + (c.email || '') + '\', \'' + (c.full_name || '') + '\')">Resend Portal Link</button>'
+        + '      <button class="da-email-link" style="cursor:pointer;background:none" id="resend-' + c.id + '" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + (c.email || '') + '\', \'' + (c.full_name || '') + '\', this)">Resend Portal Link</button>'
         + (function() { var isC = !!c.is_contractor; return '<button class="da-email-link" style="cursor:pointer;border:1px solid ' + (isC ? 'var(--success)' : 'var(--border)') + ';color:' + (isC ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + isC + ')" id="contractor-btn-' + c.id + '">' + (isC ? '\u2713 Contractor' : 'Mark as Contractor') + '</button>'; })()
         + '    </div>'
         + '  </div>'
@@ -760,13 +769,18 @@
       var res = await fetch(SURL + '/rest/v1/admin_notes', {
         method: 'POST',
         headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ client_id: id, note: noteText, created_at: new Date().toISOString() })
+        body: JSON.stringify({ client_id: id, note: noteText })
       });
+      var btn = document.querySelector('[onclick*="_saveNewNote(\'"][onclick*="' + id + '"]');
+      if (!btn) btn = document.getElementById('note-add-btn-' + id);
       if (res.ok) {
         textarea.value = '';
-        var btn = document.querySelector('[onclick*="_saveNewNote(\'' + id + '\')"]');
-        if (btn) { btn.textContent = 'Note Added!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Add Note'; btn.style.background = 'var(--gold)'; }, 2000); }
+        if (btn) { btn.textContent = 'Note Added!'; btn.style.background = 'var(--success)'; setTimeout(function() { if(btn){btn.textContent = 'Add Note'; btn.style.background = 'var(--gold)';} }, 2000); }
         window._loadNotesLog(id);
+      } else {
+        var errBody = await res.text();
+        console.error('Note save failed:', res.status, errBody);
+        if (btn) { btn.textContent = 'Error — check console'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent = 'Add Note'; btn.style.background = 'var(--gold)';} }, 3000); }
       }
     } catch(e) { console.error('Save note error:', e); }
   };
@@ -1008,11 +1022,9 @@
     } catch(e) { console.error('Project type update error:', e); }
   };
 
-  window._resendPortalAccess = async function(id, email, name) {
+  window._resendPortalAccess = async function(id, email, name, btn) {
     if (!email) return;
-    var btn = event.target;
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
+    if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
     try {
       var res = await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/functions/v1/invite-client', {
         method: 'POST',
@@ -1020,26 +1032,14 @@
         body: JSON.stringify({ email: email, full_name: name })
       });
       var data = await res.json();
-      btn.textContent = data.success ? 'Link Sent!' : 'Error';
-      btn.style.color = data.success ? 'var(--success)' : 'var(--error)';
+      if (btn) { btn.textContent = data.success ? 'Link Sent!' : 'Error'; btn.style.color = data.success ? 'var(--success)' : 'var(--error)'; }
     } catch(e) {
-      btn.textContent = 'Error';
-      btn.style.color = 'var(--error)';
+      if (btn) { btn.textContent = 'Error'; btn.style.color = 'var(--error)'; }
     }
-    setTimeout(function() { btn.textContent = 'Resend Portal Link'; btn.style.color = 'var(--gold)'; btn.disabled = false; }, 3000);
+    setTimeout(function() { if (btn) { btn.textContent = 'Resend Portal Link'; btn.style.color = 'var(--gold)'; btn.disabled = false; } }, 3000);
   };
 
-  window._toggleContractor = async function(id, checked) {
-    try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ is_contractor: checked })
-      });
-      var c = allClients.find(function(x) { return x.id === id; });
-      if (c) c.is_contractor = checked;
-    } catch(e) {}
-  };
+  // duplicate _toggleContractor removed
 
   window._sendReply = async function(clientId, projectId) {
     var textarea = document.getElementById('reply-' + clientId);
