@@ -27,8 +27,10 @@
   }
   function safeName(name) { return name.replace(/[^a-zA-Z0-9._\-]/g, '_'); }
 
+  // Design & Permit Phase Timeline
   var TIMELINE = [
     { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
+    { value: 'in_progress',                  label: 'In Progress' },
     { value: 'discovery_call',               label: 'Discovery Call' },
     { value: 'design_proposal',              label: 'Design Proposal' },
     { value: 'contract_signed',              label: 'Contract Signed' },
@@ -38,12 +40,20 @@
     { value: 'permit_submittal',             label: 'Permit Submittal' },
     { value: 'permit_design_revisions',      label: 'Permit Design Revisions' },
     { value: 'permit_approved',              label: 'Permit Approved' },
-    { value: 'final_deliverables',           label: 'Final Deliverables' },
-    { value: 'construction_start_scheduled', label: 'Construction Start Date Scheduled' },
-    { value: '50_percent_completion',        label: '50% Completion' },
-    { value: '90_percent_completion',        label: '90% Completion' },
-    { value: 'final_walk_through',           label: 'Final Walk Through' },
-    { value: 'project_complete',             label: 'Project Complete' }
+    { value: 'final_deliverables',           label: 'Final Deliverables' }
+  ];
+
+  // Construction Phase Timeline
+  var CONSTRUCTION_TIMELINE = [
+    { value: 'not_started',            label: 'Not Started' },
+    { value: 'pre_site_visit',         label: 'Pre Site Visit' },
+    { value: 'erosion_control',        label: 'Erosion Control / BMP Installed' },
+    { value: 'construction_scheduled', label: 'Construction Start Date Scheduled' },
+    { value: 'completion_30',          label: '30% Completion' },
+    { value: 'completion_60',          label: '60% Completion' },
+    { value: 'completion_90',          label: '90% Completion' },
+    { value: 'final_walk_through',     label: 'Final Walk Through' },
+    { value: 'project_complete',       label: '100% Project Complete' }
   ];
 
   var CONTRACT_LABELS = {
@@ -336,6 +346,7 @@
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
     '    <button class="dd-tab" data-tab="uploads">Documents</button>',
     '    <button class="dd-tab" data-tab="messages">Messages</button>',
+    '    <button class="dd-tab" data-tab="site-photos">Job Site Photos</button>',
     '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '  </div>',
@@ -384,7 +395,14 @@
     '          <div id="ddServicesList"></div>',
     '        </div>',
     '      </div>',
-    '      <div class="dd-timeline"><div class="dd-timeline-header">Project Timeline</div><div id="ddTimeline"></div></div>',
+    '      <div class="dd-timeline" id="ddDesignTimeline">',
+    '        <div class="dd-timeline-header">Design &amp; Permit Phase</div>',
+    '        <div id="ddTimeline"></div>',
+    '      </div>',
+    '      <div class="dd-timeline" id="ddConstructionTimeline" style="margin-top:16px;display:none">',
+    '        <div class="dd-timeline-header" style="color:var(--success);border-bottom-color:var(--success)">Construction Phase</div>',
+    '        <div id="ddConstructionTimelineItems"></div>',
+    '      </div>',
     '    </div>',
 
     // CHECKLIST
@@ -400,11 +418,11 @@
 
     // UPLOADS
     '    <div class="dd-tab-content" id="tab-uploads">',
-    '      <div class="dd-section-title">Document Uploads</div>',
+    '      <div class="dd-section-title">Documents</div>',
     '      <div class="dd-section-sub">Upload your project documents below. Videos up to 5GB supported.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Straight-on shots of the house and project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Upload here — view in Job Site Photos tab</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" id="clientSitePhotoInput" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, reference photos</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans & HOA Bylaws</div><div class="dd-upload-card-desc">Architectural plans, drawings, HOA rules</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
@@ -413,6 +431,12 @@
     '    </div>',
 
     // MESSAGES
+    '    <div class="dd-tab-content" id="tab-site-photos">',
+    '      <div class="dd-section-title">Job Site Photos</div>',
+    '      <div class="dd-section-sub">Photos from your project site, grouped by visit date.</div>',
+    '      <div id="ddSitePhotosList"><div class="dd-empty">Loading photos...</div></div>',
+    '    </div>',
+
     '    <div class="dd-tab-content" id="tab-messages">',
     '      <div class="dd-section-title">Messages</div>',
     '      <div class="dd-section-sub">Communicate directly with the Daydream team</div>',
@@ -580,7 +604,8 @@
   }
 
   // ── RENDER ────────────────────────────────────────────────────────
-  function renderTimeline(clientStage) {
+  function renderTimeline(clientStage, constructionStage) {
+    // Design & Permit timeline
     var currentIdx = getStageIndex(clientStage || 'inquiry_submitted');
     document.getElementById('ddTimeline').innerHTML = TIMELINE.map(function(stage, idx) {
       var isDone = idx < currentIdx, isActive = idx === currentIdx;
@@ -589,6 +614,25 @@
       var badge = isActive ? '<div class="dd-timeline-badge">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
       return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + dotClass + '"></div><div class="dd-timeline-label ' + labelClass + '">' + s(stage.label) + '</div>' + badge + '</div>';
     }).join('');
+
+    // Construction timeline — only show if construction has started
+    var conTimeline = document.getElementById('ddConstructionTimeline');
+    var conItems = document.getElementById('ddConstructionTimelineItems');
+    if (!conTimeline || !conItems) return;
+    if (constructionStage && constructionStage !== 'not_started') {
+      conTimeline.style.display = 'block';
+      var conIdx = CONSTRUCTION_TIMELINE.findIndex(function(t) { return t.value === constructionStage; });
+      if (conIdx === -1) conIdx = 0;
+      conItems.innerHTML = CONSTRUCTION_TIMELINE.map(function(stage, idx) {
+        var isDone = idx < conIdx, isActive = idx === conIdx;
+        var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
+        var labelClass = (isDone || isActive) ? '' : 'muted';
+        var badge = isActive ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
+        return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + (isDone ? 'done' : (isActive ? 'active' : '')) + '" style="' + (isDone || isActive ? 'background:var(--success)' : '') + '"></div><div class="dd-timeline-label ' + labelClass + '">' + s(stage.label) + '</div>' + badge + '</div>';
+      }).join('');
+    } else {
+      conTimeline.style.display = 'none';
+    }
   }
 
   function renderStatusBadges(client) {
@@ -812,7 +856,7 @@
       }
       var ptEl = document.getElementById('ddProjectType');
       if (ptEl) ptEl.textContent = PROJECT_TYPE_LABELS[client.project_type_category] || client.project_type_category || '—';
-      renderTimeline(client.client_stage || 'inquiry_submitted');
+      renderTimeline(client.client_stage || 'inquiry_submitted', client.construction_stage);
       renderStatusBadges(client);
       renderDriveLinks(client);
       // Show project goals/description if set
@@ -943,6 +987,56 @@
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
 
   // ── LOGOUT ────────────────────────────────────────────────────────
+  // ── CLIENT SITE PHOTOS — Load and display grouped by date ─────────
+  async function loadClientSitePhotos() {
+    var container = document.getElementById('ddSitePhotosList');
+    if (!container || !currentClient) return;
+    container.innerHTML = '<div class="dd-empty">Loading photos...</div>';
+    try {
+      // Load ALL photos for this client (uploaded by client AND admin)
+      var res = await apiFetch('/rest/v1/documents?client_id=eq.' + currentClient.id + '&photo_category=eq.site_photos&order=visit_date.desc,created_at.desc');
+      var photos = await res.json() || [];
+
+      if (!photos.length) {
+        container.innerHTML = '<div class="dd-empty" style="padding:48px 0">No site photos yet.<br><span style="font-size:10px;color:var(--muted)">Upload photos in the Documents tab or ask your Daydream team.</span></div>';
+        return;
+      }
+
+      // Group by visit date
+      var groups = {};
+      photos.forEach(function(p) {
+        var d = p.visit_date || p.created_at.split('T')[0];
+        if (!groups[d]) groups[d] = [];
+        groups[d].push(p);
+      });
+
+      container.innerHTML = Object.keys(groups).sort(function(a,b) { return b.localeCompare(a); }).map(function(date) {
+        var datePhotos = groups[date];
+        var d = new Date(date + 'T12:00:00');
+        var dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        var notes = datePhotos[0].photo_notes || '';
+        var uploadedBy = datePhotos[0].uploaded_by === 'daydream_team' ? 'Daydream Team' : 'You';
+        return '<div style="margin-bottom:24px">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:2px solid var(--gold);margin-bottom:12px">'
+          + '  <div><div style="font-family:Cormorant Garamond,serif;font-size:18px;color:var(--gold)">' + dateStr + '</div>'
+          + '  <div style="font-size:10px;color:var(--muted);margin-top:2px">' + datePhotos.length + ' photo(s) · Uploaded by ' + s(uploadedBy) + '</div></div>'
+          + '</div>'
+          + (notes ? '<div style="font-size:12px;color:var(--muted);padding:10px 14px;background:var(--surface);border-left:2px solid var(--gold);margin-bottom:12px;line-height:1.7">' + s(notes) + '</div>' : '')
+          + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">'
+          + datePhotos.map(function(p) {
+              var url = 'https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/public/client-documents/' + p.file_url;
+              return '<div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface-2);border:1px solid var(--border);cursor:pointer" onclick="window.open(\'' + url + '\',\'_blank\')">'
+                + '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML=\'<div style=\\"display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:var(--muted)\\">No preview</div>\'" />'
+                + '</div>';
+            }).join('')
+          + '</div></div>';
+      }).join('');
+    } catch(e) {
+      container.innerHTML = '<div class="dd-empty">Error loading photos. Please refresh.</div>';
+      console.error('loadClientSitePhotos:', e);
+    }
+  }
+
   function doLogout() {
     stopRealtime(); // Clean up WebSocket connections
     try { sessionStorage.removeItem('dd_token'); } catch(e) {}
@@ -970,6 +1064,7 @@
       tab.classList.add('active');
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
+      if (tab.dataset.tab === 'site-photos') { loadClientSitePhotos(); }
       if (tab.dataset.tab === 'messages') {
         try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
         var dot = tab.querySelector('.dd-msg-dot'); if (dot) dot.remove();
@@ -1103,7 +1198,7 @@
             ok = res.ok;
           }
           if (ok) {
-            await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
+            await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email, photo_category: category === 'photos' ? 'site_photos' : null, visit_date: category === 'photos' ? new Date().toISOString().split('T')[0] : null }) });
             // Auto-complete checklist item
             var checkItem = CHECKLIST_ITEMS.find(function(ci) { return ci.category === category; });
             if (checkItem && currentClient && !checklistState[checkItem.key]) {
@@ -1206,7 +1301,7 @@
           currentClient = Object.assign({}, currentClient, updated);
           // Re-render status badges live
           renderStatusBadges(currentClient);
-          renderTimeline(currentClient.client_stage || 'inquiry_submitted');
+          renderTimeline(currentClient.client_stage || 'inquiry_submitted', currentClient.construction_stage);
           // Update pipeline status card
           var PIPELINE_LABELS = {
             'client_inquiry_made': 'New Inquiry', 'client_qualified': 'Qualified',
