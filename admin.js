@@ -70,27 +70,28 @@
   ];
 
   var ALL_SERVICES = [
-    { key: '2d_concept',            label: '2D Concept Phase' },
-    { key: '3d_concept',            label: '3D Concept Phase' },
-    { key: '2d_3d_concept',         label: '2D + 3D Concept Phase' },
-    { key: 'permit_plan',           label: 'Permit Plan Phase' },
-    { key: '2d_3d_permit',          label: '2D + 3D + Permit Plan Phase' },
-    { key: 'site_plans',            label: 'Site Plans' },
-    { key: 'retaining_wall_permit', label: 'Permit Plans — Retaining Walls' },
-    { key: 'deck_permit',           label: 'Permit Plans — Decks' },
-    { key: 'footing_permit',        label: 'Footing Permit Plans' },
-    { key: 'pavilion_permit',       label: 'Permit Plans — Pavilion' },
-    { key: 'shade_structures',      label: 'Shade Structures' },
-    { key: 'pergolas',              label: 'Pergolas' },
-    { key: 'drainage_plans',        label: 'Drainage Plans' },
-    { key: 'planting_plans',        label: 'Planting Plans' },
-    { key: 'irrigation_plans',      label: 'Irrigation Plans' },
-    { key: 'outdoor_audio',         label: 'Outdoor Audio Plans' },
-    { key: 'outdoor_lighting',      label: 'Outdoor Lighting Plans' },
-    { key: 'furniture_layout',      label: 'Outdoor Furniture Layout' },
-    { key: 'grading_plans',         label: 'Grading Plans' },
-    { key: 'stormwater_plans',      label: 'Stormwater Management Plans' },
-    { key: 'site_consultation',     label: 'Site Consultation' }
+    { key: '2d_concept',             label: '2D Concept Phase' },
+    { key: '3d_concept',             label: '3D Concept Phase' },
+    { key: '2d_3d_concept',          label: '2D + 3D Concept Phase' },
+    { key: 'permit_plan',            label: 'Permit Plan Phase' },
+    { key: '2d_3d_permit',           label: '2D + 3D + Permit Plan Phase' },
+    { key: 'site_plans',             label: 'Site Plans' },
+    { key: 'retaining_wall_permit',  label: 'Permit Plans — Retaining Walls' },
+    { key: 'deck_permit',            label: 'Permit Plans — Decks' },
+    { key: 'pavilion_permit',        label: 'Permit Plans — Pavilion' },
+    { key: 'pergola_permit',         label: 'Permit Plans — Pergola' },
+    { key: 'shade_permit',           label: 'Permit Plans — Shade Structures' },
+    { key: 'shade_structures',       label: 'Shade Structures' },
+    { key: 'pergolas',               label: 'Pergolas' },
+    { key: 'drainage_plans',         label: 'Drainage Plans' },
+    { key: 'planting_plans',         label: 'Planting Plans' },
+    { key: 'irrigation_plans',       label: 'Irrigation Plans' },
+    { key: 'outdoor_audio',          label: 'Outdoor Audio Plans' },
+    { key: 'outdoor_lighting',       label: 'Outdoor Lighting Plans' },
+    { key: 'furniture_layout',       label: 'Outdoor Furniture Layout' },
+    { key: 'grading_plans',          label: 'Grading Plans' },
+    { key: 'stormwater_plans',       label: 'Stormwater Management Plans' },
+    { key: 'site_consultation',      label: 'Site Consultation' }
   ];
 
   var CHECKLIST_LABELS = {
@@ -311,7 +312,7 @@
     '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
-    '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 16px; } #dd-admin .da-modal-grid { grid-template-columns: 1fr; } }'
+    '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 16px; } #dd-admin .da-modal-grid { grid-template-columns: 1fr; } #dd-admin .da-svc-checklist-grid { grid-template-columns: 1fr; } }'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -739,17 +740,7 @@
 
   // ── ADD CLIENT MODAL ──────────────────────────────────────────────
   document.getElementById('daAddClientBtn').addEventListener('click', function() {
-    var modal = document.getElementById('daAddClientModal');
-    modal.classList.add('visible');
-    modal.scrollTop = 0;
-    // Render services checklist inside modal
-    var grid = document.getElementById('acServicesGrid');
-    if (grid && !grid.dataset.rendered) {
-      grid.innerHTML = ALL_SERVICES.map(function(s) {
-        return '<label class="da-modal-svc-label"><input type="checkbox" class="ac-svc-check" value="' + s.key + '" data-label="' + s.label + '" />' + s.label + '</label>';
-      }).join('');
-      grid.dataset.rendered = '1';
-    }
+    document.getElementById('daAddClientModal').classList.add('visible');
   });
   document.getElementById('daAddClientClose').addEventListener('click', function() { document.getElementById('daAddClientModal').classList.remove('visible'); });
   document.getElementById('daAddClientModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('visible'); });
