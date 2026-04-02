@@ -566,6 +566,57 @@
     } catch(e) { console.error('Load projects error:', e); showLogin(); }
   }
 
+  window._showPortalAddProject = function() {
+    var form = document.getElementById('ddAddProjectForm');
+    if (form) form.style.display = 'block';
+  };
+
+  window._hidePortalAddProject = function() {
+    var form = document.getElementById('ddAddProjectForm');
+    if (form) form.style.display = 'none';
+    var msg = document.getElementById('ddAddProjMsg');
+    if (msg) msg.textContent = '';
+  };
+
+  window._submitPortalProject = async function() {
+    var name = document.getElementById('ddNewProjectName').value.trim();
+    var type = document.getElementById('ddNewProjectType').value;
+    var address = document.getElementById('ddNewProjectAddress').value.trim();
+    var goals = document.getElementById('ddNewProjectGoals').value.trim();
+    var msg = document.getElementById('ddAddProjMsg');
+    var btn = document.getElementById('ddAddProjSubmit');
+    if (!name) { msg.textContent = 'Please enter a project name.'; msg.style.color = 'var(--error)'; return; }
+    if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
+    var clientId = (currentClient || allClientProjects[0]).id;
+    btn.textContent = 'Creating...'; btn.disabled = true;
+    try {
+      var res = await apiFetch('/rest/v1/projects', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          client_id: clientId,
+          project_name: name,
+          project_type: type || null,
+          project_address: address || null,
+          description: goals || null,
+          status: 'active'
+        })
+      });
+      if (res.ok) {
+        msg.textContent = 'Project created!'; msg.style.color = 'var(--success)';
+        ['ddNewProjectName','ddNewProjectAddress','ddNewProjectGoals'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('ddNewProjectType').value = '';
+        setTimeout(function() {
+          window._hidePortalAddProject();
+          loadContractorProjects(); // Refresh project list
+        }, 1500);
+      } else {
+        msg.textContent = 'Error creating project. Please try again.'; msg.style.color = 'var(--error)';
+      }
+    } catch(e) { msg.textContent = 'Something went wrong.'; msg.style.color = 'var(--error)'; }
+    btn.textContent = 'Create Project'; btn.disabled = false;
+  };
+
   window._selectProject = async function(clientId) {
     var client = allClientProjects.find(function(c) { return c.id === clientId; });
     if (!client) return;
@@ -760,6 +811,13 @@
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
 
   // ── LOGOUT ────────────────────────────────────────────────────────
+  window._goToAddProject = function() {
+    // Switch to project selector with add form open
+    document.getElementById('ddDashboard').classList.remove('visible');
+    showProjectSelector();
+    setTimeout(window._showPortalAddProject, 300);
+  };
+
   function doLogout() {
     try { sessionStorage.removeItem('dd_token'); } catch(e) {}
     currentUser = null; currentClient = null; currentProject = null; isContractor = false;
