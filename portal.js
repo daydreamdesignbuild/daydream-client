@@ -18,9 +18,9 @@
 
   // ── FIX 3: File validation ────────────────────────────────────────
   var ALLOWED_EXTS = ['jpg','jpeg','png','webp','heic','gif','pdf','mp4','mov','avi','mkv','dwg','dxf','txt','doc','docx'];
-  var MAX_FILE_MB  = 100;
+  var MAX_FILE_MB  = 5120; // 5GB — covers drone video and large site plans
   function validateFile(file) {
-    if (file.size > MAX_FILE_MB * 1024 * 1024) return '"' + file.name + '" is too large (max ' + MAX_FILE_MB + 'MB)';
+    if (file.size > MAX_FILE_MB * 1024 * 1024) return '"' + file.name + '" is too large (max 5GB)';
     var ext = (file.name.split('.').pop() || '').toLowerCase();
     if (!ALLOWED_EXTS.includes(ext)) return '"' + file.name + '" — file type not allowed (' + ext + ')';
     return null;
@@ -383,7 +383,7 @@
     // UPLOADS
     '    <div class="dd-tab-content" id="tab-uploads">',
     '      <div class="dd-section-title">Document Uploads</div>',
-    '      <div class="dd-section-sub">Upload your project documents below. Max file size: 100MB each.</div>',
+    '      <div class="dd-section-sub">Upload your project documents below. Videos up to 5GB supported.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Straight-on shots of the house and project area</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
@@ -488,7 +488,7 @@
 
     '    <div class="dd-create-section">',
     '      <div class="dd-create-section-title">File Uploads <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none;font-weight:300">— Optional</span></div>',
-    '      <div class="dd-create-section-sub">You can upload more files after the project is created. Max 100MB per file.</div>',
+    '      <div class="dd-create-section-sub">You can upload more files after the project is created. Videos up to 5GB supported.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-survey"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos & Videos</div><div class="dd-upload-card-desc">Current site conditions</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.mp4,.mov,.heic" data-category="photos" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-photos"></div></div></div>',
@@ -893,6 +893,52 @@
   });
 
   // ── CHECKLIST ─────────────────────────────────────────────────────
+  // ── RESUMABLE UPLOAD (TUS) for files > 6MB ───────────────────────
+  // Uses Supabase's TUS endpoint — survives network interruptions
+  async function uploadResumable(file, path, token) {
+    var CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunks
+    var endpoint = SUPABASE_URL + '/storage/v1/upload/resumable';
+    // Step 1: Create upload session
+    var createRes = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/offset+octet-stream',
+        'Upload-Length': file.size,
+        'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'),
+        'Tus-Resumable': '1.0.0'
+      }
+    });
+    if (!createRes.ok && createRes.status !== 201) {
+      console.error('TUS create failed:', createRes.status, await createRes.text());
+      return false;
+    }
+    var uploadUrl = createRes.headers.get('Location');
+    if (!uploadUrl) { console.error('No TUS upload URL returned'); return false; }
+    // Make absolute if relative
+    if (uploadUrl.startsWith('/')) uploadUrl = SUPABASE_URL + uploadUrl;
+    // Step 2: Upload in chunks
+    var offset = 0;
+    while (offset < file.size) {
+      var chunk = file.slice(offset, offset + CHUNK_SIZE);
+      var patchRes = await fetch(uploadUrl, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/offset+octet-stream',
+          'Upload-Offset': offset,
+          'Tus-Resumable': '1.0.0'
+        },
+        body: chunk
+      });
+      if (!patchRes.ok) { console.error('TUS chunk failed at offset', offset, patchRes.status); return false; }
+      offset += CHUNK_SIZE;
+    }
+    return true;
+  }
+
   window._toggleCheckItem = async function(key) {
     var item = CHECKLIST_ITEMS.find(function(i) { return i.key === key; });
     if (!item || !currentClient) return;
@@ -949,16 +995,29 @@
       statusEl.style.color = 'var(--muted)';
       var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
 
-      // FIX 7: Parallel uploads using Promise.all
+      // Parallel uploads — resumable TUS for large files, standard for small
+      var SIX_MB = 6 * 1024 * 1024;
+      var uploaded = 0;
+      var total = files.length;
+
       var uploadResults = await Promise.all(files.map(async function(file) {
         var path = clientName + '/' + category + '/' + Date.now() + '_' + safeName(file.name);
+        var token = currentUser.access_token || SUPABASE_KEY;
         try {
-          var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
-            body: file
-          });
-          if (res.ok) {
+          var ok = false;
+          if (file.size > SIX_MB) {
+            // ── Resumable TUS upload for videos and large files ──
+            ok = await uploadResumable(file, path, token);
+          } else {
+            // ── Standard upload for small files ──
+            var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
+              method: 'POST',
+              headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': file.type },
+              body: file
+            });
+            ok = res.ok;
+          }
+          if (ok) {
             await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
             // Auto-complete checklist item
             var checkItem = CHECKLIST_ITEMS.find(function(ci) { return ci.category === category; });
@@ -969,15 +1028,14 @@
               });
               renderChecklist();
             }
-            return true;
           }
-          return false;
-        } catch(e) { console.error('Upload error:', e); return false; }
+          return ok;
+        } catch(e) { console.error('Upload error:', file.name, e); return false; }
       }));
 
-      var uploaded = uploadResults.filter(Boolean).length;
-      statusEl.textContent = uploaded === files.length ? uploaded + ' file(s) uploaded successfully' : uploaded + ' of ' + files.length + ' uploaded';
-      statusEl.style.color = uploaded === files.length ? 'var(--success)' : 'var(--error)';
+      uploaded = uploadResults.filter(Boolean).length;
+      statusEl.textContent = uploaded === total ? uploaded + ' file(s) uploaded successfully' : uploaded + ' of ' + total + ' uploaded';
+      statusEl.style.color = uploaded === total ? 'var(--success)' : 'var(--error)';
     });
   });
 
@@ -1020,10 +1078,7 @@
     var msg  = document.getElementById('cpMsg');       if (msg)  msg.textContent = '';
     var succ = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'none';
     var btn  = document.getElementById('cpSubmit');    if (btn) { btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = ''; }
-    // Reset file upload statuses
-    ['survey','photos','houseplans','inspo'].forEach(function(cat) {
-      var el = document.getElementById('cp-status-' + cat); if (el) el.textContent = '';
-    });
+
     if (allClientProjects.length > 1 || isContractor) showProjectSelector();
     else if (currentClient) showDashboard();
     else showLogin();
@@ -1075,43 +1130,7 @@
       if (res.ok) {
         var projData = await res.json() || [];
         var newProjectId = projData[0] ? projData[0].id : null;
-        // FIX 7: Parallel file uploads for new project
-        if (newProjectId) {
-          var inputs = document.querySelectorAll('.dd-cp-file-input');
-          var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
-          var allUploadPromises = [];
-          inputs.forEach(function(input) {
-            var files = Array.from(input.files || []);
-            var category = input.dataset.category;
-            var statusEl = document.getElementById('cp-status-' + category);
-            if (!files.length) return;
-            // Validate
-            for (var vi = 0; vi < files.length; vi++) {
-              var verr = validateFile(files[vi]);
-              if (verr) { if (statusEl) { statusEl.textContent = verr; statusEl.style.color = 'var(--error)'; } return; }
-            }
-            if (statusEl) statusEl.textContent = 'Uploading...';
-            files.forEach(function(file) {
-              var path = clientName + '/' + category + '/' + Date.now() + '_' + safeName(file.name);
-              allUploadPromises.push(
-                fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
-                  method: 'POST',
-                  headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
-                  body: file
-                }).then(function(r) {
-                  if (r.ok) return apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: newProjectId, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
-                }).catch(function(e) { console.error('cp upload error:', e); })
-              );
-            });
-          });
-          await Promise.all(allUploadPromises);
-          // Update upload status labels
-          inputs.forEach(function(input) {
-            var cat = input.dataset.category;
-            var st = document.getElementById('cp-status-' + cat);
-            if (st && input.files && input.files.length > 0) { st.textContent = input.files.length + ' file(s) uploaded'; st.style.color = 'var(--success)'; }
-          });
-        }
+        // Files uploaded via Documents tab after project creation
         var succ = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'block';
         btn.textContent = 'Project Created!'; btn.style.background = 'var(--success)';
         setTimeout(function() { window._hideCreateProject(); loadContractorProjects(); }, 2000);
