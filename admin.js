@@ -440,11 +440,15 @@
   var allNotes = {};
 
   // ── API ───────────────────────────────────────────────────────────
+  function getAdminToken() {
+    try { return sessionStorage.getItem('dd_admin_token') || SUPABASE_KEY; } catch(e) { return SUPABASE_KEY; }
+  }
+
   function apiFetch(path, options) {
     var opts = options || {};
     opts.headers = opts.headers || {};
     opts.headers['apikey'] = SUPABASE_KEY;
-    opts.headers['Authorization'] = 'Bearer ' + SUPABASE_KEY;
+    opts.headers['Authorization'] = 'Bearer ' + getAdminToken();
     opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json';
     return fetch(SUPABASE_URL + path, opts);
   }
@@ -628,6 +632,15 @@
         + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + s([c.street, c.city, c.state, c.zip].filter(Boolean).join(', ') || '—') + '</div></div>'
         + '    <div class="da-detail-item"><div class="da-detail-label">Referral</div><div class="da-detail-value">' + s(c.referral || '—') + '</div></div>'
         + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + s(c.notes || '—') + '</div></div>'
+        + '  </div>'
+        + '  <div class="da-card-actions" style="border-top:1px solid var(--border)">'
+        + '    <div class="da-section-divider">Edit Contact Info</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Name</div><input class="da-text-input" id="edit-name-' + c.id + '" type="text" value="' + s(c.full_name || '') + '" placeholder="Full name" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Phone</div><input class="da-text-input" id="edit-phone-' + c.id + '" type="text" value="' + s(c.phone || '') + '" placeholder="Phone number" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Address</div><input class="da-text-input" id="edit-street-' + c.id + '" type="text" value="' + s(c.street || '') + '" placeholder="Street address" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Investment</div><input class="da-text-input" id="edit-investment-' + c.id + '" type="text" value="' + s(c.investment || '') + '" placeholder="e.g. $75,000" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Notes</div><input class="da-text-input" id="edit-notes-' + c.id + '" type="text" value="' + s(c.notes || '') + '" placeholder="Internal notes" /></div>'
+        + '    <button class="da-update-btn" onclick="window._saveContactInfo(\'' + c.id + '\')">Save Contact Info</button>'
         + '  </div>'
         + contractorProjectsHtml
         + '  <div class="da-card-actions">'
@@ -868,6 +881,46 @@
   };
 
   // ── CONTRACTOR TOGGLE ─────────────────────────────────────────────
+  window._saveContactInfo = async function(id) {
+    var name       = (document.getElementById('edit-name-' + id) || {}).value || '';
+    var phone      = (document.getElementById('edit-phone-' + id) || {}).value || '';
+    var street     = (document.getElementById('edit-street-' + id) || {}).value || '';
+    var investment = (document.getElementById('edit-investment-' + id) || {}).value || '';
+    var notes      = (document.getElementById('edit-notes-' + id) || {}).value || '';
+    var btn = document.querySelector('[onclick*="_saveContactInfo(\'' + id + '\')"]');
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          full_name: name || null,
+          phone: phone || null,
+          street: street || null,
+          investment: investment || null,
+          notes: notes || null
+        })
+      });
+      if (res.ok) {
+        // Update local cache
+        var c = allClients.find(function(x) { return x.id === id; });
+        if (c) { c.full_name = name; c.phone = phone; c.street = street; c.investment = investment; c.notes = notes; }
+        // Update visible card name + sub
+        var cardName = document.querySelector('#card-' + id + ' .da-card-name');
+        if (cardName && name) cardName.childNodes[0].textContent = name;
+        if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; }
+      } else {
+        var err = await res.text();
+        console.error('_saveContactInfo error:', err);
+        if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; }
+      }
+    } catch(e) {
+      console.error('_saveContactInfo exception:', e);
+      if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; }
+    }
+    setTimeout(function() { if(btn){ btn.textContent = 'Save Contact Info'; btn.style.background = 'var(--gold)'; btn.disabled = false; } }, 2500);
+  };
+
   window._toggleContractor = async function(id, currentState) {
     var newState = !currentState;
     try {
