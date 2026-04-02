@@ -512,6 +512,7 @@
         document.getElementById('daLoginWrap').style.display = 'none';
         document.getElementById('daDashboard').classList.add('visible');
         loadClients();
+        startAdminRealtime(); // Start live updates
       } else {
         msg.textContent = 'Incorrect password. Please try again.'; msg.className = 'da-login-msg error';
       }
@@ -520,6 +521,7 @@
   });
   document.getElementById('daPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('daLoginBtn').click(); });
   document.getElementById('daLogoutBtn').addEventListener('click', function() {
+    stopAdminRealtime(); // Clean up WebSocket connections
     try { sessionStorage.removeItem('dd_admin_token'); } catch(e) {}
     document.getElementById('daDashboard').classList.remove('visible');
     document.getElementById('daLoginWrap').style.display = 'flex';
@@ -536,6 +538,7 @@
             document.getElementById('daLoginWrap').style.display = 'none';
             document.getElementById('daDashboard').classList.add('visible');
             loadClients();
+            startAdminRealtime(); // Start live updates on auto-login
           } else { sessionStorage.removeItem('dd_admin_token'); }
         }).catch(function() { sessionStorage.removeItem('dd_admin_token'); });
     }
@@ -1275,5 +1278,150 @@
       else console.error('_sendReply error:', await res.text());
     } catch(e) { console.error('_sendReply:', e); }
   };
+
+  // ── ADMIN REALTIME — Live updates when clients act ────────────────
+  var adminRealtimeChannels = [];
+
+  function startAdminRealtime() {
+    stopAdminRealtime();
+
+    // ── 1. LIVE NEW MESSAGES from clients ─────────────────────────
+    // Admin sees gold dot and unread count update the moment a client sends a message
+    var msgChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    msgChannel.onopen = function() {
+      // Subscribe to ALL new messages (admin sees everything)
+      msgChannel.send(JSON.stringify({
+        topic: 'realtime:public:messages',
+        event: 'phx_join',
+        payload: {},
+        ref: '1'
+      }));
+    };
+
+    msgChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        if (data.event === 'INSERT' && data.payload && data.payload.record) {
+          var msg = data.payload.record;
+          // Only react to client messages, not admin replies
+          if (msg.sender === 'daydream_team') return;
+          // Update unread dot on Messages tab
+          var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
+          if (msgTab) {
+            var dot = msgTab.querySelector('.da-msg-dot');
+            if (!dot) { dot = document.createElement('span'); dot.className = 'da-msg-dot'; msgTab.appendChild(dot); }
+            var currentCount = parseInt(dot.textContent) || 0;
+            dot.textContent = currentCount + 1;
+          }
+          // If messages tab is open, reload it live
+          var msgsTab = document.getElementById('tab-messages');
+          if (msgsTab && msgsTab.classList.contains('active')) {
+            loadMessages();
+          }
+          // Show admin toast
+          showAdminToast('New message from client');
+        }
+      } catch(e) { console.error('Admin realtime messages:', e); }
+    };
+
+    msgChannel.onerror = function(e) { console.error('Admin realtime msg error:', e); };
+    adminRealtimeChannels.push(msgChannel);
+
+    // ── 2. LIVE NEW CLIENTS from intake form ──────────────────────
+    // Admin sees new leads instantly when someone submits the intake form
+    var clientChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    clientChannel.onopen = function() {
+      clientChannel.send(JSON.stringify({
+        topic: 'realtime:public:clients',
+        event: 'phx_join',
+        payload: {},
+        ref: '2'
+      }));
+    };
+
+    clientChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        if (data.event === 'INSERT' && data.payload && data.payload.record) {
+          var newClient = data.payload.record;
+          // Add to local cache
+          allClients.unshift(newClient);
+          updateStats();
+          // If clients tab is active, re-render
+          var clientsTab = document.getElementById('tab-clients');
+          if (clientsTab && clientsTab.classList.contains('active')) {
+            applyFilters();
+          }
+          showAdminToast('New lead: ' + (newClient.full_name || newClient.email || 'Unknown'));
+        }
+        if (data.event === 'UPDATE' && data.payload && data.payload.record) {
+          var updated = data.payload.record;
+          // Update local cache
+          var idx = allClients.findIndex(function(c) { return c.id === updated.id; });
+          if (idx > -1) allClients[idx] = Object.assign({}, allClients[idx], updated);
+        }
+      } catch(e) { console.error('Admin realtime clients:', e); }
+    };
+
+    clientChannel.onerror = function(e) { console.error('Admin realtime client error:', e); };
+    adminRealtimeChannels.push(clientChannel);
+
+    // ── 3. LIVE NEW PROJECTS from client portal ───────────────────
+    var projChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    projChannel.onopen = function() {
+      projChannel.send(JSON.stringify({
+        topic: 'realtime:public:projects',
+        event: 'phx_join',
+        payload: {},
+        ref: '3'
+      }));
+    };
+
+    projChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        if (data.event === 'INSERT' && data.payload && data.payload.record) {
+          var proj = data.payload.record;
+          // If projects tab is active, reload it
+          var projTab = document.getElementById('tab-projects');
+          if (projTab && projTab.classList.contains('active')) {
+            loadProjects();
+          }
+          showAdminToast('New project created: ' + (proj.project_name || 'Unnamed'));
+        }
+      } catch(e) { console.error('Admin realtime projects:', e); }
+    };
+
+    projChannel.onerror = function(e) { console.error('Admin realtime proj error:', e); };
+    adminRealtimeChannels.push(projChannel);
+  }
+
+  function stopAdminRealtime() {
+    adminRealtimeChannels.forEach(function(ch) {
+      try { ch.close(); } catch(e) {}
+    });
+    adminRealtimeChannels = [];
+  }
+
+  // Admin toast notification
+  function showAdminToast(message) {
+    var existing = document.getElementById('daRealtimeToast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = 'daRealtimeToast';
+    toast.textContent = message;
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--bg);font-family:Jost,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 20px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);animation:daFade 0.3s ease both';
+    document.body.appendChild(toast);
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 4000);
+  }
 
 })();
