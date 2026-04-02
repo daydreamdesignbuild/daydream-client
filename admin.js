@@ -148,6 +148,7 @@
     '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
     '#dd-admin .da-tab:hover { color: var(--text); }',
     '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-admin .da-tab-add { color: var(--gold) !important; font-weight: 500; }',
     '#dd-admin .da-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
     '#dd-admin .da-tab-content { display: none; flex: 1; }',
     '#dd-admin .da-tab-content.active { display: block; }',
