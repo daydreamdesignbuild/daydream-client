@@ -84,6 +84,7 @@
     '#dd-form-wrap button[type="submit"]:disabled { opacity: 0.35; cursor: not-allowed; }',
     '#dd-form-wrap button[type="submit"].loading .btn-text { display: none; }',
     '#dd-form-wrap button[type="submit"].loading .btn-loading { display: inline; }',
+    '#dd-form-wrap input[type="checkbox"] { accent-color: var(--gold); }',
     '#dd-form-wrap .btn-loading { display: none; }',
     '#dd-form-wrap .dd-privacy { font-size: 9px; letter-spacing: 0.2em; color: var(--muted); text-align: center; text-transform: uppercase; }',
 
@@ -160,12 +161,18 @@
     '    <label>How Did You Hear About Us?</label>',
     '    <select id="ddReferral">',
     '      <option value="" disabled selected>Select an option</option>',
-    '      <option value="google">Google Search</option>',
-    '      <option value="instagram">Instagram</option>',
-    '      <option value="facebook">Facebook</option>',
-    '      <option value="referral">Friend / Referral</option>',
-    '      <option value="houzz">Houzz</option>',
-    '      <option value="other">Other</option>',
+    '      <option value="Google Search">Google Search</option>',
+    '      <option value="Instagram">Instagram</option>',
+    '      <option value="Facebook">Facebook</option>',
+    '      <option value="LinkedIn">LinkedIn</option>',
+    '      <option value="YouTube">YouTube</option>',
+    '      <option value="Houzz">Houzz</option>',
+    '      <option value="Nextdoor">Nextdoor</option>',
+    '      <option value="Referral — Friend or Family">Referral — Friend or Family</option>',
+    '      <option value="Referral — Past Client">Referral — Past Client</option>',
+    '      <option value="Yard Sign / Drove By">Yard Sign / Drove By</option>',
+    '      <option value="Home Show / Event">Home Show / Event</option>',
+    '      <option value="Other">Other</option>',
     '    </select>',
     '    <span class="dd-arrow">&#9662;</span>',
     '  </div>',
@@ -184,6 +191,15 @@
     '  <div class="dd-field dd-full"><label>What Level of Investment Are You Preparing for This Project?</label><input type="text" id="ddInvestment" placeholder="e.g. $75,000" /></div>',
     '  <div class="dd-field dd-full"><label>Anything Else We Need to Know?</label><textarea id="ddNotes" placeholder="Tell us about your vision, timeline, or any other details..."></textarea></div>',
 
+    '  <div class="dd-field dd-full" style="padding:16px 0">',
+    '    <label style="display:flex;align-items:center;gap:12px;cursor:pointer;font-size:13px;color:var(--text);font-weight:300">',
+    '      <input type="checkbox" id="ddIsContractor" style="accent-color:var(--gold);width:16px;height:16px;cursor:pointer;flex-shrink:0" />',
+    '      I am a contractor submitting on behalf of a client / project',
+    '    </label>',
+    '    <div id="ddCompanyWrap" style="display:none;margin-top:12px">',
+    '      <input type="text" id="ddCompany" placeholder="Company name (e.g. Smith Contracting LLC)" style="width:100%" />',
+    '    </div>',
+    '  </div>',
     '  <div class="dd-submit-wrap">',
     '    <div class="dd-error" id="ddError">Something went wrong. Please try again.</div>',
     '    <button type="submit" id="ddSubmit"><span class="btn-text">Submit Inquiry</span><span class="btn-loading">Sending...</span></button>',
@@ -202,6 +218,15 @@
   var errMsg   = document.getElementById('ddError');
   var success  = document.getElementById('ddSuccess');
 
+  // Show company field when contractor is checked
+  var contractorCheck = document.getElementById('ddIsContractor');
+  var companyWrap = document.getElementById('ddCompanyWrap');
+  if (contractorCheck && companyWrap) {
+    contractorCheck.addEventListener('change', function() {
+      companyWrap.style.display = this.checked ? 'block' : 'none';
+    });
+  }
+
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     errMsg.classList.remove('visible');
@@ -218,6 +243,8 @@
       zip:          document.getElementById('ddZip').value.trim(),
       country:      document.getElementById('ddCountry').value || '',
       referral:     document.getElementById('ddReferral').value || '',
+      is_contractor: document.getElementById('ddIsContractor') ? document.getElementById('ddIsContractor').checked : false,
+      company_name: document.getElementById('ddCompany') ? document.getElementById('ddCompany').value.trim() || null : null,
       project_type: document.getElementById('ddServices').value,
       investment:   document.getElementById('ddInvestment').value.trim(),
       notes:        document.getElementById('ddNotes').value.trim(),
