@@ -964,8 +964,16 @@
     var sel = document.getElementById('apClientId');
     if (sel && allClients.length) {
       sel.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
-        return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
+        return '<option value="' + c.id + '" data-name="' + s(c.full_name || '') + '">' + s(c.full_name || c.email) + '</option>';
       }).join('');
+    }
+    // Auto-fill client name when client is selected
+    if (sel) {
+      sel.onchange = function() {
+        var opt = sel.options[sel.selectedIndex];
+        var nameInput = document.getElementById('apClientName');
+        if (nameInput && opt) nameInput.value = opt.dataset.name || '';
+      };
     }
   };
 
@@ -979,34 +987,77 @@
     document.querySelector('[data-tab="projects"]').classList.add('active');
     document.getElementById('tab-projects').classList.add('active');
     window._showAddProjectForm();
-    setTimeout(function() { var sel = document.getElementById('apClientId'); if (sel) sel.value = clientId; }, 100);
+    setTimeout(function() {
+      var sel = document.getElementById('apClientId');
+      if (sel) sel.value = clientId;
+      var nameInput = document.getElementById('apClientName');
+      if (nameInput && clientName) nameInput.value = clientName;
+    }, 150);
     loadProjects();
   };
 
   window._submitAddProject = async function() {
-    var clientId = document.getElementById('apClientId').value;
-    var name = document.getElementById('apProjectName').value.trim();
-    var type = document.getElementById('apProjectType').value;
-    var start = document.getElementById('apStartDate').value;
-    var end = document.getElementById('apEndDate').value;
-    var address = document.getElementById('apAddress').value.trim();
-    var goals = document.getElementById('apGoals').value.trim();
-    var msg = document.getElementById('apMsg');
-    if (!clientId || !name) { msg.textContent = 'Client and project name required.'; msg.className = 'da-modal-msg error'; return; }
+    var clientId    = document.getElementById('apClientId').value;
+    var clientName  = (document.getElementById('apClientName') || {}).value ? document.getElementById('apClientName').value.trim() : '';
+    var address     = document.getElementById('apAddress').value.trim();
+    var name        = document.getElementById('apProjectName').value.trim();
+    var type        = document.getElementById('apProjectType').value;
+    var anything    = (document.getElementById('apAnything') || {}).value ? document.getElementById('apAnything').value.trim() : '';
+    var goals       = document.getElementById('apGoals').value.trim();
+    var investment  = document.getElementById('apInvestment').value;
+    var msg         = document.getElementById('apMsg');
+
+    // Validation — unified required fields
+    if (!clientId)  { msg.textContent = 'Please select a client.';         msg.className = 'da-modal-msg error'; return; }
+    if (!address)   { msg.textContent = 'Project address is required.';    msg.className = 'da-modal-msg error'; document.getElementById('apAddress').focus(); return; }
+    if (!name)      { msg.textContent = 'Project name is required.';       msg.className = 'da-modal-msg error'; document.getElementById('apProjectName').focus(); return; }
+    if (!investment){ msg.textContent = 'Please select an investment level.'; msg.className = 'da-modal-msg error'; document.getElementById('apInvestment').focus(); return; }
+
     var btn = document.getElementById('apSubmit');
     btn.disabled = true; btn.textContent = 'Creating...'; msg.textContent = '';
+
+    // Combine goals + anything into description
+    var description = [goals, anything ? 'Additional notes: ' + anything : ''].filter(Boolean).join('\n\n');
+
     try {
-      var res = await apiFetch('/rest/v1/projects', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, project_name: name, project_type: type||null, start_date: start||null, end_date: end||null, project_address: address||null, description: goals||null, status: 'active' }) });
+      var res = await apiFetch('/rest/v1/projects', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          client_id: clientId,
+          project_name: name,
+          project_type: type || null,
+          project_address: address || null,
+          description: description || null,
+          status: 'active'
+        })
+      });
+      // Also update investment on client record
+      if (investment) {
+        apiFetch('/rest/v1/clients?id=eq.' + clientId, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ investment: investment })
+        }).catch(function(e) { console.error('investment patch:', e); });
+      }
       if (res.ok) {
-        msg.textContent = 'Project created!'; msg.className = 'da-modal-msg success';
-        ['apProjectName','apAddress','apGoals'].forEach(function(fid) { var el = document.getElementById(fid); if (el) el.value = ''; });
-        document.getElementById('apProjectType').value = '';
-        document.getElementById('apStartDate').value = '';
-        document.getElementById('apEndDate').value = '';
-        document.getElementById('apClientId').value = '';
+        msg.textContent = 'Project created successfully!'; msg.className = 'da-modal-msg success';
+        // Reset all unified fields
+        ['apClientName','apAddress','apProjectName','apAnything','apGoals'].forEach(function(fid) {
+          var el = document.getElementById(fid); if (el) el.value = '';
+        });
+        ['apProjectType','apInvestment','apClientId'].forEach(function(fid) {
+          var el = document.getElementById(fid); if (el) el.value = '';
+        });
         setTimeout(function() { window._hideAddProjectForm(); msg.textContent = ''; loadProjects(); }, 1500);
-      } else { var et = await res.text(); msg.textContent = 'Error: ' + et.substring(0,100); msg.className = 'da-modal-msg error'; }
-    } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
+      } else {
+        var et = await res.text();
+        msg.textContent = 'Error: ' + et.substring(0,120); msg.className = 'da-modal-msg error';
+      }
+    } catch(e) {
+      msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error';
+      console.error('_submitAddProject:', e);
+    }
     btn.disabled = false; btn.textContent = 'Create Project';
   };
 
