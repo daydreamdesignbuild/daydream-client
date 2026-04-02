@@ -113,8 +113,8 @@
     // Dashboard
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
-    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }',
-    '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 20px; }',
+    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
+    '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
     '#dd-portal .dd-nav-project-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 4px 12px; border: 1px solid var(--border); display: none; }',
     '#dd-portal .dd-nav-project-name.visible { display: block; }',
