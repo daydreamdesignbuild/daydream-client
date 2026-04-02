@@ -244,10 +244,12 @@
       project_type: document.getElementById('ddServices').value,
       investment:   document.getElementById('ddInvestment').value.trim(),
       notes:        document.getElementById('ddNotes').value.trim(),
-      status:       'new_lead'
+      status:       'client_inquiry_made',
+      client_stage: 'inquiry_submitted'
     };
 
     try {
+      // ── STEP 1: Insert client record into database ────────────────
       var res = await fetch(SUPABASE_URL + '/rest/v1/clients', {
         method: 'POST',
         headers: {
@@ -265,17 +267,14 @@
         throw new Error('Insert failed');
       }
 
-      // Create auth account (ignore error if email already exists)
-      await fetch(SUPABASE_URL + '/auth/v1/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({
-          email: data.email,
-          password: Math.random().toString(36).slice(-10) + 'Dd1!',
-          data: { full_name: data.full_name }
-        })
-      });
+      // ── STEP 2: Portal email is sent automatically ──────────────
+      // The Supabase database trigger (send-email) fires on INSERT
+      // and sends the branded magic link email automatically.
+      // No manual email call needed here — doing so would cause
+      // duplicate emails. The trigger handles auth user creation
+      // and the portal access link in one step.
 
+      // ── STEP 3: Show success screen ───────────────────────────────
       form.style.display = 'none';
       success.classList.add('visible');
 
