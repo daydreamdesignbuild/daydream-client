@@ -360,6 +360,12 @@
     '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div></div>',
     '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div></div>',
     '      </div>',
+    '      <div id="ddProjectGoals" style="display:none;margin-bottom:32px">',
+    '        <div style="border:1px solid var(--border);">',
+    '          <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Project Goals &amp; Notes</div>',
+    '          <div id="ddProjectGoalsText" style="padding:20px 24px;font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap"></div>',
+    '        </div>',
+    '      </div>',
     '      <div id="ddServicesCard" style="display:none;margin-bottom:32px">',
     '        <div style="border:1px solid var(--border);">',
     '          <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Services</div>',
@@ -732,7 +738,17 @@
       var freshRes = await apiFetch('/rest/v1/clients?id=eq.' + client.id);
       var freshData = await freshRes.json() || [];
       if (freshData[0]) {
-        client = Object.assign({}, freshData[0], { _projectId: client._projectId });
+        // Preserve project-specific overrides from projects table (name, address, drive links)
+        client = Object.assign({}, freshData[0], {
+          _projectId: client._projectId,
+          _projectGoals: client._projectGoals,
+          // Keep project-table values if they were set
+          full_name: client._projectId ? client.full_name : (freshData[0].full_name || client.full_name),
+          street: client._projectId ? client.street : (freshData[0].street || client.street),
+          drive_design_link: client._projectId ? (client.drive_design_link || freshData[0].drive_design_link) : freshData[0].drive_design_link,
+          drive_permit_link: client._projectId ? (client.drive_permit_link || freshData[0].drive_permit_link) : freshData[0].drive_permit_link,
+          drive_construction_link: client._projectId ? (client.drive_construction_link || freshData[0].drive_construction_link) : freshData[0].drive_construction_link
+        });
         currentClient = client;
         var idx = allClientProjects.findIndex(function(c) { return c.id === client.id; });
         if (idx > -1) allClientProjects[idx] = client;
@@ -751,6 +767,18 @@
       renderTimeline(client.client_stage || 'inquiry_submitted');
       renderStatusBadges(client);
       renderDriveLinks(client);
+      // Show project goals/description if set
+      var goalsCard = document.getElementById('ddProjectGoals');
+      var goalsText = document.getElementById('ddProjectGoalsText');
+      var projectDesc = (currentProject && currentProject.description) || client._projectGoals || '';
+      if (goalsCard && goalsText) {
+        if (projectDesc) {
+          goalsText.textContent = projectDesc;
+          goalsCard.style.display = 'block';
+        } else {
+          goalsCard.style.display = 'none';
+        }
+      }
       try {
         var svcRes = await apiFetch('/rest/v1/client_services?client_id=eq.' + client.id + '&order=created_at.asc');
         renderServices(await svcRes.json() || []);
@@ -842,7 +870,8 @@
     var clients = await res.json() || [];
     allClientProjects = clients;
     if (!allClientProjects.length) { showLogin(); return; }
-    isContractor = allClientProjects.length > 1 || (allClientProjects[0] && allClientProjects[0].is_contractor);
+    // Only treat as contractor if explicitly flagged — don't assume multiple records = contractor
+    isContractor = allClientProjects.some(function(c) { return c.is_contractor; });
     if (isContractor || allClientProjects.length > 1) await loadContractorProjects();
     else await loadProjectDashboard(allClientProjects[0]);
   }
@@ -1099,7 +1128,7 @@
     if (!address)    { msg.textContent = 'Project address is required.';           msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
     if (!clientName) { msg.textContent = 'Client name is required.';               msg.style.color = 'var(--error)'; document.getElementById('cpClientName').focus(); return; }
     if (!name)       { msg.textContent = 'Project name is required.';              msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
-    if (!budget)     { msg.textContent = 'Please select an investment level.';     msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
+    if (!budget)     { msg.textContent = 'Please enter your investment / budget level.';     msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
 
     if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
     var clientId = (currentClient || allClientProjects[0]).id;
