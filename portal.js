@@ -233,6 +233,25 @@
     '#dd-portal .dd-tab-content.active { display: block; }',
     '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
+    // Create project panel styles
+    '#dd-portal .dd-create-project { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); }',
+    '#dd-portal .dd-create-project.visible { display: flex; }',
+    '#dd-portal .dd-create-project-body { flex: 1; padding: 40px 32px; max-width: 860px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-create-section { margin-bottom: 32px; }',
+    '#dd-portal .dd-create-section-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }',
+    '#dd-portal .dd-create-section-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }',
+    '#dd-portal .dd-create-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }',
+    '#dd-portal .dd-create-field { display: flex; flex-direction: column; gap: 6px; }',
+    '#dd-portal .dd-create-full { grid-column: 1 / -1; }',
+    '#dd-portal .dd-create-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
+    '#dd-portal .dd-create-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 12px 14px; outline: none; width: 100%; transition: border-color 0.2s; appearance: none; }',
+    '#dd-portal .dd-create-input:focus { border-color: var(--gold); }',
+    '#dd-portal .dd-create-input::placeholder { color: var(--muted); }',
+    '#dd-portal .dd-create-textarea { resize: vertical; min-height: 120px; line-height: 1.7; }',
+    '#dd-portal .dd-create-select-wrap { position: relative; }',
+    '#dd-portal .dd-create-select-wrap::after { content: "▾"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }',
+    '#dd-portal .dd-create-msg { font-size: 12px; min-height: 20px; margin-bottom: 12px; }',
+
     '@media (max-width: 600px) {',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
@@ -376,7 +395,61 @@
     '    </div>',
 
     '  </div>',
+    '</div>',
+
+    // ── CREATE PROJECT PANEL ──────────────────────────────────────
+    '<div id="ddCreateProject" class="dd-create-project">',
+    '  <nav class="dd-nav">',
+    '    <div class="dd-nav-left"><div class="dd-nav-logo">Daydream</div></div>',
+    '    <div class="dd-nav-right">',
+    '      <button class="dd-nav-logout" onclick="window._hideCreateProject()">&#8592; Back</button>',
+    '    </div>',
+    '  </nav>',
+    '  <div class="dd-create-project-body">',
+    '    <div class="dd-section-title">Create New Project</div>',
+    '    <div class="dd-section-sub">Fill in the details below to create a new project.</div>',
+
+    '    <div class="dd-create-section">',
+    '      <div class="dd-create-section-title">Project Details</div>',
+    '      <div class="dd-create-grid">',
+    '        <div class="dd-create-field dd-create-full"><div class="dd-create-label">Project Name *</div><input class="dd-create-input" id="cpName" type="text" placeholder="e.g. Backyard Renovation" /></div>',
+    '        <div class="dd-create-field"><div class="dd-create-label">Project Type *</div><div class="dd-create-select-wrap"><select class="dd-create-input" id="cpType"><option value="">Select type...</option><option value="full_yard">Full Yard</option><option value="front_yard">Front Yard</option><option value="backyard">Backyard</option><option value="custom">Custom / Other</option></select></div></div>',
+    '        <div class="dd-create-field"><div class="dd-create-label">Investment / Budget *</div><input class="dd-create-input" id="cpBudget" type="text" placeholder="e.g. $75,000" /></div>',
+    '        <div class="dd-create-field dd-create-full"><div class="dd-create-label">Project Address *</div><input class="dd-create-input" id="cpAddress" type="text" placeholder="123 Main St, Atlanta GA" /></div>',
+    '        <div class="dd-create-field"><div class="dd-create-label">Start Date</div><input class="dd-create-input" id="cpStartDate" type="date" /></div>',
+    '        <div class="dd-create-field"><div class="dd-create-label">End Date</div><input class="dd-create-input" id="cpEndDate" type="date" /></div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div class="dd-create-section">',
+    '      <div class="dd-create-section-title">Goals & Notes</div>',
+    '      <textarea class="dd-create-input dd-create-textarea" id="cpGoals" placeholder="Describe your project goals, must-have features, vision, and any important details..."></textarea>',
+    '    </div>',
+
+    '    <div class="dd-create-section">',
+    '      <div class="dd-create-section-title">File Uploads</div>',
+    '      <div class="dd-create-section-sub">Upload any relevant files for this project. You can add more after the project is created.</div>',
+    '      <div class="dd-upload-grid">',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-survey"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos & Videos</div><div class="dd-upload-card-desc">Current site conditions and walkthrough</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.mp4,.mov,.heic" data-category="photos" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Existing Plans</div><div class="dd-upload-card-desc">Architectural drawings, house plans</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-houseplans"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, references</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="cp-status-inspo"></div></div></div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div class="dd-create-section" id="cpSuccessMsg" style="display:none">',
+    '      <div style="background:var(--gold-dim);border:1px solid var(--gold);padding:24px;text-align:center">',
+    '        <div style="font-size:20px;color:var(--gold);margin-bottom:8px">&#10003; Project Created!</div>',
+    '        <div style="font-size:13px;color:var(--muted)">Your project has been created successfully. Redirecting to your projects...</div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div class="dd-create-msg" id="cpMsg"></div>',
+    '    <button class="dd-btn" id="cpSubmit" onclick="window._submitCreateProject()">Create Project</button>',
+    '    <div style="height:60px"></div>',
+    '  </div>',
     '</div>'
+
   ].join('\n');
 
   // ── STATE ─────────────────────────────────────────────────────────
@@ -566,56 +639,146 @@
     } catch(e) { console.error('Load projects error:', e); showLogin(); }
   }
 
-  window._showPortalAddProject = function() {
-    var form = document.getElementById('ddAddProjectForm');
-    if (form) form.style.display = 'block';
+  // ── CREATE PROJECT PANEL ─────────────────────────────────────────
+  window._showCreateProject = function() {
+    var panel = document.getElementById('ddCreateProject');
+    if (panel) panel.classList.add('visible');
+    // Hide other panels
+    document.getElementById('ddProjectSelector').classList.remove('visible');
+    document.getElementById('ddDashboard').classList.remove('visible');
   };
 
-  window._hidePortalAddProject = function() {
-    var form = document.getElementById('ddAddProjectForm');
-    if (form) form.style.display = 'none';
-    var msg = document.getElementById('ddAddProjMsg');
-    if (msg) msg.textContent = '';
+  window._hideCreateProject = function() {
+    var panel = document.getElementById('ddCreateProject');
+    if (panel) panel.classList.remove('visible');
+    // Reset form
+    ['cpName','cpBudget','cpAddress','cpGoals'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    var type = document.getElementById('cpType'); if (type) type.value = '';
+    var start = document.getElementById('cpStartDate'); if (start) start.value = '';
+    var end = document.getElementById('cpEndDate'); if (end) end.value = '';
+    var msg = document.getElementById('cpMsg'); if (msg) msg.textContent = '';
+    var success = document.getElementById('cpSuccessMsg'); if (success) success.style.display = 'none';
+    // Reset upload statuses
+    ['survey','photos','houseplans','inspo'].forEach(function(cat) {
+      var el = document.getElementById('cp-status-' + cat); if (el) el.textContent = '';
+    });
+    // Go back to project selector
+    if (allClientProjects.length > 1 || isContractor) showProjectSelector();
+    else if (currentClient) showDashboard();
+    else showLogin();
   };
 
-  window._submitPortalProject = async function() {
-    var name = document.getElementById('ddNewProjectName').value.trim();
-    var type = document.getElementById('ddNewProjectType').value;
-    var address = document.getElementById('ddNewProjectAddress').value.trim();
-    var goals = document.getElementById('ddNewProjectGoals').value.trim();
-    var msg = document.getElementById('ddAddProjMsg');
-    var btn = document.getElementById('ddAddProjSubmit');
-    if (!name) { msg.textContent = 'Please enter a project name.'; msg.style.color = 'var(--error)'; return; }
+  // Legacy alias
+  window._showPortalAddProject = window._showCreateProject;
+  window._hidePortalAddProject = window._hideCreateProject;
+
+  window._submitCreateProject = async function() {
+    var name = document.getElementById('cpName').value.trim();
+    var type = document.getElementById('cpType').value;
+    var budget = document.getElementById('cpBudget').value.trim();
+    var address = document.getElementById('cpAddress').value.trim();
+    var goals = document.getElementById('cpGoals').value.trim();
+    var startDate = document.getElementById('cpStartDate').value;
+    var endDate = document.getElementById('cpEndDate').value;
+    var msg = document.getElementById('cpMsg');
+    var btn = document.getElementById('cpSubmit');
+
+    // Validation
+    if (!name) { msg.textContent = 'Project name is required.'; msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
+    if (!address) { msg.textContent = 'Project address is required.'; msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
+    if (!budget) { msg.textContent = 'Investment / budget is required.'; msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
+
     if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
     var clientId = (currentClient || allClientProjects[0]).id;
-    btn.textContent = 'Creating...'; btn.disabled = true;
+
+    btn.textContent = 'Creating Project...'; btn.disabled = true;
+    msg.textContent = '';
+
     try {
       var res = await apiFetch('/rest/v1/projects', {
         method: 'POST',
-        headers: { 'Prefer': 'return=minimal' },
+        headers: { 'Prefer': 'return=representation' },
         body: JSON.stringify({
           client_id: clientId,
           project_name: name,
           project_type: type || null,
           project_address: address || null,
           description: goals || null,
+          start_date: startDate || null,
+          end_date: endDate || null,
           status: 'active'
         })
       });
+
       if (res.ok) {
-        msg.textContent = 'Project created!'; msg.style.color = 'var(--success)';
-        ['ddNewProjectName','ddNewProjectAddress','ddNewProjectGoals'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
-        document.getElementById('ddNewProjectType').value = '';
+        var projData = await res.json();
+        var newProjectId = projData && projData[0] ? projData[0].id : null;
+
+        // Upload any pending files
+        if (newProjectId) {
+          await window._uploadCreateProjectFiles(clientId, newProjectId);
+        }
+
+        // Show success
+        var successMsg = document.getElementById('cpSuccessMsg');
+        if (successMsg) successMsg.style.display = 'block';
+        btn.textContent = 'Project Created!'; btn.style.background = 'var(--success)';
+
+        // Refresh and navigate after delay
         setTimeout(function() {
-          window._hidePortalAddProject();
-          loadContractorProjects(); // Refresh project list
-        }, 1500);
+          window._hideCreateProject();
+          loadContractorProjects();
+        }, 2000);
       } else {
+        var errText = await res.text();
+        console.error('Create project error:', errText);
         msg.textContent = 'Error creating project. Please try again.'; msg.style.color = 'var(--error)';
+        btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
       }
-    } catch(e) { msg.textContent = 'Something went wrong.'; msg.style.color = 'var(--error)'; }
-    btn.textContent = 'Create Project'; btn.disabled = false;
+    } catch(e) {
+      console.error('Create project exception:', e);
+      msg.textContent = 'Something went wrong. Please try again.'; msg.style.color = 'var(--error)';
+      btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
+    }
   };
+
+  // Upload files for new project
+  window._uploadCreateProjectFiles = async function(clientId, projectId) {
+    var inputs = document.querySelectorAll('.dd-cp-file-input');
+    var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : (currentUser ? currentUser.email : 'unknown');
+    for (var i = 0; i < inputs.length; i++) {
+      var input = inputs[i];
+      var files = Array.from(input.files || []);
+      var category = input.dataset.category;
+      var statusEl = document.getElementById('cp-status-' + category);
+      if (!files.length) continue;
+      if (statusEl) statusEl.textContent = 'Uploading ' + files.length + ' file(s)...';
+      var uploaded = 0;
+      for (var j = 0; j < files.length; j++) {
+        var file = files[j];
+        var path = clientName + '/' + category + '/' + Date.now() + '_' + file.name;
+        try {
+          var upRes = await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/client-documents/' + path, {
+            method: 'POST',
+            headers: { 'apikey': 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Authorization': 'Bearer ' + (currentUser ? currentUser.access_token : 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU'), 'Content-Type': file.type },
+            body: file
+          });
+          if (upRes.ok) {
+            uploaded++;
+            await apiFetch('/rest/v1/documents', {
+              method: 'POST',
+              headers: { 'Prefer': 'return=minimal' },
+              body: JSON.stringify({ project_id: projectId, file_name: file.name, file_url: path, uploaded_by: currentUser ? currentUser.email : 'client' })
+            });
+          }
+        } catch(e) { console.error('File upload error:', e); }
+      }
+      if (statusEl) statusEl.textContent = uploaded === files.length ? uploaded + ' file(s) uploaded' : uploaded + '/' + files.length + ' uploaded';
+    }
+  };
+
+  // Legacy submit alias
+  window._submitPortalProject = window._submitCreateProject;
 
   window._selectProject = async function(clientId) {
     var client = allClientProjects.find(function(c) { return c.id === clientId; });
@@ -828,10 +991,7 @@
 
   // ── LOGOUT ────────────────────────────────────────────────────────
   window._goToAddProject = function() {
-    // Switch to project selector with add form open
-    document.getElementById('ddDashboard').classList.remove('visible');
-    showProjectSelector();
-    setTimeout(window._showPortalAddProject, 300);
+    window._showCreateProject();
   };
 
   function doLogout() {
