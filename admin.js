@@ -486,6 +486,8 @@
     opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json';
     return fetch(SUPABASE_URL + path, opts);
   }
+  // Make apiFetch globally available so onclick handlers can use it
+  window._apiFetch = apiFetch;
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
   function serviceLabel(key) {
     var found = ALL_SERVICES.find(function(s) { return s.key === key; });
@@ -666,10 +668,13 @@
 
   // ── UPDATE FIELDS ─────────────────────────────────────────────────
   window._updateField = async function(id, field, selectId) {
-    var val = document.getElementById(selectId).value;
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    var val = sel.value;
     try {
       var body = {}; body[field] = val;
-      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
+      var res = await window._apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
+      if (!res.ok) { var err = await res.text(); console.error('_updateField error:', err); return; }
       var c = allClients.find(function(x) { return x.id === id; });
       if (c) c[field] = val;
       if (field === 'status') {
@@ -679,20 +684,21 @@
         updateStats();
       }
       flashSaved(selectId);
-    } catch(e) {}
+    } catch(e) { console.error('_updateField exception:', e); }
   };
 
   window._updateDriveLinks = async function(id) {
-    var design = document.getElementById('dlink-design-' + id).value.trim();
-    var permit = document.getElementById('dlink-permit-' + id).value.trim();
-    var construction = document.getElementById('dlink-construction-' + id).value.trim();
+    var design = (document.getElementById('dlink-design-' + id) || {}).value || '';
+    var permit = (document.getElementById('dlink-permit-' + id) || {}).value || '';
+    var construction = (document.getElementById('dlink-construction-' + id) || {}).value || '';
     try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ drive_design_link: design || null, drive_permit_link: permit || null, drive_construction_link: construction || null }) });
-      var c = allClients.find(function(x) { return x.id === id; });
-      if (c) { c.drive_design_link = design; c.drive_permit_link = permit; c.drive_construction_link = construction; }
+      var res = await window._apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ drive_design_link: design.trim() || null, drive_permit_link: permit.trim() || null, drive_construction_link: construction.trim() || null }) });
       var card = document.getElementById('card-' + id);
-      if (card) { var btn = card.querySelector('[onclick*="_updateDriveLinks"]'); if (btn) { btn.textContent = 'Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Save Drive Links'; btn.style.background = 'var(--gold)'; }, 2000); } }
-    } catch(e) {}
+      var btn = card ? card.querySelector('[onclick*="_updateDriveLinks"]') : null;
+      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error saving'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent = 'Save Drive Links'; btn.style.background = 'var(--gold)';} }, 2000); }
+      if (res.ok) { var c = allClients.find(function(x) { return x.id === id; }); if (c) { c.drive_design_link = design; c.drive_permit_link = permit; c.drive_construction_link = construction; } }
+      else { var err = await res.text(); console.error('_updateDriveLinks error:', err); }
+    } catch(e) { console.error('_updateDriveLinks exception:', e); }
   };
 
   function flashSaved(selectId) {
@@ -701,9 +707,10 @@
     var btn = sel.nextElementSibling;
     if (!btn || btn.tagName !== 'BUTTON') return;
     var orig = btn.textContent;
-    btn.textContent = 'Saved!'; btn.style.background = 'var(--success)';
-    setTimeout(function() { if (btn) { btn.textContent = orig; btn.style.background = 'var(--gold)'; } }, 2000);
+    btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; btn.style.color = '#fff';
+    setTimeout(function() { if (btn) { btn.textContent = orig; btn.style.background = 'var(--gold)'; btn.style.color = 'var(--bg)'; } }, 2000);
   }
+  window._flashSaved = flashSaved;
 
   // ── SERVICES ─────────────────────────────────────────────────────
   async function loadClientServices(clientId) {
@@ -767,11 +774,12 @@
 
     try {
       for (var i = 0; i < toAdd.length; i++) {
-        await apiFetch('/rest/v1/client_services', {
+        var svcRes = await window._apiFetch('/rest/v1/client_services', {
           method: 'POST',
           headers: { 'Prefer': 'return=minimal' },
           body: JSON.stringify({ client_id: clientId, service_name: toAdd[i].label, service_key: toAdd[i].key, status: 'pending' })
         });
+        if (!svcRes.ok) console.error('Add service error:', await svcRes.text());
       }
       if (customInput) customInput.value = '';
       await loadClientServices(clientId);
@@ -779,11 +787,18 @@
   };
 
   window._updateServiceStatus = async function(serviceId, status) {
-    try { await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) }); } catch(e) {}
+    try {
+      var res = await window._apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) });
+      if (!res.ok) console.error('_updateServiceStatus error:', await res.text());
+    } catch(e) { console.error('_updateServiceStatus exception:', e); }
   };
 
   window._removeService = async function(serviceId, clientId) {
-    try { await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' }); await loadClientServices(clientId); } catch(e) {}
+    try {
+      var res = await window._apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' });
+      if (res.ok) await window.loadClientServices(clientId);
+      else console.error('_removeService error:', await res.text());
+    } catch(e) { console.error('_removeService exception:', e); }
   };
 
   // ── ADMIN NOTES ───────────────────────────────────────────────────
@@ -970,6 +985,7 @@
   });
 
   // ── MESSAGES ─────────────────────────────────────────────────────
+  window._loadMessages = loadMessages;
   async function loadMessages() {
     try {
       var res = await apiFetch('/rest/v1/messages?order=created_at.asc&limit=200');
