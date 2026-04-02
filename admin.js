@@ -103,6 +103,9 @@
     'houseplans': 'Existing House Architectural Plans'
   };
 
+  // Expose PROJECT_TYPES globally
+  window._PROJECT_TYPES = PROJECT_TYPES;
+
   // Expose ALL_SERVICES globally so renderClientServices can access it
   window._ALL_SERVICES = ALL_SERVICES;
 
@@ -252,12 +255,13 @@
     '#dd-admin .da-svc-custom-row { display: flex; gap: 8px; margin-top: 4px; }',
 
     // Admin Notes
-    '#dd-admin .da-notes-tabs { display: flex; gap: 1px; background: var(--border); margin-top: 8px; }',
-    '#dd-admin .da-note-tab { flex: 1; background: var(--surface-2); border: none; color: var(--muted); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; padding: 10px; cursor: pointer; transition: color 0.2s, background 0.2s; }',
-    '#dd-admin .da-note-tab:hover { color: var(--text); }',
-    '#dd-admin .da-note-tab.active { background: var(--gold-dim); color: var(--gold); border-bottom: 2px solid var(--gold); }',
-    '#dd-admin .da-note-panel { display: none; }',
-    '#dd-admin .da-note-panel.active { display: block; }',
+    '#dd-admin .da-notes-log { max-height: 260px; overflow-y: auto; border: 1px solid var(--border); background: var(--surface-2); margin-top: 8px; }',
+    '#dd-admin .da-notes-log-empty { padding: 16px; font-size: 11px; color: var(--muted); text-align: center; letter-spacing: 0.08em; }',
+    '#dd-admin .da-note-entry { padding: 12px 16px; border-bottom: 1px solid var(--border); }',
+    '#dd-admin .da-note-entry:last-child { border-bottom: none; }',
+    '#dd-admin .da-note-entry-meta { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }',
+    '#dd-admin .da-note-entry-text { font-size: 12px; color: var(--text); line-height: 1.7; white-space: pre-wrap; }',
+    '#dd-admin .da-notes-new { margin-top: 8px; }',
     '#dd-admin .da-note-textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-top: none; color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 12px 14px; resize: vertical; min-height: 100px; outline: none; line-height: 1.7; transition: border-color 0.2s; }',
     '#dd-admin .da-note-textarea:focus { border-color: var(--gold); }',
     '#dd-admin .da-note-textarea::placeholder { color: var(--muted); }',
@@ -595,9 +599,11 @@
         + '    <div class="da-section-divider">Scope of Work</div>'
         + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
         + '    <div class="da-section-divider">Admin Notes</div>'
-        + '    <div class="da-notes-tabs"><button class="da-note-tab active" data-note="general" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">General</button><button class="da-note-tab" data-note="discussion" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Discussion</button><button class="da-note-tab" data-note="design" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Design</button><button class="da-note-tab" data-note="construction" data-id="' + c.id + '" onclick="window._switchNoteTab(this)">Construction</button></div>'
-        + '    <div class="da-note-panels"><div class="da-note-panel active" id="note-panel-general-' + c.id + '"><textarea class="da-note-textarea" id="note-general-' + c.id + '" placeholder="General notes...">' + (c.admin_notes_general || '') + '</textarea></div><div class="da-note-panel" id="note-panel-discussion-' + c.id + '"><textarea class="da-note-textarea" id="note-discussion-' + c.id + '" placeholder="Discussion and call notes...">' + (c.admin_notes_discussion || '') + '</textarea></div><div class="da-note-panel" id="note-panel-design-' + c.id + '"><textarea class="da-note-textarea" id="note-design-' + c.id + '" placeholder="Design phase notes...">' + (c.admin_notes_design || '') + '</textarea></div><div class="da-note-panel" id="note-panel-construction-' + c.id + '"><textarea class="da-note-textarea" id="note-construction-' + c.id + '" placeholder="Construction phase notes...">' + (c.admin_notes_construction || '') + '</textarea></div></div>'
-        + '    <button class="da-update-btn" style="margin-top:8px" onclick="window._saveAdminNotes(\'' + c.id + '\')">Save Notes</button>'
+        + '    <div class="da-notes-log" id="notes-log-' + c.id + '"><div class="da-notes-log-empty">No notes yet</div></div>'
+        + '    <div class="da-notes-new">'
+        + '      <textarea class="da-note-textarea" id="note-new-' + c.id + '" placeholder="Write a note..."></textarea>'
+        + '      <button class="da-update-btn" style="margin-top:8px;width:100%" onclick="window._saveNewNote(\'' + c.id + '\')">Add Note</button>'
+        + '    </div>'
         + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
         + '      <a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a>'
         + (function() { var isC = !!c.is_contractor; return '<button class="da-email-link" style="cursor:pointer;border:1px solid ' + (isC ? 'var(--success)' : 'var(--border)') + ';color:' + (isC ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + isC + ')" id="contractor-btn-' + c.id + '">' + (isC ? '\u2713 Contractor' : 'Mark as Contractor') + '</button>'; })()
@@ -613,7 +619,7 @@
     var det = document.getElementById('det-' + id);
     var exp = document.getElementById('exp-' + id);
     if (det.classList.contains('visible')) { det.classList.remove('visible'); exp.classList.remove('open'); }
-    else { det.classList.add('visible'); exp.classList.add('open'); loadClientServices(id); }
+    else { det.classList.add('visible'); exp.classList.add('open'); loadClientServices(id); window._loadNotesLog(id); }
   };
 
   // ── UPDATE FIELDS ─────────────────────────────────────────────────
@@ -739,55 +745,46 @@
   };
 
   // ── ADMIN NOTES ───────────────────────────────────────────────────
-  window._switchNoteTab = function(btn) {
-    var id = btn.dataset.id;
-    var note = btn.dataset.note;
-    btn.closest('.da-notes-tabs').querySelectorAll('.da-note-tab').forEach(function(t) { t.classList.remove('active'); });
-    btn.classList.add('active');
-    ['general','discussion','design','construction'].forEach(function(n) {
-      var panel = document.getElementById('note-panel-' + n + '-' + id);
-      if (panel) panel.classList.toggle('active', n === note);
-    });
-  };
+  // Note tabs replaced with note log
 
-  window._saveAdminNotes = async function(id) {
-    var g = document.getElementById('note-general-' + id);
-    var d = document.getElementById('note-discussion-' + id);
-    var ds = document.getElementById('note-design-' + id);
-    var c = document.getElementById('note-construction-' + id);
+  window._saveNewNote = async function(id) {
+    var textarea = document.getElementById('note-new-' + id);
+    if (!textarea || !textarea.value.trim()) return;
+    var noteText = textarea.value.trim();
     var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
     var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
     try {
-      var res = await fetch(SURL + '/rest/v1/clients?id=eq.' + id, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SKEY,
-          'Authorization': 'Bearer ' + SKEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          admin_notes_general: g ? g.value : null,
-          admin_notes_discussion: d ? d.value : null,
-          admin_notes_design: ds ? ds.value : null,
-          admin_notes_construction: c ? c.value : null
-        })
+      var res = await fetch(SURL + '/rest/v1/admin_notes', {
+        method: 'POST',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_id: id, note: noteText, created_at: new Date().toISOString() })
       });
-      var card = document.getElementById('card-' + id);
-      if (card) {
-        var btn = card.querySelector('[onclick*="_saveAdminNotes"]');
-        if (btn) {
-          if (res.ok) {
-            btn.textContent = 'Notes Saved!';
-            btn.style.background = 'var(--success)';
-          } else {
-            btn.textContent = 'Error saving';
-            btn.style.background = 'var(--error)';
-          }
-          setTimeout(function() { btn.textContent = 'Save Notes'; btn.style.background = 'var(--gold)'; }, 2000);
-        }
+      if (res.ok) {
+        textarea.value = '';
+        var btn = document.querySelector('[onclick*="_saveNewNote(\'' + id + '\')"]');
+        if (btn) { btn.textContent = 'Note Added!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Add Note'; btn.style.background = 'var(--gold)'; }, 2000); }
+        window._loadNotesLog(id);
       }
-    } catch(e) { console.error('Save notes error:', e); }
+    } catch(e) { console.error('Save note error:', e); }
+  };
+
+  window._loadNotesLog = async function(id) {
+    var log = document.getElementById('notes-log-' + id);
+    if (!log) return;
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      var res = await fetch(SURL + '/rest/v1/admin_notes?client_id=eq.' + id + '&order=created_at.desc', {
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY }
+      });
+      var notes = await res.json();
+      if (!notes || !notes.length) { log.innerHTML = '<div class="da-notes-log-empty">No notes yet</div>'; return; }
+      log.innerHTML = notes.map(function(n) {
+        var d = new Date(n.created_at);
+        var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        return '<div class="da-note-entry"><div class="da-note-entry-meta">' + dateStr + '</div><div class="da-note-entry-text">' + n.note.replace(/</g, '&lt;') + '</div></div>';
+      }).join('');
+    } catch(e) { log.innerHTML = '<div class="da-notes-log-empty">Could not load notes</div>'; }
   };
 
   // ── SEARCH & FILTER ───────────────────────────────────────────────
@@ -995,13 +992,17 @@
     var val = document.getElementById('ptypesel-' + id);
     if (!val) return;
     var v = val.value;
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
     try {
-      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_type_category: v || null }) });
-      var c = allClients.find(function(x) { return x.id === id; });
-      if (c) c.project_type_category = v;
-      var btn = val.nextElementSibling;
-      if (btn) { btn.textContent = 'Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Update'; btn.style.background = 'var(--gold)'; }, 2000); }
-    } catch(e) {}
+      var res = await fetch(SURL + '/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ project_type_category: v || null })
+      });
+      var btn = document.getElementById('ptypebtn-' + id);
+      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { btn.textContent = 'Update'; btn.style.background = 'var(--gold)'; }, 2000); }
+    } catch(e) { console.error('Project type update error:', e); }
   };
 
   window._toggleContractor = async function(id, checked) {
