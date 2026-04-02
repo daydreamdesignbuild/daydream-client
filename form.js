@@ -222,11 +222,11 @@
   var success  = document.getElementById('ddSuccess');
 
   // Show company field when contractor is checked
-  var contractorCheck = document.getElementById('ddIsContractor');
+  var contractorSelect = document.getElementById('ddIsContractor');
   var companyWrap = document.getElementById('ddCompanyWrap');
-  if (contractorCheck && companyWrap) {
-    contractorCheck.addEventListener('change', function() {
-      companyWrap.style.display = this.checked ? 'block' : 'none';
+  if (contractorSelect && companyWrap) {
+    contractorSelect.addEventListener('change', function() {
+      companyWrap.style.display = this.value === 'yes' ? 'block' : 'none';
     });
   }
 
@@ -246,7 +246,7 @@
       zip:          document.getElementById('ddZip').value.trim(),
       country:      document.getElementById('ddCountry').value || '',
       referral:     document.getElementById('ddReferral').value || '',
-      is_contractor: document.getElementById('ddIsContractor') ? document.getElementById('ddIsContractor').checked : false,
+      is_contractor: document.getElementById('ddIsContractor') ? document.getElementById('ddIsContractor').value === 'yes' : false,
       company_name: document.getElementById('ddCompany') ? document.getElementById('ddCompany').value.trim() || null : null,
       project_type: document.getElementById('ddServices').value,
       investment:   document.getElementById('ddInvestment').value.trim(),
