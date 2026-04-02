@@ -777,20 +777,50 @@
     var sel = document.getElementById(selectId);
     if (!sel) return;
     var val = sel.value;
+    // Find the Update button — it may not be the direct next sibling if there's a label div
+    var row = sel.closest('.da-action-row');
+    var btn = row ? row.querySelector('.da-update-btn') : sel.nextElementSibling;
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
     try {
-      var body = {}; body[field] = val;
+      var body = {}; body[field] = val || null;
       var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
-      if (!res.ok) { console.error('_updateField error:', await res.text()); return; }
+      if (!res.ok) {
+        var errText = await res.text();
+        console.error('_updateField error [' + field + ']:', errText);
+        if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
+        return;
+      }
+      // Update local cache
       var c = allClients.find(function(x) { return x.id === id; });
       if (c) c[field] = val;
+      // Special UI updates per field
       if (field === 'status') {
         var stage = getPipelineStage(val);
         var card = document.getElementById('card-' + id);
         if (card) { var pill = card.querySelector('.da-stage-pill'); if (pill) { pill.textContent = stage.label; pill.style.color = stage.color; pill.style.borderColor = stage.color; pill.style.background = stage.color + '18'; } }
         updateStats();
       }
-      flashSaved(selectId);
-    } catch(e) { console.error('_updateField exception:', e); }
+      if (field === 'client_status') {
+        // Update archived dimming
+        var card2 = document.getElementById('card-' + id);
+        if (card2) { card2.classList.toggle('archived', val === 'archived'); }
+        // Update badge in card name
+        var nameDiv = card2 ? card2.querySelector('.da-card-name') : null;
+        if (nameDiv) {
+          var existingBadge = nameDiv.querySelector('.da-status-badge-inline');
+          if (existingBadge) existingBadge.remove();
+          if (val === 'lead') {
+            nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>');
+          } else if (val === 'archived') {
+            nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>');
+          }
+        }
+      }
+      if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2000); }
+    } catch(e) {
+      console.error('_updateField exception [' + field + ']:', e);
+      if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
+    }
   };
 
   window._updateDriveLinks = async function(id) {
