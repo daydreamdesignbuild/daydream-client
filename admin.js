@@ -1197,9 +1197,9 @@
           + '    <div class="da-action-row"><div class="da-action-label">Design</div><input class="da-text-input" id="plink-design-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + (p.drive_design_link || '') + '" /></div>'
           + '    <div class="da-action-row"><div class="da-action-label">Permit</div><input class="da-text-input" id="plink-permit-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + (p.drive_permit_link || '') + '" /></div>'
           + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="plink-const-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + (p.drive_construction_link || '') + '" /></div>'
-          + '    <button class="da-update-btn" onclick="window._saveProjectLinks(\'' + p.id + '\')">Save Links</button>'
+          + '    <button class="da-update-btn" id="plinkbtn-' + p.id + '" onclick="window._saveProjectLinks(\'' + p.id + '\', this)">Save Links</button>'
           + '    <div class="da-section-divider">Status</div>'
-          + '    <div class="da-action-row"><select class="da-select" id="pstatus-' + p.id + '"><option value="active"' + (p.status==='active'?' selected':'') + '>Active</option><option value="on_hold"' + (p.status==='on_hold'?' selected':'') + '>On Hold</option><option value="complete"' + (p.status==='complete'?' selected':'') + '>Complete</option><option value="cancelled"' + (p.status==='cancelled'?' selected':'') + '>Cancelled</option></select><button class="da-update-btn" onclick="window._updateProjectStatus(\'' + p.id + '\')">Update</button></div>'
+          + '    <div class="da-action-row"><select class="da-select" id="pstatus-' + p.id + '"><option value="active"' + (p.status==='active'?' selected':'') + '>Active</option><option value="on_hold"' + (p.status==='on_hold'?' selected':'') + '>On Hold</option><option value="complete"' + (p.status==='complete'?' selected':'') + '>Complete</option><option value="cancelled"' + (p.status==='cancelled'?' selected':'') + '>Cancelled</option></select><button class="da-update-btn" id="pstatusbtn-' + p.id + '" onclick="window._updateProjectStatus(\'' + p.id + '\', this)">Update</button></div>'
           + '    <div class="da-section-divider">Danger</div>'
           + '    <div class="da-action-row"><button class="da-update-btn" style="background:var(--error);border-color:var(--error)" onclick="window._deleteProject(\'' + p.id + '\')">Delete Project</button></div>'
           + '  </div>'
@@ -1216,7 +1216,7 @@
     if (exp) exp.classList.toggle('open');
   };
 
-  window._saveProjectLinks = async function(id) {
+  window._saveProjectLinks = async function(id, btn) {
     var design = document.getElementById('plink-design-' + id).value.trim();
     var permit = document.getElementById('plink-permit-' + id).value.trim();
     var cons = document.getElementById('plink-const-' + id).value.trim();
@@ -1228,23 +1228,23 @@
         headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify({ drive_design_link: design || null, drive_permit_link: permit || null, drive_construction_link: cons || null })
       });
-      var btn = event.currentTarget;
-      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { btn.textContent = 'Save Links'; btn.style.background = 'var(--gold)'; }, 2000); }
-    } catch(e) {}
+      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent = 'Save Links'; btn.style.background = 'var(--gold)';} }, 2000); }
+    } catch(e) { console.error('Save project links error:', e); }
   };
 
-  window._updateProjectStatus = async function(id) {
+  window._updateProjectStatus = async function(id, btn) {
     var val = document.getElementById('pstatus-' + id).value;
     var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
     var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
     try {
-      await fetch(SURL + '/rest/v1/projects?id=eq.' + id, {
+      var res = await fetch(SURL + '/rest/v1/projects?id=eq.' + id, {
         method: 'PATCH',
         headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify({ status: val })
       });
-      loadProjects();
-    } catch(e) {}
+      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update'; btn.style.background='var(--gold)';} loadProjects(); }, 1500); }
+      else loadProjects();
+    } catch(e) { console.error(e); }
   };
 
   window._deleteProject = async function(id) {
