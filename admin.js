@@ -103,6 +103,30 @@
     'houseplans': 'Existing House Architectural Plans'
   };
 
+  // Expose ALL_SERVICES globally so renderClientServices can access it
+  window._ALL_SERVICES = ALL_SERVICES;
+
+  // Fix _addService to use window._ALL_SERVICES
+  window._addService = async function(clientId) {
+    var sel = document.getElementById('svc-select-' + clientId);
+    var customInput = document.getElementById('svc-custom-input-' + clientId);
+    if (!sel) return;
+    var serviceKey = sel.value;
+    var serviceName = '';
+    if (!serviceKey) return;
+    var found = (window._ALL_SERVICES || []).find(function(s) { return s.key === serviceKey; });
+    serviceName = found ? found.label : serviceKey;
+    try {
+      await apiFetch('/rest/v1/client_services', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_id: clientId, service_name: serviceName, service_key: serviceKey, status: 'pending' })
+      });
+      if (sel) sel.value = '';
+      await window.loadClientServices(clientId);
+    } catch(e) { console.error('Add service error:', e); }
+  };
+
   function getPipelineStage(value) {
     return PIPELINE_STAGES.find(function(s) { return s.value === value; }) || { value: value, label: value || 'New Inquiry', color: '#8a8680' };
   }
@@ -544,6 +568,8 @@
         + '  <div class="da-card-actions">'
         + '    <div class="da-section-divider">Internal Pipeline</div>'
         + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'status\', \'psel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-section-divider">Project Type</div>'
+        + '<div class="da-action-row"><select class="da-select" id="ptypesel-' + c.id + '"><option value="">Select project type...</option>' + PROJECT_TYPES.map(function(t) { return '<option value="' + t.key + '"' + (c.project_type_category === t.key ? ' selected' : '') + '>' + t.label + '</option>'; }).join('') + '</select><button class="da-update-btn" id="ptypebtn-' + c.id + '" onclick="window._updateProjType(\'' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Client Timeline</div>'
         + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Contract &amp; Payment</div>'
@@ -637,7 +663,7 @@
   function renderClientServices(clientId, services) {
     var wrap = document.getElementById('services-' + clientId);
     if (!wrap) return;
-    var serviceOpts = ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('');
+    var serviceOpts = (window._ALL_SERVICES || []).map(function(s) { return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('');
     var existingHtml = services.length ? services.map(function(s) {
       return '<div class="da-service-item" id="svc-' + s.id + '"><div class="da-service-name">' + s.service_name + '</div><div class="da-service-actions"><select class="da-service-status" onchange="window._updateServiceStatus(\'' + s.id + '\', this.value)"><option value="pending"' + (s.status === 'pending' ? ' selected' : '') + '>Pending</option><option value="in_progress"' + (s.status === 'in_progress' ? ' selected' : '') + '>In Progress</option><option value="complete"' + (s.status === 'complete' ? ' selected' : '') + '>Complete</option></select><button class="da-service-remove" onclick="window._removeService(\'' + s.id + '\', \'' + clientId + '\')">&#10005;</button></div></div>';
     }).join('') : '<div style="font-size:11px;color:var(--muted);padding:4px 0 8px">No services added yet</div>';
@@ -923,6 +949,19 @@
         } else if (!newState && badge) { badge.remove(); }
       }
     } catch(e) { console.error('Toggle contractor error:', e); }
+  };
+
+  window._updateProjType = async function(id) {
+    var val = document.getElementById('ptypesel-' + id);
+    if (!val) return;
+    var v = val.value;
+    try {
+      await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_type_category: v || null }) });
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.project_type_category = v;
+      var btn = val.nextElementSibling;
+      if (btn) { btn.textContent = 'Saved!'; btn.style.background = 'var(--success)'; setTimeout(function() { btn.textContent = 'Update'; btn.style.background = 'var(--gold)'; }, 2000); }
+    } catch(e) {}
   };
 
   window._toggleContractor = async function(id, checked) {
