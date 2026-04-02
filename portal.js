@@ -637,6 +637,22 @@
   async function loadProjectDashboard(client) {
     currentClient = client;
     try {
+      // Always fetch fresh client data to reflect admin changes
+      var freshRes = await apiFetch('/rest/v1/clients?id=eq.' + client.id);
+      var freshData = await freshRes.json();
+      if (freshData && freshData[0]) {
+        // Merge fresh data preserving any portal-specific overrides
+        client = Object.assign({}, freshData[0], {
+          _projectId: client._projectId,
+          _projectGoals: client._projectGoals
+        });
+        currentClient = client;
+        // Update cached version too
+        var idx = allClientProjects.findIndex(function(c) { return c.id === client.id; });
+        if (idx > -1) allClientProjects[idx] = client;
+      }
+    } catch(e) {}
+    try {
       // Update overview
       var title = document.getElementById('ddProjectTitle');
       var addrEl = document.getElementById('ddProjectAddress');
@@ -672,7 +688,7 @@
 
       showDashboard();
     } catch(e) { console.error('Project load error:', e); }
-  }
+  }  // end loadProjectDashboard
 
   async function loadChecklistData() {
     if (!currentClient) return;
