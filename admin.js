@@ -868,21 +868,21 @@
         // Reset services select
         var svcSel = document.getElementById('acServicesSelect');
         if (svcSel) Array.from(svcSel.options).forEach(function(o) { o.selected = false; });
+        // Switch to clients tab FIRST then reload
+        document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(c) { c.classList.remove('active'); });
+        document.querySelector('[data-tab="clients"]').classList.add('active');
+        document.getElementById('tab-clients').classList.add('active');
+        // Clear form
+        ['acName','acEmail','acPhone','acCompany','acInvestment','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+        if (document.getElementById('acCustomService')) document.getElementById('acCustomService').value = '';
+        if (document.getElementById('acContractor')) document.getElementById('acContractor').checked = false;
+        if (document.getElementById('acReferral')) document.getElementById('acReferral').value = '';
+        var svcSel2 = document.getElementById('acServicesSelect');
+        if (svcSel2) Array.from(svcSel2.options).forEach(function(o) { o.selected = false; });
+        msg.textContent = '';
         await loadClients();
         setTimeout(function() {
-          // Switch to clients tab
-          document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
-          document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(c) { c.classList.remove('active'); });
-          document.querySelector('[data-tab="clients"]').classList.add('active');
-          document.getElementById('tab-clients').classList.add('active');
-          msg.textContent = '';
-          // Clear form
-          ['acName','acEmail','acPhone','acCompany','acInvestment','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
-          if (document.getElementById('acCustomService')) document.getElementById('acCustomService').value = '';
-          if (document.getElementById('acContractor')) document.getElementById('acContractor').checked = false;
-          if (document.getElementById('acReferral')) document.getElementById('acReferral').value = '';
-          var svcSel = document.getElementById('acServicesSelect');
-          if (svcSel) Array.from(svcSel.options).forEach(function(o) { o.selected = false; });
         }, 2000);
       } else { msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error'; }
     } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
