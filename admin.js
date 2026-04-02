@@ -46,8 +46,10 @@
     { value: 'project_complete',                      label: 'Project Complete',                      color: '#eeb24a' }
   ];
 
+  // Design & Permit Phase Timeline
   var CLIENT_STAGES = [
     { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
+    { value: 'in_progress',                  label: 'In Progress' },
     { value: 'discovery_call',               label: 'Discovery Call' },
     { value: 'design_proposal',              label: 'Design Proposal' },
     { value: 'contract_signed',              label: 'Contract Signed' },
@@ -57,12 +59,20 @@
     { value: 'permit_submittal',             label: 'Permit Submittal' },
     { value: 'permit_design_revisions',      label: 'Permit Design Revisions' },
     { value: 'permit_approved',              label: 'Permit Approved' },
-    { value: 'final_deliverables',           label: 'Final Deliverables' },
-    { value: 'construction_start_scheduled', label: 'Construction Start Date Scheduled' },
-    { value: '50_percent_completion',        label: '50% Completion' },
-    { value: '90_percent_completion',        label: '90% Completion' },
+    { value: 'final_deliverables',           label: 'Final Deliverables' }
+  ];
+
+  // Construction Phase Timeline
+  var CONSTRUCTION_STAGES = [
+    { value: 'not_started',                  label: 'Not Started' },
+    { value: 'pre_site_visit',               label: 'Pre Site Visit' },
+    { value: 'erosion_control',              label: 'Erosion Control / BMP Installed' },
+    { value: 'construction_scheduled',       label: 'Construction Start Date Scheduled' },
+    { value: 'completion_30',                label: '30% Completion' },
+    { value: 'completion_60',                label: '60% Completion' },
+    { value: 'completion_90',                label: '90% Completion' },
     { value: 'final_walk_through',           label: 'Final Walk Through' },
-    { value: 'project_complete',             label: 'Project Complete' }
+    { value: 'project_complete',             label: '100% Project Complete' }
   ];
 
   var CONTRACT_STAGES = [
@@ -355,6 +365,7 @@
     '    <button class="da-tab da-tab-add" data-tab="add-client">+ Add Client</button>',
     '    <button class="da-tab da-tab-add" data-tab="projects">Projects</button>',
     '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
+    '    <button class="da-tab" data-tab="site-photos">Job Site Photos</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div>',
 
@@ -422,6 +433,42 @@
     '  </div>',
 
     // CHECKLIST TAB
+    '  <div class="da-tab-content" id="tab-site-photos">',
+    '    <div class="da-add-client-wrap" style="max-width:900px">',
+    '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">',
+    '        <div class="da-section-title" style="margin-bottom:0">Job Site Photos</div>',
+    '        <div style="display:flex;gap:12px;align-items:center">',
+    '          <select class="da-filter" id="daPhotoClientFilter" style="min-width:200px"><option value="">All Clients</option></select>',
+    '          <button class="da-update-btn" onclick="window._showAdminPhotoUpload()">+ Upload Photos</button>',
+    '        </div>',
+    '      </div>',
+    '      <div id="daAdminPhotoUploadForm" style="display:none;background:var(--surface);border:1px solid var(--gold);padding:24px;margin-bottom:24px">',
+    '        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Upload Job Site Photos</div>',
+    '        <div class="da-modal-grid">',
+    '          <div class="da-modal-field"><label class="da-field-label">Client *</label><select class="da-field-input" id="daPhotoUploadClient"><option value="">Select client...</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Visit Date</label><input class="da-field-input" type="date" id="daPhotoVisitDate" /></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes / Description</label><textarea class="da-field-input" id="daPhotoNotes" rows="2" placeholder="Describe what was photographed, progress made, etc..."></textarea></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1">',
+    '            <label class="da-field-label">Photos *</label>',
+    '            <div class="dd-drop-zone" style="border:1px dashed var(--border);padding:24px;text-align:center;cursor:pointer;position:relative;background:var(--surface-2)">',
+    '              <input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" id="daPhotoFiles" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" />',
+    '              <div style="font-size:20px;color:var(--gold);margin-bottom:8px">&#8679;</div>',
+    '              <div style="font-size:11px;color:var(--muted)">Drop photos or click to upload</div>',
+    '            </div>',
+    '            <div id="daPhotoUploadStatus" style="font-size:11px;color:var(--success);margin-top:8px;min-height:16px"></div>',
+    '          </div>',
+    '        </div>',
+    '        <div class="da-modal-msg" id="daPhotoMsg"></div>',
+    '        <div style="display:flex;gap:12px;margin-top:12px">',
+    '          <button class="da-modal-submit" id="daPhotoSubmit" style="flex:1" onclick="window._submitAdminPhotos()">Upload to Drive &amp; Save</button>',
+    '          <button class="da-modal-submit" style="background:var(--surface);color:var(--muted);border:1px solid var(--border);flex:0 0 auto;width:120px" onclick="window._hideAdminPhotoUpload()">Cancel</button>',
+    '        </div>',
+    '      </div>',
+    '      <div id="daPhotosList"></div>',
+    '    </div>',
+    '  </div>',
+
+
     '  <div class="da-tab-content" id="tab-checklist">',
     '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
     '  </div>',
@@ -606,6 +653,8 @@
 
       var pOpts = PIPELINE_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
       var cOpts = CLIENT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.client_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+      var conOpts = CONSTRUCTION_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.construction_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+      var conOpts = CONSTRUCTION_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.construction_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
       var contractOpts = CONTRACT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.contract_status === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
       var paymentOpts = PAYMENT_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.payment_status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
       var ptOpts = (window._PROJECT_TYPES || []).map(function(t) { return '<option value="' + t.key + '"' + (c.project_type_category === t.key ? ' selected' : '') + '>' + t.label + '</option>'; }).join('');
@@ -651,8 +700,10 @@
         + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'status\', \'psel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Project Type</div>'
         + '    <div class="da-action-row"><select class="da-select" id="ptypesel-' + c.id + '"><option value="">Select project type...</option>' + ptOpts + '</select><button class="da-update-btn" id="ptypebtn-' + c.id + '" onclick="window._updateProjType(\'' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-section-divider">Client Timeline</div>'
+        + '    <div class="da-section-divider">Design &amp; Permit Phase</div>'
         + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-section-divider">Construction Phase</div>'
+        + '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Contract &amp; Payment</div>'
         + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'contract_status\', \'contractsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'payment_status\', \'paymentsel-' + c.id + '\')">Update</button></div>'
@@ -1278,6 +1329,183 @@
       else console.error('_sendReply error:', await res.text());
     } catch(e) { console.error('_sendReply:', e); }
   };
+
+  // ── JOB SITE PHOTOS ──────────────────────────────────────────────
+  var SIX_MB = 6 * 1024 * 1024;
+
+  function populatePhotoClientFilter() {
+    var filter = document.getElementById('daPhotoClientFilter');
+    var uploadSel = document.getElementById('daPhotoUploadClient');
+    if (!filter || !allClients.length) return;
+    var opts = '<option value="">All Clients</option>' + allClients.map(function(c) {
+      return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
+    }).join('');
+    filter.innerHTML = opts;
+    if (uploadSel) uploadSel.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
+      return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
+    }).join('');
+    filter.onchange = function() { loadAdminPhotos(filter.value); };
+  }
+
+  window._showAdminPhotoUpload = function() {
+    var form = document.getElementById('daAdminPhotoUploadForm');
+    if (form) form.style.display = 'block';
+    // Default visit date to today
+    var dateInput = document.getElementById('daPhotoVisitDate');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    // Populate client selector
+    var uploadClient = document.getElementById('daPhotoUploadClient');
+    if (uploadClient && allClients.length && uploadClient.options.length <= 1) {
+      uploadClient.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
+        return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
+      }).join('');
+    }
+    populatePhotoClientFilter();
+    // Default visit date to today
+    var dateInput = document.getElementById('daPhotoVisitDate');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+  };
+
+  window._hideAdminPhotoUpload = function() {
+    var form = document.getElementById('daAdminPhotoUploadForm');
+    if (form) form.style.display = 'none';
+    var msg = document.getElementById('daPhotoMsg');
+    if (msg) msg.textContent = '';
+  };
+
+  window._submitAdminPhotos = async function() {
+    var clientId = (document.getElementById('daPhotoUploadClient') || {}).value;
+    var visitDate = (document.getElementById('daPhotoVisitDate') || {}).value || new Date().toISOString().split('T')[0];
+    var notes = (document.getElementById('daPhotoNotes') || {}).value || '';
+    var fileInput = document.getElementById('daPhotoFiles');
+    var files = fileInput ? Array.from(fileInput.files) : [];
+    var msg = document.getElementById('daPhotoMsg');
+    var btn = document.getElementById('daPhotoSubmit');
+    var statusEl = document.getElementById('daPhotoUploadStatus');
+
+    if (!clientId) { msg.textContent = 'Please select a client.'; msg.className = 'da-modal-msg error'; return; }
+    if (!files.length) { msg.textContent = 'Please select at least one photo.'; msg.className = 'da-modal-msg error'; return; }
+
+    btn.disabled = true; btn.textContent = 'Uploading...'; msg.textContent = '';
+    var client = allClients.find(function(c) { return c.id === clientId; });
+    var clientName = client ? (client.full_name || client.email) : clientId;
+    var folderPath = clientName + '/site-photos/' + visitDate + ' Site Visit';
+
+    // Upload all photos in parallel
+    var uploadResults = await Promise.all(files.map(async function(file) {
+      var safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
+      var path = folderPath + '/' + Date.now() + '_' + safeName;
+      try {
+        var ok = false;
+        if (file.size > SIX_MB) {
+          ok = await adminUploadResumable(file, path);
+        } else {
+          var res = await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/client-documents/' + path, {
+            method: 'POST',
+            headers: { 'apikey': 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Authorization': 'Bearer ' + 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Content-Type': file.type },
+            body: file
+          });
+          ok = res.ok;
+        }
+        if (ok) {
+          await apiFetch('/rest/v1/documents', {
+            method: 'POST',
+            headers: { 'Prefer': 'return=minimal' },
+            body: JSON.stringify({
+              client_id: clientId,
+              file_name: file.name,
+              file_url: path,
+              uploaded_by: 'daydream_team',
+              photo_category: 'site_photos',
+              photo_notes: notes,
+              visit_date: visitDate
+            })
+          });
+        }
+        return ok;
+      } catch(e) { console.error('Admin photo upload error:', e); return false; }
+    }));
+
+    var uploaded = uploadResults.filter(Boolean).length;
+    if (statusEl) statusEl.textContent = uploaded + ' of ' + files.length + ' photo(s) uploaded';
+    if (uploaded > 0) {
+      msg.textContent = uploaded + ' photo(s) saved successfully!'; msg.className = 'da-modal-msg success';
+      if (fileInput) fileInput.value = '';
+      setTimeout(function() { window._hideAdminPhotoUpload(); loadAdminPhotos(clientId); }, 1500);
+    } else {
+      msg.textContent = 'Upload failed. Please try again.'; msg.className = 'da-modal-msg error';
+    }
+    btn.disabled = false; btn.textContent = 'Upload & Save';
+  };
+
+  async function adminUploadResumable(file, path) {
+    var CHUNK = 6 * 1024 * 1024;
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      var createRes = await fetch(SURL + '/storage/v1/upload/resumable', {
+        method: 'POST',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/offset+octet-stream', 'Upload-Length': file.size, 'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'), 'Tus-Resumable': '1.0.0' }
+      });
+      if (!createRes.ok && createRes.status !== 201) return false;
+      var uploadUrl = createRes.headers.get('Location');
+      if (!uploadUrl) return false;
+      if (uploadUrl.startsWith('/')) uploadUrl = SURL + uploadUrl;
+      var offset = 0;
+      while (offset < file.size) {
+        var chunk = file.slice(offset, offset + CHUNK);
+        var patchRes = await fetch(uploadUrl, { method: 'PATCH', headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/offset+octet-stream', 'Upload-Offset': offset, 'Tus-Resumable': '1.0.0' }, body: chunk });
+        if (!patchRes.ok) return false;
+        offset += CHUNK;
+      }
+      return true;
+    } catch(e) { return false; }
+  }
+
+  async function loadAdminPhotos(clientIdFilter) {
+    var container = document.getElementById('daPhotosList');
+    if (!container) return;
+    container.innerHTML = '<div class="da-empty">Loading photos...</div>';
+    try {
+      var url = '/rest/v1/documents?photo_category=eq.site_photos&order=visit_date.desc,created_at.desc';
+      if (clientIdFilter) url += '&client_id=eq.' + clientIdFilter;
+      var res = await apiFetch(url);
+      var photos = await res.json() || [];
+      if (!photos.length) { container.innerHTML = '<div class="da-empty">No site photos yet. Click + Upload Photos to add some.</div>'; return; }
+
+      // Group by visit date
+      var groups = {};
+      photos.forEach(function(p) {
+        var d = p.visit_date || p.created_at.split('T')[0];
+        if (!groups[d]) groups[d] = [];
+        groups[d].push(p);
+      });
+
+      container.innerHTML = Object.keys(groups).sort(function(a,b) { return b.localeCompare(a); }).map(function(date) {
+        var datePhotos = groups[date];
+        var client = allClients.find(function(c) { return c.id === datePhotos[0].client_id; });
+        var clientName = client ? s(client.full_name || client.email) : 'Unknown Client';
+        var d = new Date(date + 'T12:00:00');
+        var dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        var notes = datePhotos[0].photo_notes || '';
+        return '<div class="da-client-card" style="margin-bottom:16px">'
+          + '<div style="padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:space-between">'
+          + '  <div><div class="da-card-name">' + dateStr + ' Site Visit</div><div class="da-card-sub">' + clientName + ' · ' + datePhotos.length + ' photo(s) · Uploaded by ' + s(datePhotos[0].uploaded_by === 'daydream_team' ? 'Daydream Team' : 'Client') + '</div></div>'
+          + '</div>'
+          + (notes ? '<div style="padding:12px 20px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);border-left:3px solid var(--gold)">' + s(notes) + '</div>' : '')
+          + '<div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'
+          + datePhotos.map(function(p) {
+              var signedUrl = 'https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/public/client-documents/' + p.file_url;
+              return '<div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface-2);border:1px solid var(--border)">'
+                + '<img src="' + signedUrl + '" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="window.open(\'' + signedUrl + '\', \'_blank\')" onerror="this.parentNode.innerHTML=\'<div style=\\"display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--muted);\\">No preview</div>\'" />'
+                + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);padding:4px 6px;font-size:9px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + s(p.file_name) + '</div>'
+                + '</div>';
+            }).join('')
+          + '</div>'
+          + '</div>';
+      }).join('');
+    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading photos</div>'; console.error('loadAdminPhotos:', e); }
+  }
 
   // ── ADMIN REALTIME — Live updates when clients act ────────────────
   var adminRealtimeChannels = [];
