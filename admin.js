@@ -241,7 +241,7 @@
     '#dd-admin .da-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999999; display: none; align-items: flex-start; justify-content: center; padding: 80px 20px 20px; overflow-y: auto; }',
     '#dd-admin .da-modal-overlay.visible { display: flex; }',
     '#dd-admin .da-modal { background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 640px; }',    
-    '#dd-admin .da-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); position: sticky; top: 0; }',
+    '#dd-admin .da-modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface-2); }',
     '#dd-admin .da-modal-title { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 300; color: var(--gold); }',
     '#dd-admin .da-modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }',
     '#dd-admin .da-modal-close:hover { color: var(--text); }',
@@ -726,7 +726,9 @@
 
   // ── ADD CLIENT MODAL ──────────────────────────────────────────────
   document.getElementById('daAddClientBtn').addEventListener('click', function() {
-    document.getElementById('daAddClientModal').classList.add('visible');
+    var modal = document.getElementById('daAddClientModal');
+    modal.classList.add('visible');
+    modal.scrollTop = 0;
     // Render services checklist inside modal
     var grid = document.getElementById('acServicesGrid');
     if (grid && !grid.dataset.rendered) {
