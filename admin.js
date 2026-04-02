@@ -261,6 +261,10 @@
     '#dd-admin .da-modal-submit { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity 0.2s; }',
     '#dd-admin .da-modal-submit:hover { opacity: 0.85; }',
     '#dd-admin .da-modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }',
+    '#dd-admin .da-modal-svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }',
+    '#dd-admin .da-modal-svc-label { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text); cursor: pointer; padding: 7px 10px; border: 1px solid var(--border); transition: background 0.15s, border-color 0.15s; }',
+    '#dd-admin .da-modal-svc-label:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-admin .da-modal-svc-label input { accent-color: var(--gold); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }',
 
     // Checklist tab
     '#dd-admin .da-checklist-wrap { padding: 24px 32px; }',
@@ -362,10 +366,13 @@
     '        <div class="da-modal-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
     '        <div class="da-modal-field"><label class="da-field-label">Service</label><select class="da-field-input" id="acService"><option value="">Select service...</option>' + ALL_SERVICES.map(function(s) { return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('') + '</select></div>',
     '        <div class="da-modal-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
-    '        <div class="da-modal-field"><label class="da-field-label">Referral</label><input class="da-field-input" type="text" id="acReferral" placeholder="How did they hear about you?" /></div>',
+    '        <div class="da-modal-field"><label class="da-field-label">How Did They Hear About Us?</label><select class="da-field-input" id="acReferral"><option value="">Select...</option><option>Google Search</option><option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>YouTube</option><option>Houzz</option><option>Nextdoor</option><option>Referral — Friend or Family</option><option>Referral — Past Client</option><option>Yard Sign / Drove By</option><option>Home Show / Event</option><option>Other</option></select></div>',
     '        <div class="da-modal-field"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
     '        <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
     '      </div>',
+    '      <div class="da-modal-field" style="margin-bottom:16px"><label class="da-field-label" style="margin-bottom:8px;display:block">Project Services</label><div class="da-modal-svc-grid" id="acServicesGrid">'
+    + ALL_SERVICES.map(function(s) { return ''; }).join('') // placeholder rendered by JS
+    + '</div><input class="da-field-input" id="acCustomService" type="text" placeholder="Custom service (optional)..." style="margin-top:8px" /></div>',
     '      <div class="da-modal-check"><input type="checkbox" id="acContractor" /><label for="acContractor">This is a contractor (will have multiple projects)</label></div>',
     '      <div class="da-modal-check"><input type="checkbox" id="acSendEmail" checked /><label for="acSendEmail">Send welcome email with portal access link</label></div>',
     '      <div class="da-modal-msg" id="acMsg"></div>',
@@ -714,7 +721,17 @@
   document.getElementById('daFilter').addEventListener('change', applyFilters);
 
   // ── ADD CLIENT MODAL ──────────────────────────────────────────────
-  document.getElementById('daAddClientBtn').addEventListener('click', function() { document.getElementById('daAddClientModal').classList.add('visible'); });
+  document.getElementById('daAddClientBtn').addEventListener('click', function() {
+    document.getElementById('daAddClientModal').classList.add('visible');
+    // Render services checklist inside modal
+    var grid = document.getElementById('acServicesGrid');
+    if (grid && !grid.dataset.rendered) {
+      grid.innerHTML = ALL_SERVICES.map(function(s) {
+        return '<label class="da-modal-svc-label"><input type="checkbox" class="ac-svc-check" value="' + s.key + '" data-label="' + s.label + '" />' + s.label + '</label>';
+      }).join('');
+      grid.dataset.rendered = '1';
+    }
+  });
   document.getElementById('daAddClientClose').addEventListener('click', function() { document.getElementById('daAddClientModal').classList.remove('visible'); });
   document.getElementById('daAddClientModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('visible'); });
 
@@ -725,10 +742,15 @@
     var company = document.getElementById('acCompany').value.trim();
     var service = document.getElementById('acService').value;
     var investment = document.getElementById('acInvestment').value.trim();
-    var referral = document.getElementById('acReferral').value.trim();
+    var referral = document.getElementById('acReferral').value;
     var street = document.getElementById('acStreet').value.trim();
     var notes = document.getElementById('acNotes').value.trim();
     var isContractor = document.getElementById('acContractor').checked;
+    var customService = document.getElementById('acCustomService') ? document.getElementById('acCustomService').value.trim() : '';
+    var selectedServices = Array.from(document.querySelectorAll('.ac-svc-check:checked')).map(function(cb) {
+      return { key: cb.value, label: cb.dataset.label };
+    });
+    if (customService) selectedServices.push({ key: null, label: customService });
     var msg = document.getElementById('acMsg');
     if (!name || !email) { msg.textContent = 'Name and email are required.'; msg.className = 'da-modal-msg error'; return; }
     this.disabled = true; this.textContent = 'Adding...'; msg.textContent = '';
@@ -751,9 +773,27 @@
           msg.textContent = 'Client added successfully!';
         }
         msg.className = 'da-modal-msg success';
-        ['acName','acEmail','acPhone','acCompany','acInvestment','acReferral','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+        // Add selected services to the new client
+        if (selectedServices.length > 0) {
+          var newClient = await res.json();
+          var newClientId = newClient && newClient[0] ? newClient[0].id : null;
+          if (newClientId) {
+            for (var si = 0; si < selectedServices.length; si++) {
+              await apiFetch('/rest/v1/client_services', {
+                method: 'POST',
+                headers: { 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ client_id: newClientId, service_name: selectedServices[si].label, service_key: selectedServices[si].key, status: 'pending' })
+              }).catch(function() {});
+            }
+          }
+        }
+        ['acName','acEmail','acPhone','acCompany','acInvestment','acStreet','acNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+        if (document.getElementById('acCustomService')) document.getElementById('acCustomService').value = '';
         document.getElementById('acService').value = '';
         document.getElementById('acContractor').checked = false;
+        document.getElementById('acReferral').value = '';
+        // Uncheck all services
+        document.querySelectorAll('.ac-svc-check').forEach(function(cb) { cb.checked = false; });
         await loadClients();
         setTimeout(function() { document.getElementById('daAddClientModal').classList.remove('visible'); msg.textContent = ''; }, 2500);
       } else { msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error'; }
