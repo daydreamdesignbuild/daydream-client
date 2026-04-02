@@ -388,6 +388,7 @@
     '  <div class="da-tabs">',
     '    <button class="da-tab active" data-tab="clients">Clients</button>',
     '    <button class="da-tab da-tab-add" data-tab="add-client">+ Add Client</button>',
+    '    <button class="da-tab da-tab-add" data-tab="projects">Projects</button>',
     '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div>',
@@ -419,6 +420,33 @@
     '        <div class="da-modal-msg" id="acMsg"></div>',
     '        <button class="da-modal-submit" id="acSubmit">Add Client</button>',
     '      </div>',
+    '    </div>',
+    '  </div>',
+
+    '  <div class="da-tab-content" id="tab-projects">',
+    '    <div class="da-add-client-wrap">',
+    '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">',
+    '        <div class="da-section-title" style="margin-bottom:0">Projects</div>',
+    '        <button class="da-add-btn" id="daShowAddProjectForm" onclick="window._showAddProjectForm()">+ Add Project</button>',
+    '      </div>',
+    '      <div id="daAddProjectForm" style="display:none;background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:24px">',
+    '        <div style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">New Project</div>',
+    '        <div class="da-modal-grid">',
+    '          <div class="da-modal-field"><label class="da-field-label">Client *</label><select class="da-field-input" id="apClientId"><option value="">Select client...</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Project Name *</label><input class="da-field-input" type="text" id="apProjectName" placeholder="e.g. Backyard Renovation" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Project Type</label><select class="da-field-input" id="apProjectType"><option value="">Select type...</option><option value="full_yard">Full Yard</option><option value="front_yard">Front Yard</option><option value="backyard">Backyard</option><option value="outdoor_living">Outdoor Living</option><option value="landscape_construction">Landscape Construction</option><option value="pool_and_spa">Pool & Spa</option><option value="custom">Custom / Other</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Start Date</label><input class="da-field-input" type="date" id="apStartDate" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">End Date</label><input class="da-field-input" type="date" id="apEndDate" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="apAddress" placeholder="123 Main St, Atlanta GA" /></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Goals / Notes</label><textarea class="da-field-input" id="apGoals" rows="3" placeholder="Project goals and key details..."></textarea></div>',
+    '        </div>',
+    '        <div class="da-modal-msg" id="apMsg"></div>',
+    '        <div style="display:flex;gap:12px;margin-top:12px">',
+    '          <button class="da-modal-submit" id="apSubmit" style="flex:1" onclick="window._submitAddProject()">Create Project</button>',
+    '          <button class="da-modal-submit" style="background:var(--surface);color:var(--muted);border-color:var(--border);flex:0 0 auto;width:120px" onclick="window._hideAddProjectForm()">Cancel</button>',
+    '        </div>',
+    '      </div>',
+    '      <div id="daProjectsList"></div>',
     '    </div>',
     '  </div>',
 
@@ -474,6 +502,7 @@
       tab.classList.add('active');
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
+      if (tab.dataset.tab === 'projects') { loadProjects(); }
       if (tab.dataset.tab === 'messages') {
         loadMessages();
         apiFetch('/rest/v1/messages?sender=neq.daydream_team&is_read=eq.false', { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_read: true }) }).catch(function() {});
@@ -617,6 +646,7 @@
         + '    </div>'
         + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
         + '      <a class="da-email-link" href="mailto:' + (c.email || '') + '">Email Client</a>'
+        + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._openAddProjectForClient(\'' + c.id + '\', \'' + (c.full_name || '') + '\')">+ Add Project</button>'
         + '      <button class="da-email-link" style="cursor:pointer;background:none" id="resend-' + c.id + '" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + (c.email || '') + '\', \'' + (c.full_name || '') + '\', this)">Resend Portal Link</button>'
         + (function() { var isC = !!c.is_contractor; return '<button class="da-email-link" style="cursor:pointer;border:1px solid ' + (isC ? 'var(--success)' : 'var(--border)') + ';color:' + (isC ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + isC + ')" id="contractor-btn-' + c.id + '">' + (isC ? '\u2713 Contractor' : 'Mark as Contractor') + '</button>'; })()
         + '    </div>'
@@ -1040,6 +1070,195 @@
   };
 
   // duplicate _toggleContractor removed
+
+  // ── PROJECT MANAGEMENT FUNCTIONS ────────────────────────────────
+
+  var PROJECT_TYPE_LABELS_MAP = {
+    'full_yard': 'Full Yard', 'front_yard': 'Front Yard', 'backyard': 'Backyard',
+    'outdoor_living': 'Outdoor Living', 'landscape_construction': 'Landscape Construction',
+    'pool_and_spa': 'Pool & Spa', 'custom': 'Custom / Other'
+  };
+
+  window._showAddProjectForm = function() {
+    var form = document.getElementById('daAddProjectForm');
+    if (!form) return;
+    form.style.display = 'block';
+    // Populate client dropdown
+    var sel = document.getElementById('apClientId');
+    if (sel && allClients.length) {
+      sel.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
+        return '<option value="' + c.id + '">' + (c.full_name || c.email) + '</option>';
+      }).join('');
+    }
+  };
+
+  window._hideAddProjectForm = function() {
+    var form = document.getElementById('daAddProjectForm');
+    if (form) form.style.display = 'none';
+  };
+
+  window._openAddProjectForClient = function(clientId, clientName) {
+    // Switch to projects tab and pre-select client
+    document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(c) { c.classList.remove('active'); });
+    document.querySelector('[data-tab="projects"]').classList.add('active');
+    document.getElementById('tab-projects').classList.add('active');
+    window._showAddProjectForm();
+    setTimeout(function() {
+      var sel = document.getElementById('apClientId');
+      if (sel) sel.value = clientId;
+    }, 100);
+    loadProjects();
+  };
+
+  window._submitAddProject = async function() {
+    var clientId = document.getElementById('apClientId').value;
+    var name = document.getElementById('apProjectName').value.trim();
+    var type = document.getElementById('apProjectType').value;
+    var start = document.getElementById('apStartDate').value;
+    var end = document.getElementById('apEndDate').value;
+    var address = document.getElementById('apAddress').value.trim();
+    var goals = document.getElementById('apGoals').value.trim();
+    var msg = document.getElementById('apMsg');
+    if (!clientId || !name) { msg.textContent = 'Client and project name are required.'; msg.className = 'da-modal-msg error'; return; }
+    var btn = document.getElementById('apSubmit');
+    btn.disabled = true; btn.textContent = 'Creating...'; msg.textContent = '';
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      var res = await fetch(SURL + '/rest/v1/projects', {
+        method: 'POST',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          client_id: clientId,
+          project_name: name,
+          project_type: type || null,
+          start_date: start || null,
+          end_date: end || null,
+          project_address: address || null,
+          description: goals || null,
+          status: 'active'
+        })
+      });
+      if (res.ok) {
+        msg.textContent = 'Project created!'; msg.className = 'da-modal-msg success';
+        ['apProjectName','apAddress','apGoals'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+        document.getElementById('apProjectType').value = '';
+        document.getElementById('apStartDate').value = '';
+        document.getElementById('apEndDate').value = '';
+        document.getElementById('apClientId').value = '';
+        setTimeout(function() { window._hideAddProjectForm(); msg.textContent = ''; loadProjects(); }, 1500);
+      } else {
+        var errText = await res.text();
+        msg.textContent = 'Error: ' + errText.substring(0, 100); msg.className = 'da-modal-msg error';
+      }
+    } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
+    btn.disabled = false; btn.textContent = 'Create Project';
+  };
+
+  async function loadProjects() {
+    var container = document.getElementById('daProjectsList');
+    if (!container) return;
+    container.innerHTML = '<div class="da-empty">Loading projects...</div>';
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      var res = await fetch(SURL + '/rest/v1/projects?order=created_at.desc&select=*,clients(full_name,email)', {
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY }
+      });
+      var projects = await res.json();
+      if (!projects || !projects.length) { container.innerHTML = '<div class="da-empty">No projects yet. Use + Add Project to create one.</div>'; return; }
+      container.innerHTML = projects.map(function(p) {
+        var clientName = p.clients ? (p.clients.full_name || p.clients.email) : 'Unknown Client';
+        var typeLabel = PROJECT_TYPE_LABELS_MAP[p.project_type] || p.project_type || '—';
+        var startStr = p.start_date ? new Date(p.start_date).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
+        var endStr = p.end_date ? new Date(p.end_date).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
+        return '<div class="da-client-card" style="margin-bottom:8px">'
+          + '<div class="da-card-top" onclick="window._toggleProjectCard(\'' + p.id + '\')">'
+          + '  <div class="da-card-left"><div class="da-card-avatar" style="font-size:11px">' + (p.project_name || 'P').charAt(0).toUpperCase() + '</div>'
+          + '  <div><div class="da-card-name">' + (p.project_name || 'Unnamed Project') + '</div>'
+          + '  <div class="da-card-sub">' + clientName + ' &middot; ' + typeLabel + '</div></div></div>'
+          + '  <div class="da-card-right">'
+          + '    <div class="da-stage-pill" style="color:var(--gold);border-color:var(--gold);background:var(--gold-dim)">' + (p.status || 'active') + '</div>'
+          + '    <div class="da-card-date">' + startStr + ' → ' + endStr + '</div>'
+          + '    <div class="da-expand-icon" id="proj-exp-' + p.id + '">&#9660;</div>'
+          + '  </div>'
+          + '</div>'
+          + '<div class="da-card-details" id="proj-det-' + p.id + '">'
+          + '  <div class="da-details-grid">'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Client</div><div class="da-detail-value">' + clientName + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Type</div><div class="da-detail-value">' + typeLabel + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + (p.project_address || '—') + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Status</div><div class="da-detail-value">' + (p.status || 'active') + '</div></div>'
+          + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Goals / Notes</div><div class="da-detail-value">' + (p.description || '—') + '</div></div>'
+          + '  </div>'
+          + '  <div class="da-card-actions">'
+          + '    <div class="da-section-divider">Drive Links</div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Design</div><input class="da-text-input" id="plink-design-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + (p.drive_design_link || '') + '" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Permit</div><input class="da-text-input" id="plink-permit-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + (p.drive_permit_link || '') + '" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="plink-const-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + (p.drive_construction_link || '') + '" /></div>'
+          + '    <button class="da-update-btn" onclick="window._saveProjectLinks(\'' + p.id + '\')">Save Links</button>'
+          + '    <div class="da-section-divider">Status</div>'
+          + '    <div class="da-action-row"><select class="da-select" id="pstatus-' + p.id + '"><option value="active"' + (p.status==='active'?' selected':'') + '>Active</option><option value="on_hold"' + (p.status==='on_hold'?' selected':'') + '>On Hold</option><option value="complete"' + (p.status==='complete'?' selected':'') + '>Complete</option><option value="cancelled"' + (p.status==='cancelled'?' selected':'') + '>Cancelled</option></select><button class="da-update-btn" onclick="window._updateProjectStatus(\'' + p.id + '\')">Update</button></div>'
+          + '    <div class="da-section-divider">Danger</div>'
+          + '    <div class="da-action-row"><button class="da-update-btn" style="background:var(--error);border-color:var(--error)" onclick="window._deleteProject(\'' + p.id + '\')">Delete Project</button></div>'
+          + '  </div>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading projects</div>'; console.error(e); }
+  }
+
+  window._toggleProjectCard = function(id) {
+    var det = document.getElementById('proj-det-' + id);
+    var exp = document.getElementById('proj-exp-' + id);
+    if (det) det.classList.toggle('visible');
+    if (exp) exp.classList.toggle('open');
+  };
+
+  window._saveProjectLinks = async function(id) {
+    var design = document.getElementById('plink-design-' + id).value.trim();
+    var permit = document.getElementById('plink-permit-' + id).value.trim();
+    var cons = document.getElementById('plink-const-' + id).value.trim();
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      var res = await fetch(SURL + '/rest/v1/projects?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ drive_design_link: design || null, drive_permit_link: permit || null, drive_construction_link: cons || null })
+      });
+      var btn = event.currentTarget;
+      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { btn.textContent = 'Save Links'; btn.style.background = 'var(--gold)'; }, 2000); }
+    } catch(e) {}
+  };
+
+  window._updateProjectStatus = async function(id) {
+    var val = document.getElementById('pstatus-' + id).value;
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      await fetch(SURL + '/rest/v1/projects?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ status: val })
+      });
+      loadProjects();
+    } catch(e) {}
+  };
+
+  window._deleteProject = async function(id) {
+    if (!confirm('Delete this project? This cannot be undone.')) return;
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      await fetch(SURL + '/rest/v1/projects?id=eq.' + id, {
+        method: 'DELETE',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY }
+      });
+      loadProjects();
+    } catch(e) {}
+  };
 
   window._sendReply = async function(clientId, projectId) {
     var textarea = document.getElementById('reply-' + clientId);
