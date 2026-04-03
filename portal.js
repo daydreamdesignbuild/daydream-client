@@ -1107,18 +1107,42 @@
 
   // ── LOGIN ─────────────────────────────────────────────────────────
   document.getElementById('ddLoginBtn').addEventListener('click', async function() {
-    var email = document.getElementById('ddLoginEmail').value.trim();
-    var msg = document.getElementById('ddLoginMsg');
+    var email = (document.getElementById('ddLoginEmail').value || '').trim().toLowerCase();
+    var msg   = document.getElementById('ddLoginMsg');
     if (!email) { showMsg(msg, 'Please enter your email address.', 'error'); return; }
+    if (!email.match(/^[^@]+@[^@]+\.[^@]+$/)) { showMsg(msg, 'Please enter a valid email address.', 'error'); return; }
     this.disabled = true; this.textContent = 'Sending...';
     try {
+      // Try OTP first (works when email confirmations are off in Supabase)
       var res = await fetch(SUPABASE_URL + '/auth/v1/otp', {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, options: { emailRedirectTo: PORTAL_URL } })
+        body: JSON.stringify({
+          email: email,
+          create_user: true,
+          options: { emailRedirectTo: PORTAL_URL }
+        })
       });
-      showMsg(msg, res.ok ? 'Login link sent! Check your inbox and click the link to access your portal.' : 'Something went wrong. Please try again.', res.ok ? 'success' : 'error');
-    } catch(e) { showMsg(msg, 'Something went wrong. Please try again.', 'error'); }
+      if (res.ok) {
+        showMsg(msg, 'Login link sent — check your inbox.', 'success');
+        this.disabled = false; this.textContent = 'Send Login Link';
+        return;
+      }
+      // Fallback: use invite-client Edge Function
+      var res2 = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email: email, full_name: '' })
+      });
+      var data = await res2.json().catch(function() { return {}; });
+      if (res2.ok) {
+        showMsg(msg, 'Login link sent — check your inbox.', 'success');
+      } else {
+        showMsg(msg, 'Could not send login link. Please contact us at start@daydreamdesignandbuild.com', 'error');
+      }
+    } catch(e) {
+      showMsg(msg, 'Connection error. Please check your internet and try again.', 'error');
+    }
     this.disabled = false; this.textContent = 'Send Login Link';
   });
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
