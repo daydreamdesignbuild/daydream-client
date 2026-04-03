@@ -235,17 +235,7 @@
     });
   }
 
-  // Dynamic role options based on service selection
-  window._onServiceChange = function(val) {
-    var stoneRoles    = document.querySelectorAll('#ddProfRole .dd-role-stone');
-    var defaultRoles  = document.querySelectorAll('#ddProfRole .dd-role-default');
-    var profSelect    = document.getElementById('ddProfRole');
-    var showStone     = val === 'stone_sourcing' || val === 'both';
-    stoneRoles.forEach(function(o)   { o.style.display = showStone ? '' : 'none'; });
-    defaultRoles.forEach(function(o) { o.style.display = ''; });
-    // Reset role selection when service changes
-    if (profSelect) profSelect.value = '';
-  };
+
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -269,8 +259,8 @@
       investment:   document.getElementById('ddInvestment').value.trim(),
       notes:        document.getElementById('ddNotes').value.trim(),
       status:       'client_inquiry_made',
-      service_type:   (document.getElementById('ddServiceType') || {}).value || 'design_build',
-      professional_role: document.getElementById('ddProfRole') ? document.getElementById('ddProfRole').value || null : null,
+      service_type:   'design_build',
+      professional_role: document.getElementById('ddIsContractor') ? (document.getElementById('ddIsContractor').value === 'yes' ? 'contractor' : 'homeowner') : null,
       client_stage: 'inquiry_submitted'
     };
 
