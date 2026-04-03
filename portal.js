@@ -173,7 +173,10 @@
     '#dd-portal .dd-nav-back.visible { display: block; }',
     '#dd-portal .dd-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
     '#dd-portal .dd-nav-logout:hover { color: var(--gold); }',
-    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; }',
+    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }',
+    '#dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
+    '#dd-portal .dd-tabs-wrap { position: relative; }',
+    '#dd-portal .dd-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 48px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; }',
     '#dd-portal .dd-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; }',
     '#dd-portal .dd-tab:hover { color: var(--text); }',
     '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
@@ -304,17 +307,13 @@
     '#dd-portal .dd-create-textarea { resize: vertical; min-height: 120px; line-height: 1.7; }',
     '#dd-portal .dd-create-msg { font-size: 12px; min-height: 20px; margin-bottom: 12px; }',
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
-    '#dd-portal .dd-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 10px 14px; color: var(--muted); font-size: 20px; line-height: 1; flex-shrink: 0; }',
-    '#dd-portal .dd-active-tab-label { display: none; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); padding: 0 16px; flex: 1; }',
-    '#dd-portal .dd-mobile-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--border); z-index: 200; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }',
-    '#dd-portal .dd-mobile-menu.open { display: flex; }',
-    '#dd-portal .dd-mobile-menu .dd-tab { display: block !important; text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--border); width: 100%; font-size: 9px; }',
     '@media (max-width: 600px) {',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
     '  #dd-portal .dd-nav-user { display: none; }',
     '  #dd-portal #ddRefreshBtn { display: none; }',
     '  #dd-portal .dd-nav-project-name { display: none !important; }',
+    '  #dd-portal .dd-tabs { padding: 0 8px; }',
     '  #dd-portal .dd-content { padding: 24px 16px; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
@@ -323,10 +322,6 @@
     '  #dd-portal .dd-project-card { flex-direction: column; align-items: flex-start; }',
     '  #dd-portal .dd-create-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-create-project-body { padding: 24px 16px; }',
-    '  #dd-portal .dd-tabs .dd-tab { display: none; }',
-    '  #dd-portal .dd-tabs { padding: 0; display: flex; align-items: center; justify-content: space-between; position: relative; }',
-    '  #dd-portal .dd-active-tab-label { display: block; }',
-    '  #dd-portal .dd-hamburger { display: block; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
@@ -391,17 +386,6 @@
     '  </nav>',
 
     '  <div class="dd-tabs" id="ddTabBar">',
-    '    <span class="dd-active-tab-label" id="ddActiveTabLabel">Overview</span>',
-    '    <button class="dd-hamburger" id="ddHamburger" onclick="window._toggleMobileMenu()" aria-label="Menu">&#9776;</button>',
-    '    <div class="dd-mobile-menu" id="ddMobileMenu">',
-    '      <button class="dd-tab active" data-tab="overview" onclick="window._selectMobileTab(this)">Overview</button>',
-    '      <button class="dd-tab" data-tab="checklist" onclick="window._selectMobileTab(this)">Checklist</button>',
-    '      <button class="dd-tab" data-tab="uploads" onclick="window._selectMobileTab(this)">Documents</button>',
-    '      <button class="dd-tab" data-tab="messages" onclick="window._selectMobileTab(this)">Messages</button>',
-    '      <button class="dd-tab" data-tab="schedule" onclick="window._selectMobileTab(this)">Schedule</button>',
-    '      <button class="dd-tab" data-tab="drive" onclick="window._selectMobileTab(this)">Project Files</button>',
-    '      <button class="dd-tab" data-tab="settings" onclick="window._selectMobileTab(this)">Settings</button>',
-    '    </div>',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
     '    <button class="dd-tab" data-tab="uploads">Documents</button>',
@@ -935,40 +919,6 @@
 
   document.getElementById('ddNavBack').addEventListener('click', function() {
     stopRealtime(); // Stop subscriptions for this project before switching
-  // ── MOBILE HAMBURGER MENU ─────────────────────────────────────────
-  window._toggleMobileMenu = function() {
-    var menu = document.getElementById('ddMobileMenu');
-    if (menu) menu.classList.toggle('open');
-  };
-
-  window._selectMobileTab = function(btn) {
-    var tab = btn.getAttribute('data-tab');
-    // Close menu
-    var menu = document.getElementById('ddMobileMenu');
-    if (menu) menu.classList.remove('open');
-    // Update active label
-    var label = document.getElementById('ddActiveTabLabel');
-    if (label) label.textContent = btn.textContent;
-    // Trigger normal tab switch
-    var desktopTab = document.querySelector('#dd-portal .dd-tabs > .dd-tab[data-tab="' + tab + '"]');
-    if (desktopTab) desktopTab.click();
-    else {
-      // Direct tab switch
-      document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
-      var content = document.getElementById('tab-' + tab);
-      if (content) content.classList.add('active');
-    }
-  };
-
-  // Close hamburger menu when clicking outside
-  document.addEventListener('click', function(e) {
-    var menu = document.getElementById('ddMobileMenu');
-    var hamburger = document.getElementById('ddHamburger');
-    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== hamburger) {
-      menu.classList.remove('open');
-    }
-  });
-
     document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
     document.querySelector('[data-tab="overview"]').classList.add('active');
