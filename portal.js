@@ -332,11 +332,18 @@
     '  <div class="dd-login-card">',
     '    <div class="dd-login-header"><div class="dd-login-logo">Daydream</div><div class="dd-login-sub">Design + Build &mdash; Atlanta, Georgia</div></div>',
     '    <div class="dd-login-body">',
-    '      <div class="dd-login-title">Access Your Portal</div>',
-    '      <div class="dd-login-desc">Enter your email address and we will send you a secure one-click link to sign in.</div>',
-    '      <div class="dd-input-wrap"><label class="dd-input-label">Email Address</label><input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" /></div>',
-    '      <button class="dd-btn" id="ddLoginBtn">Send Login Link</button>',
+    '      <div class="dd-login-title">Welcome Back</div>',
+    '      <div class="dd-login-desc">Sign in to access your client portal.</div>',
+    '      <div class="dd-input-wrap"><label class="dd-input-label">Email Address</label><input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" autocomplete="email" /></div>',
+    '      <div class="dd-input-wrap"><label class="dd-input-label">Password</label><input class="dd-input" type="password" id="ddLoginPassword" placeholder="Enter your password" autocomplete="current-password" /></div>',
+    '      <button class="dd-btn" id="ddLoginBtn">Sign In</button>',
     '      <div class="dd-msg" id="ddLoginMsg"></div>',
+    '      <div style="text-align:center;margin-top:16px"><button id="ddForgotBtn" style="background:none;border:none;color:var(--muted);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;text-decoration:underline">Forgot password?</button></div>',
+    '      <div id="ddResetWrap" style="display:none;margin-top:12px">',
+    '        <div class="dd-input-wrap"><label class="dd-input-label">Enter your email to reset</label><input class="dd-input" type="email" id="ddResetEmail" placeholder="youremail@email.com" /></div>',
+    '        <button class="dd-btn" id="ddResetBtn" style="margin-top:8px">Send Reset Link</button>',
+    '        <div class="dd-msg" id="ddResetMsg"></div>',
+    '      </div>',
     '    </div>',
     '  </div>',
     '</div>',
@@ -1106,44 +1113,64 @@
   init();
 
   // ── LOGIN ─────────────────────────────────────────────────────────
+  // ── EMAIL + PASSWORD LOGIN ──────────────────────────────────────
   document.getElementById('ddLoginBtn').addEventListener('click', async function() {
-    var email = (document.getElementById('ddLoginEmail').value || '').trim().toLowerCase();
-    var msg   = document.getElementById('ddLoginMsg');
-    if (!email) { showMsg(msg, 'Please enter your email address.', 'error'); return; }
-    if (!email.match(/^[^@]+@[^@]+\.[^@]+$/)) { showMsg(msg, 'Please enter a valid email address.', 'error'); return; }
-    this.disabled = true; this.textContent = 'Sending...';
+    var email    = (document.getElementById('ddLoginEmail').value    || '').trim().toLowerCase();
+    var password = (document.getElementById('ddLoginPassword').value || '').trim();
+    var msg      = document.getElementById('ddLoginMsg');
+    if (!email)    { showMsg(msg, 'Please enter your email address.', 'error'); return; }
+    if (!password) { showMsg(msg, 'Please enter your password.', 'error'); return; }
+    this.disabled = true; this.textContent = 'Signing in...';
     try {
-      // Try OTP first (works when email confirmations are off in Supabase)
-      var res = await fetch(SUPABASE_URL + '/auth/v1/otp', {
+      var res  = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email,
-          create_user: true,
-          options: { emailRedirectTo: PORTAL_URL }
-        })
+        body: JSON.stringify({ email: email, password: password })
       });
-      if (res.ok) {
-        showMsg(msg, 'Login link sent — check your inbox.', 'success');
-        this.disabled = false; this.textContent = 'Send Login Link';
-        return;
-      }
-      // Fallback: use invite-client Edge Function
-      var res2 = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({ email: email, full_name: '' })
-      });
-      var data = await res2.json().catch(function() { return {}; });
-      if (res2.ok) {
-        showMsg(msg, 'Login link sent — check your inbox.', 'success');
+      var data = await res.json();
+      if (data.access_token) {
+        try {
+          localStorage.setItem('dd_token', data.access_token);
+          sessionStorage.setItem('dd_token', data.access_token);
+        } catch(e) {}
+        await loadPortal(data.access_token);
       } else {
-        showMsg(msg, 'Could not send login link. Please contact us at start@daydreamdesignandbuild.com', 'error');
+        showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
       }
     } catch(e) {
-      showMsg(msg, 'Connection error. Please check your internet and try again.', 'error');
+      showMsg(msg, 'Connection error. Please try again.', 'error');
     }
-    this.disabled = false; this.textContent = 'Send Login Link';
+    this.disabled = false; this.textContent = 'Sign In';
+  });
+
+  document.getElementById('ddLoginEmail').addEventListener('keydown',    function(e) { if (e.key === 'Enter') document.getElementById('ddLoginPassword').focus(); });
+  document.getElementById('ddLoginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
+
+  // ── FORGOT PASSWORD ──────────────────────────────────────────────
+  document.getElementById('ddForgotBtn').addEventListener('click', function() {
+    var wrap = document.getElementById('ddResetWrap');
+    var email = document.getElementById('ddLoginEmail').value.trim();
+    if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+    var resetInput = document.getElementById('ddResetEmail');
+    if (resetInput && email) resetInput.value = email;
+  });
+
+  document.getElementById('ddResetBtn').addEventListener('click', async function() {
+    var email = (document.getElementById('ddResetEmail').value || '').trim().toLowerCase();
+    var msg   = document.getElementById('ddResetMsg');
+    if (!email) { showMsg(msg, 'Please enter your email.', 'error'); return; }
+    this.disabled = true; this.textContent = 'Sending...';
+    try {
+      var res = await fetch(SUPABASE_URL + '/auth/v1/recover', {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      });
+      showMsg(msg, res.ok ? 'Reset link sent — check your inbox.' : 'Could not send reset link. Please contact us.', res.ok ? 'success' : 'error');
+    } catch(e) {
+      showMsg(msg, 'Connection error. Please try again.', 'error');
+    }
+    this.disabled = false; this.textContent = 'Send Reset Link';
   });
   document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
 
