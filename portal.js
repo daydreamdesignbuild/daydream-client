@@ -507,8 +507,7 @@
     // PROJECT FILES
     '    <div class="dd-tab-content" id="tab-drive">',
     '      <div class="dd-section-title">Project Files</div>',
-    '      <div class="dd-section-sub">Access your shared project folders</div>',
-    '      <div id="ddDriveList"></div>',
+    '      <div class="dd-section-sub">Your project files and shared folders will appear here once your project is active. Your project manager will share access with you directly.</div>',
     '    </div>',
     '    <div class="dd-tab-content" id="tab-settings">',
     '      <div class="dd-section-title">Account Settings</div>',
@@ -998,7 +997,6 @@
       if (ptEl) ptEl.textContent = PROJECT_TYPE_LABELS[client.project_type_category] || client.project_type_category || '—';
       renderTimeline(client.client_stage || 'inquiry_submitted', client.construction_stage);
       renderStatusBadges(client);
-      renderDriveLinks(client);
       // Load discussion link if set
       if (client.discussion_link) {
         showDiscussionLink(client.discussion_link);
