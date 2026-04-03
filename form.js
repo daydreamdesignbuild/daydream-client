@@ -138,12 +138,13 @@
     '    <div class="dd-field"><label>Email Address</label><input type="email" id="ddEmail" placeholder="youremail@email.com" required /></div>',
     '    <div class="dd-field"><label>Phone Number</label><input type="tel" id="ddPhone" placeholder="+1 (404) 000-0000" /></div>',
     '  </div>',
-    '  <div class="dd-row">',
-    '  </div>',
 
     '  <div class="dd-row">',
     '    <div class="dd-field"><label>Are You a Contractor?</label><div class="dd-select-wrap"><select id="ddIsContractor" onchange="window._onContractorChange(this.value)"><option value="">Select an option</option><option value="no">No — I am the homeowner</option><option value="yes">Yes — I am a contractor</option></select><span class="dd-arrow">&#9662;</span></div></div>',
-    '    <div class="dd-field" id="ddCompanyWrap" style="display:none"><label>Company Name</label><input type="text" id="ddCompany" placeholder="e.g. Smith Contracting LLC" /></div>',
+    '    <div class="dd-field"><label>What Service Are You Interested In?</label><div class="dd-select-wrap"><select id="ddServiceType"><option value="">Select a service...</option><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="both">Both (Design, Build &amp; Stone)</option></select><span class="dd-arrow">&#9662;</span></div></div>',
+    '  </div>',
+    '  <div class="dd-row" id="ddCompanyWrap" style="display:none">',
+    '    <div class="dd-field dd-full"><label>Company Name</label><input type="text" id="ddCompany" placeholder="e.g. Smith Contracting LLC" /></div>',
     '  </div>',
 
     '  <div class="dd-section">Project Address</div>',
@@ -259,7 +260,7 @@
       investment:   document.getElementById('ddInvestment').value.trim(),
       notes:        document.getElementById('ddNotes').value.trim(),
       status:       'client_inquiry_made',
-      service_type:   'design_build',
+      service_type:   (document.getElementById('ddServiceType') || {}).value || 'design_build',
       professional_role: document.getElementById('ddIsContractor') ? (document.getElementById('ddIsContractor').value === 'yes' ? 'contractor' : 'homeowner') : null,
       client_stage: 'inquiry_submitted'
     };
