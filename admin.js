@@ -741,12 +741,23 @@
   async function loadClients() {
     try {
       var res = await apiFetch('/rest/v1/clients?order=created_at.desc');
-      allClients = await res.json() || [];
+      var data = await res.json();
+      if (!res.ok) {
+        console.error('loadClients API error:', res.status, JSON.stringify(data));
+        // Token may be expired — show login
+        if (res.status === 401 || res.status === 403) {
+          try { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); } catch(e) {}
+          document.getElementById('daDashboard').classList.remove('visible');
+          document.getElementById('daLoginWrap').style.display = 'flex';
+        }
+        return;
+      }
+      allClients = Array.isArray(data) ? data : [];
       updateStats();
       updateSubtabCounts();
       renderCards(allClients);
       checkUnreadMessages();
-    } catch(e) { console.error('loadClients error:', e); }
+    } catch(e) { console.error('loadClients error:', e.message); }
   }
 
   async function checkUnreadMessages() {
@@ -776,8 +787,11 @@
 
   // ── RENDER CARDS ──────────────────────────────────────────────────
   function renderCards(clients) {
+    try {
     var container = document.getElementById('daCardsWrap');
-    document.getElementById('daCount').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
+    if (!container) { console.error('daCardsWrap not found'); return; }
+    var countEl = document.getElementById('daCount');
+    if (countEl) countEl.textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
     if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients found</div>'; return; }
 
     // Group contractors by email
@@ -792,9 +806,11 @@
       }
     });
 
-    container.innerHTML = grouped.map(function(g) {
+    try {
+      container.innerHTML = grouped.map(function(g) {
       var c = g.lead;
       var isContr = c.is_contractor && g.projects.length > 0;
+      var isStone = c.service_type === 'stone_sourcing';
       var stage = getPipelineStage(c.status || 'client_inquiry_made');
       var inv = formatInvestment(c.investment || '');
 
@@ -881,6 +897,8 @@
         + '</div>'
         + '</div>';
     }).join('');
+    } catch(e) { console.error('renderCards HTML error:', e.message, e.stack); container.innerHTML = '<div class="da-empty">Error rendering clients: ' + e.message + '</div>'; }
+    } catch(e) { console.error('renderCards error:', e.message, e.stack); }
   }
 
   // ── TOGGLE CARD ───────────────────────────────────────────────────
