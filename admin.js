@@ -477,6 +477,8 @@
     '          <div class="da-modal-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
     '          <div class="da-modal-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
     '          <div class="da-modal-field"><label class="da-field-label">How Did They Hear About Us?</label><select class="da-field-input" id="acReferral"><option value="">Select...</option><option>Google Search</option><option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>YouTube</option><option>Houzz</option><option>Nextdoor</option><option>Referral — Friend or Family</option><option>Referral — Past Client</option><option>Yard Sign / Drove By</option><option>Home Show / Event</option><option>Other</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Service Type</label><select class="da-field-input" id="acServiceType"><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="both">Both (Design, Build &amp; Stone)</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Service Type</label><select class="da-field-input" id="acServiceType"><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="both">Both (Design, Build &amp; Stone)</option></select></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1">',
@@ -1265,7 +1267,8 @@
     if (!name || !email) { msg.textContent = 'Name and email are required.'; msg.className = 'da-modal-msg error'; return; }
     this.disabled = true; this.textContent = 'Adding...'; msg.textContent = '';
     try {
-      var res = await apiFetch('/rest/v1/clients', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ full_name: name, email: email, phone: phone||null, company_name: company||null, investment: investment||null, referral: referral||null, street: street||null, notes: notes||null, status: 'client_inquiry_made', client_stage: 'inquiry_submitted', is_contractor: isContr }) });
+      var serviceType = (document.getElementById('acServiceType') || {}).value || 'design_build';
+      var res = await apiFetch('/rest/v1/clients', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ full_name: name, email: email, phone: phone||null, company_name: company||null, investment: investment||null, referral: referral||null, street: street||null, notes: notes||null, status: 'client_inquiry_made', client_stage: 'inquiry_submitted', is_contractor: isContr, service_type: serviceType }) });
       if (res.ok) {
         var newClient = await res.json();
         var newClientId = newClient && newClient[0] ? newClient[0].id : null;
