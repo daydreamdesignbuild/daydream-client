@@ -603,20 +603,7 @@
 
   var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing'
 
-  window._setPortalType = function(type) {
-    portalType = type;
-    var dBtn = document.getElementById('ddPortalTypeDesign');
-    var sBtn = document.getElementById('ddPortalTypeStone');
-    if (dBtn && sBtn) {
-      if (type === 'design_build') {
-        dBtn.style.background = 'var(--gold)'; dBtn.style.color = 'var(--bg)';
-        sBtn.style.background = 'var(--surface-2)'; sBtn.style.color = 'var(--muted)';
-      } else {
-        sBtn.style.background = 'var(--gold)'; sBtn.style.color = 'var(--bg)';
-        dBtn.style.background = 'var(--surface-2)'; dBtn.style.color = 'var(--muted)';
-      }
-    }
-  };
+
   var currentClient  = null;
   var allClientProjects = [];
   var currentProject = null;
@@ -972,6 +959,12 @@
       renderTimeline(client.client_stage || 'inquiry_submitted', client.construction_stage);
       renderStatusBadges(client);
       renderDriveLinks(client);
+      // Load discussion link if set
+      if (client.discussion_link) {
+        showDiscussionLink(client.discussion_link);
+        var urlInput = document.getElementById('ddDiscussionUrl');
+        if (urlInput) urlInput.value = client.discussion_link;
+      }
       // Show project goals/description if set
       var goalsCard = document.getElementById('ddProjectGoals');
       var goalsText = document.getElementById('ddProjectGoalsText');
