@@ -129,26 +129,27 @@
 
     '<form id="ddForm">',
 
-    '  <div class="dd-section">Service Interest</div>',
+    '  <div class="dd-section">Service &amp; Role</div>',
     '  <div class="dd-row">',
     '    <div class="dd-field">',
     '      <label class="dd-label">What service are you interested in? *</label>',
-    '      <div class="dd-radio-group" id="ddServiceTypeGroup">',
-    '        <label class="dd-radio-label"><input type="radio" name="serviceType" value="design_build" checked> Design &amp; Build</label>',
-    '        <label class="dd-radio-label"><input type="radio" name="serviceType" value="stone_sourcing"> Stone Sourcing &amp; Procurement</label>',
-    '      </div>',
+    '      <select class="dd-input" id="ddServiceType" required onchange="window._onServiceChange(this.value)">',
+    '        <option value="">Select a service...</option>',
+    '        <option value="design_build">Design &amp; Build</option>',
+    '        <option value="stone_sourcing">Stone Sourcing &amp; Procurement</option>',
+    '        <option value="both">Both (Design, Build &amp; Stone)</option>',
+    '      </select>',
     '    </div>',
-    '  </div>',
-    '  <div class="dd-row" id="ddProfRoleRow" style="display:none">',
     '    <div class="dd-field">',
     '      <label class="dd-label">Professional Role</label>',
     '      <select class="dd-input" id="ddProfRole">',
     '        <option value="">Select your role...</option>',
-    '        <option value="architect">Architect</option>',
-    '        <option value="homeowner">Homeowner</option>',
-    '        <option value="builder">Builder</option>',
-    '        <option value="landscape_architect">Landscape Architect</option>',
-    '        <option value="interior_designer">Interior Designer</option>',
+    '        <option value="homeowner" class="dd-role-default">Homeowner</option>',
+    '        <option value="contractor" class="dd-role-default">Contractor / Builder</option>',
+    '        <option value="architect" class="dd-role-stone" style="display:none">Architect</option>',
+    '        <option value="builder" class="dd-role-stone" style="display:none">Builder</option>',
+    '        <option value="landscape_architect" class="dd-role-stone" style="display:none">Landscape Architect</option>',
+    '        <option value="interior_designer" class="dd-role-stone" style="display:none">Interior Designer</option>',
     '      </select>',
     '    </div>',
     '  </div>',
@@ -250,13 +251,17 @@
     });
   }
 
-  // Show/hide Professional Role based on service type
-  document.querySelectorAll('input[name="serviceType"]').forEach(function(radio) {
-    radio.addEventListener('change', function() {
-      var profRow = document.getElementById('ddProfRoleRow');
-      if (profRow) profRow.style.display = this.value === 'stone_sourcing' ? 'block' : 'none';
-    });
-  });
+  // Dynamic role options based on service selection
+  window._onServiceChange = function(val) {
+    var stoneRoles    = document.querySelectorAll('#ddProfRole .dd-role-stone');
+    var defaultRoles  = document.querySelectorAll('#ddProfRole .dd-role-default');
+    var profSelect    = document.getElementById('ddProfRole');
+    var showStone     = val === 'stone_sourcing' || val === 'both';
+    stoneRoles.forEach(function(o)   { o.style.display = showStone ? '' : 'none'; });
+    defaultRoles.forEach(function(o) { o.style.display = ''; });
+    // Reset role selection when service changes
+    if (profSelect) profSelect.value = '';
+  };
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -280,7 +285,7 @@
       investment:   document.getElementById('ddInvestment').value.trim(),
       notes:        document.getElementById('ddNotes').value.trim(),
       status:       'client_inquiry_made',
-      service_type:   (document.querySelector('input[name="serviceType"]:checked') || {}).value || 'design_build',
+      service_type:   (document.getElementById('ddServiceType') || {}).value || 'design_build',
       professional_role: document.getElementById('ddProfRole') ? document.getElementById('ddProfRole').value || null : null,
       client_stage: 'inquiry_submitted'
     };
