@@ -707,7 +707,6 @@
   try {
     var savedToken = localStorage.getItem('dd_admin_token') || sessionStorage.getItem('dd_admin_token');
     if (savedToken) {
-      // Verify token is still valid
       fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + savedToken } })
         .then(function(r) { return r.json(); })
         .then(function(u) {
@@ -715,11 +714,25 @@
             document.getElementById('daLoginWrap').style.display = 'none';
             document.getElementById('daDashboard').classList.add('visible');
             loadClients();
-            startAdminRealtime(); // Start live updates on auto-login
-          } else { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); }
-        }).catch(function() { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); });
+            startAdminRealtime();
+          } else {
+            // Token invalid — clear it and show login
+            localStorage.removeItem('dd_admin_token');
+            sessionStorage.removeItem('dd_admin_token');
+            document.getElementById('daLoginWrap').style.display = 'flex';
+          }
+        }).catch(function() {
+          localStorage.removeItem('dd_admin_token');
+          sessionStorage.removeItem('dd_admin_token');
+          document.getElementById('daLoginWrap').style.display = 'flex';
+        });
+    } else {
+      // No saved token — ensure login is visible
+      document.getElementById('daLoginWrap').style.display = 'flex';
     }
-  } catch(e) {}
+  } catch(e) {
+    document.getElementById('daLoginWrap').style.display = 'flex';
+  }
 
   // ── LOAD CLIENTS ──────────────────────────────────────────────────
   async function loadClients() {
