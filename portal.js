@@ -983,7 +983,7 @@
         var user = await res.json();
         if (user && user.email) {
           currentUser = { access_token: accessToken, email: user.email, id: user.id };
-          try { sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
+          try { localStorage.setItem('dd_token', accessToken); sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
           // Clean URL — remove token params
           history.replaceState(null, '', window.location.pathname);
           return true;
@@ -995,14 +995,14 @@
 
   async function tryTokenFromSession() {
     var token = null;
-    try { token = sessionStorage.getItem('dd_token'); } catch(e) {}
+    try { token = localStorage.getItem('dd_token') || sessionStorage.getItem('dd_token'); } catch(e) {}
     if (!token) return false;
     try {
       var res = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token } });
       var user = await res.json();
       if (user && user.email) { currentUser = { access_token: token, email: user.email, id: user.id }; return true; }
     } catch(e) {}
-    try { sessionStorage.removeItem('dd_token'); } catch(e) {}
+    try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
     return false;
   }
 
@@ -1091,7 +1091,7 @@
 
   function doLogout() {
     stopRealtime(); // Clean up WebSocket connections
-    try { sessionStorage.removeItem('dd_token'); } catch(e) {}
+    try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
     currentUser = null; currentClient = null; currentProject = null; isContractor = false;
     document.getElementById('ddDashboard').classList.remove('visible');
     document.getElementById('ddProjectSelector').classList.remove('visible');
