@@ -1374,52 +1374,6 @@
   };
 
   // ── CHANGE PASSWORD ──────────────────────────────────────────────
-  window._toggleChangePass = function() {
-    var panel = document.getElementById('ddChangePassPanel');
-    if (!panel) return;
-    var isHidden = panel.style.display === 'none';
-    panel.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) {
-      document.getElementById('ddNewPass').value = '';
-      document.getElementById('ddConfirmPass').value = '';
-      document.getElementById('ddChangePassMsg').textContent = '';
-      document.getElementById('ddNewPass').focus();
-    }
-  };
-
-  window._saveNewPassword = async function() {
-    var newPass     = (document.getElementById('ddNewPass').value     || '').trim();
-    var confirmPass = (document.getElementById('ddConfirmPass').value || '').trim();
-    var msg         = document.getElementById('ddChangePassMsg');
-    if (!newPass)               { msg.textContent = 'Please enter a new password.';         msg.style.color = 'var(--error)'; return; }
-    if (newPass.length < 6)     { msg.textContent = 'Password must be at least 6 characters.'; msg.style.color = 'var(--error)'; return; }
-    if (newPass !== confirmPass) { msg.textContent = 'Passwords do not match.';              msg.style.color = 'var(--error)'; return; }
-    msg.textContent = 'Updating...'; msg.style.color = 'var(--muted)';
-    try {
-      var token = null;
-      try { token = localStorage.getItem('dd_token') || sessionStorage.getItem('dd_token'); } catch(e) {}
-      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-        method: 'PUT',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: newPass })
-      });
-      var data = await res.json().catch(function() { return {}; });
-      if (res.ok) {
-        msg.textContent = 'Password updated successfully!';
-        msg.style.color = 'var(--success)';
-        document.getElementById('ddNewPass').value = '';
-        document.getElementById('ddConfirmPass').value = '';
-        setTimeout(function() { window._toggleChangePass(); }, 2000);
-      } else {
-        msg.textContent = data.msg || data.message || 'Could not update. Please try again.';
-        msg.style.color = 'var(--error)';
-      }
-    } catch(e) {
-      msg.textContent = 'Connection error. Please try again.';
-      msg.style.color = 'var(--error)';
-    }
-  };
-
   document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
   document.getElementById('ddRefreshBtn').addEventListener('click', async function() {
     if (!currentClient) return;
