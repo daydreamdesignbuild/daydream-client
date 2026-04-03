@@ -341,7 +341,7 @@
     '      <div style="text-align:center;margin-top:16px"><button id="ddForgotBtn" style="background:none;border:none;color:var(--muted);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;text-decoration:underline">Forgot password?</button></div>',
     '      <div id="ddResetWrap" style="display:none;margin-top:12px">',
     '        <div class="dd-input-wrap"><label class="dd-input-label">Enter your email to reset</label><input class="dd-input" type="email" id="ddResetEmail" placeholder="youremail@email.com" /></div>',
-    '        <button class="dd-btn" id="ddResetBtn" style="margin-top:8px">Send Reset Link</button>',
+    '        <button class="dd-btn" id="ddResetBtn" style="margin-top:8px">Send New Password</button>',
     '        <div class="dd-msg" id="ddResetMsg"></div>',
     '      </div>',
     '    </div>',
@@ -1168,26 +1168,19 @@
     if (!email) { showMsg(msg, 'Please enter your email.', 'error'); return; }
     this.disabled = true; this.textContent = 'Sending...';
     try {
-      var res = await fetch(SUPABASE_URL + '/auth/v1/recover', {
+      // Use invite-client to send a fresh password — more reliable than Supabase's built-in recovery
+      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
         method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: email })
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email: email, full_name: '' })
       });
-      var data = {};
-      try { data = await res.json(); } catch(e) {}
-      console.log('Password reset response:', res.status, JSON.stringify(data));
-      if (res.status === 200 || res.status === 204) {
-        showMsg(msg, 'Reset link sent — check your inbox.', 'success');
+      var data = await res.json().catch(function() { return {}; });
+      if (res.ok) {
+        showMsg(msg, 'New login credentials sent — check your inbox.', 'success');
       } else {
-        var errDetail = data.msg || data.message || data.error_description || ('Status ' + res.status);
-        console.error('Reset error detail:', errDetail);
-        showMsg(msg, 'Could not send reset link. Please email us at start@daydreamdesignandbuild.com', 'error');
+        showMsg(msg, 'Could not send reset. Please contact us at start@daydreamdesignandbuild.com', 'error');
       }
     } catch(e) {
-      console.error('Reset exception:', e.message);
       showMsg(msg, 'Connection error. Please try again.', 'error');
     }
     this.disabled = false; this.textContent = 'Send Reset Link';
