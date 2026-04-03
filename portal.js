@@ -375,9 +375,39 @@
     '      <span class="dd-nav-user" id="ddNavUser"></span>',
     '      <button class="dd-nav-logout" id="ddRefreshBtn" title="Refresh project data" style="border:1px solid var(--border);padding:6px 12px;font-size:9px">&#8635; Refresh</button>',
     '      <button class="dd-nav-back" id="ddNavBack">&#8592; All Projects</button>',
+    '      <button id="ddChangePassBtn" onclick="window._toggleChangePass()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:8px;letter-spacing:0.25em;text-transform:uppercase;padding:6px 14px;cursor:pointer;font-family:Jost,sans-serif;margin-right:8px">Change Password</button>',
+    '      <button id="ddChangePassBtn" onclick="window._toggleChangePass()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:8px;letter-spacing:0.25em;text-transform:uppercase;padding:6px 14px;cursor:pointer;font-family:Jost,sans-serif;margin-right:8px">Change Password</button>',
     '      <button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button>',
     '    </div>',
     '  </nav>',
+    '  <div id="ddChangePassPanel" style="display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:24px 32px">',
+    '    <div style="max-width:380px">',
+    '      <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Change Your Password</div>',
+    '      <div style="display:flex;flex-direction:column;gap:10px">',
+    '        <input type="password" id="ddNewPass" placeholder="New password (min 6 characters)" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
+    '        <input type="password" id="ddConfirmPass" placeholder="Confirm new password" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
+    '        <div style="display:flex;gap:8px">',
+    '          <button class="dd-btn" onclick="window._saveNewPassword()" style="padding:10px 24px;font-size:9px">Update Password</button>',
+    '          <button onclick="window._toggleChangePass()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:10px 20px;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-family:Jost,sans-serif">Cancel</button>',
+    '        </div>',
+    '        <div id="ddChangePassMsg" style="font-size:11px;min-height:16px"></div>',
+    '      </div>',
+    '    </div>',
+    '  </div>',
+    '  <div id="ddChangePassPanel" style="display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:24px 32px">',
+    '    <div style="max-width:380px">',
+    '      <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Change Your Password</div>',
+    '      <div style="display:flex;flex-direction:column;gap:10px">',
+    '        <input type="password" id="ddNewPass" placeholder="New password (min 6 characters)" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
+    '        <input type="password" id="ddConfirmPass" placeholder="Confirm new password" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
+    '        <div style="display:flex;gap:8px">',
+    '          <button class="dd-btn" onclick="window._saveNewPassword()" style="padding:10px 24px;font-size:9px">Update Password</button>',
+    '          <button onclick="window._toggleChangePass()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:10px 20px;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-family:Jost,sans-serif">Cancel</button>',
+    '        </div>',
+    '        <div id="ddChangePassMsg" style="font-size:11px;min-height:16px"></div>',
+    '      </div>',
+    '    </div>',
+    '  </div>',
     '  <div class="dd-tabs">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
@@ -1247,6 +1277,104 @@
     document.getElementById('ddCreateProject').classList.remove('visible');
     showLogin();
   }
+  // ── CHANGE PASSWORD ──────────────────────────────────────────────
+  window._toggleChangePass = function() {
+    var panel = document.getElementById('ddChangePassPanel');
+    if (!panel) return;
+    var isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) {
+      document.getElementById('ddNewPass').value = '';
+      document.getElementById('ddConfirmPass').value = '';
+      document.getElementById('ddChangePassMsg').textContent = '';
+      document.getElementById('ddNewPass').focus();
+    }
+  };
+
+  window._saveNewPassword = async function() {
+    var newPass     = (document.getElementById('ddNewPass').value     || '').trim();
+    var confirmPass = (document.getElementById('ddConfirmPass').value || '').trim();
+    var msg         = document.getElementById('ddChangePassMsg');
+    if (!newPass)                { msg.textContent = 'Please enter a new password.';        msg.style.color = 'var(--error)';   return; }
+    if (newPass.length < 6)      { msg.textContent = 'Password must be at least 6 characters.'; msg.style.color = 'var(--error)';   return; }
+    if (newPass !== confirmPass)  { msg.textContent = 'Passwords do not match.';             msg.style.color = 'var(--error)';   return; }
+    msg.textContent = 'Updating...'; msg.style.color = 'var(--muted)';
+    try {
+      var token = null;
+      try { token = localStorage.getItem('dd_token') || sessionStorage.getItem('dd_token'); } catch(e) {}
+      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+        method: 'PUT',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: newPass })
+      });
+      var data = await res.json().catch(function() { return {}; });
+      if (res.ok) {
+        msg.textContent = 'Password updated successfully!';
+        msg.style.color = 'var(--success)';
+        document.getElementById('ddNewPass').value     = '';
+        document.getElementById('ddConfirmPass').value = '';
+        setTimeout(function() { window._toggleChangePass(); }, 2000);
+      } else {
+        msg.textContent = data.msg || data.message || 'Could not update password. Please try again.';
+        msg.style.color = 'var(--error)';
+      }
+    } catch(e) {
+      msg.textContent = 'Connection error. Please try again.';
+      msg.style.color = 'var(--error)';
+    }
+  };
+
+  // ── CHANGE PASSWORD ──────────────────────────────────────────────
+  window._toggleChangePass = function() {
+    var panel = document.getElementById('ddChangePassPanel');
+    if (!panel) return;
+    var isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) {
+      document.getElementById('ddNewPass').value = '';
+      document.getElementById('ddConfirmPass').value = '';
+      document.getElementById('ddChangePassMsg').textContent = '';
+      document.getElementById('ddNewPass').focus();
+    }
+  };
+
+  window._saveNewPassword = async function() {
+    var newPass     = (document.getElementById('ddNewPass').value     || '').trim();
+    var confirmPass = (document.getElementById('ddConfirmPass').value || '').trim();
+    var msg         = document.getElementById('ddChangePassMsg');
+    if (!newPass)               { msg.textContent = 'Please enter a new password.';         msg.style.color = 'var(--error)'; return; }
+    if (newPass.length < 6)     { msg.textContent = 'Password must be at least 6 characters.'; msg.style.color = 'var(--error)'; return; }
+    if (newPass !== confirmPass) { msg.textContent = 'Passwords do not match.';              msg.style.color = 'var(--error)'; return; }
+    msg.textContent = 'Updating...'; msg.style.color = 'var(--muted)';
+    try {
+      var token = null;
+      try { token = localStorage.getItem('dd_token') || sessionStorage.getItem('dd_token'); } catch(e) {}
+      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+        method: 'PUT',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPass })
+      });
+      var data = await res.json().catch(function() { return {}; });
+      if (res.ok) {
+        msg.textContent = 'Password updated successfully!';
+        msg.style.color = 'var(--success)';
+        document.getElementById('ddNewPass').value = '';
+        document.getElementById('ddConfirmPass').value = '';
+        setTimeout(function() { window._toggleChangePass(); }, 2000);
+      } else {
+        msg.textContent = data.msg || data.message || 'Could not update. Please try again.';
+        msg.style.color = 'var(--error)';
+      }
+    } catch(e) {
+      msg.textContent = 'Connection error. Please try again.';
+      msg.style.color = 'var(--error)';
+    }
+  };
+
   document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
   document.getElementById('ddRefreshBtn').addEventListener('click', async function() {
     if (!currentClient) return;
