@@ -578,7 +578,7 @@
 
   // ── API ───────────────────────────────────────────────────────────
   function getAdminToken() {
-    try { return sessionStorage.getItem('dd_admin_token') || SUPABASE_KEY; } catch(e) { return SUPABASE_KEY; }
+    try { return localStorage.getItem('dd_admin_token') || sessionStorage.getItem('dd_admin_token') || SUPABASE_KEY; } catch(e) { return SUPABASE_KEY; }
   }
 
   function apiFetch(path, options) {
@@ -704,7 +704,7 @@
   });
   // Auto-login from session
   try {
-    var savedToken = sessionStorage.getItem('dd_admin_token');
+    var savedToken = localStorage.getItem('dd_admin_token') || sessionStorage.getItem('dd_admin_token');
     if (savedToken) {
       // Verify token is still valid
       fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + savedToken } })
@@ -715,8 +715,8 @@
             document.getElementById('daDashboard').classList.add('visible');
             loadClients();
             startAdminRealtime(); // Start live updates on auto-login
-          } else { sessionStorage.removeItem('dd_admin_token'); }
-        }).catch(function() { sessionStorage.removeItem('dd_admin_token'); });
+          } else { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); }
+        }).catch(function() { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); });
     }
   } catch(e) {}
 
