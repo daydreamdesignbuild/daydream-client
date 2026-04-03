@@ -1172,18 +1172,22 @@
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json',
-          'Referer': PORTAL_URL
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          email: email,
-          gotrue_meta_security: {}
-        })
+        body: JSON.stringify({ email: email })
       });
-      // Supabase returns 200 even if email doesn't exist (security best practice)
-      var ok = res.status === 200 || res.status === 204;
-      showMsg(msg, ok ? 'Reset link sent — check your inbox.' : 'Could not send reset link. Please contact us at start@daydreamdesignandbuild.com', ok ? 'success' : 'error');
+      var data = {};
+      try { data = await res.json(); } catch(e) {}
+      console.log('Password reset response:', res.status, JSON.stringify(data));
+      if (res.status === 200 || res.status === 204) {
+        showMsg(msg, 'Reset link sent — check your inbox.', 'success');
+      } else {
+        var errDetail = data.msg || data.message || data.error_description || ('Status ' + res.status);
+        console.error('Reset error detail:', errDetail);
+        showMsg(msg, 'Could not send reset link. Please email us at start@daydreamdesignandbuild.com', 'error');
+      }
     } catch(e) {
+      console.error('Reset exception:', e.message);
       showMsg(msg, 'Connection error. Please try again.', 'error');
     }
     this.disabled = false; this.textContent = 'Send Reset Link';
