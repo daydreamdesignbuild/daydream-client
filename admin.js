@@ -75,6 +75,40 @@
     { value: 'project_complete',             label: '100% Project Complete' }
   ];
 
+  var STONE_STAGES = [
+    { value: 'discovery_call',        label: 'Discovery Call',         color: '#8a8680' },
+    { value: 'designs_received',      label: 'Designs Received',       color: '#7a9eb8' },
+    { value: 'model_started',         label: '3D Model Started',       color: '#6a8ea8' },
+    { value: 'model_completed',       label: '3D Model Completed',     color: '#5a7e98' },
+    { value: 'takeoffs_complete',     label: 'Take-offs Complete',     color: '#eeb24a' },
+    { value: 'proposal_sent',         label: 'Proposal Sent',          color: '#d4a043' },
+    { value: 'proposal_accepted',     label: 'Proposal Accepted',      color: '#6a9e7a' },
+    { value: 'payment_sent',          label: 'Payment Sent',           color: '#5a8e6a' },
+    { value: 'payment_received',      label: 'Payment Received',       color: '#4a7e5a' },
+    { value: 'stone_purchased',       label: 'Stone Purchased',        color: '#9e7a5a' },
+    { value: 'stone_ordered',         label: 'Stone Ordered',          color: '#8e6a4a' },
+    { value: 'in_transit',            label: 'In Transit',             color: '#7e5a3a' },
+    { value: 'arrived_at_port',       label: 'Arrived at Port',        color: '#6a9e7a' },
+    { value: 'delivered_to_job_site', label: 'Delivered to Job Site',  color: '#4a9e4a' }
+  ];
+
+  var STONE_STAGES = [
+    { value: 'discovery_call',        label: 'Discovery Call',         color: '#8a8680' },
+    { value: 'designs_received',      label: 'Designs Received',       color: '#7a9eb8' },
+    { value: 'model_started',         label: '3D Model Started',       color: '#6a8ea8' },
+    { value: 'model_completed',       label: '3D Model Completed',     color: '#5a7e98' },
+    { value: 'takeoffs_complete',     label: 'Take-offs Complete',     color: '#eeb24a' },
+    { value: 'proposal_sent',         label: 'Proposal Sent',          color: '#d4a043' },
+    { value: 'proposal_accepted',     label: 'Proposal Accepted',      color: '#6a9e7a' },
+    { value: 'payment_sent',          label: 'Payment Sent',           color: '#5a8e6a' },
+    { value: 'payment_received',      label: 'Payment Received',       color: '#4a7e5a' },
+    { value: 'stone_purchased',       label: 'Stone Purchased',        color: '#9e7a5a' },
+    { value: 'stone_ordered',         label: 'Stone Ordered',          color: '#8e6a4a' },
+    { value: 'in_transit',            label: 'In Transit',             color: '#7e5a3a' },
+    { value: 'arrived_at_port',       label: 'Arrived at Port',        color: '#6a9e7a' },
+    { value: 'delivered_to_job_site', label: 'Delivered to Job Site',  color: '#4a9e4a' }
+  ];
+
   var CONTRACT_STAGES = [
     { value: 'not_sent',   label: 'Not Yet Sent',               color: '#8a8680' },
     { value: 'sent',       label: 'Sent — Awaiting Signature',  color: '#eeb24a' },
@@ -436,6 +470,8 @@
     '      <button class="da-client-subtab" data-status="lead">Leads <span class="da-subtab-count" id="cnt-lead"></span></button>',
     '      <button class="da-client-subtab" data-status="finished">Finished <span class="da-subtab-count" id="cnt-finished"></span></button>',
     '      <button class="da-client-subtab" data-status="archived">Archived <span class="da-subtab-count" id="cnt-archived"></span></button>',
+    '      <button class="da-client-subtab" data-status="stone_sourcing" style="border-left:1px solid var(--border);margin-left:8px">Stone Sourcing <span class="da-subtab-count" id="cnt-stone"></span></button>',
+    '      <button class="da-client-subtab" data-status="stone_sourcing" style="border-left:1px solid var(--border);margin-left:8px">Stone Sourcing <span class="da-subtab-count" id="cnt-stone"></span></button>',
     '    </div>',
 
     '    <div class="da-toolbar">',
@@ -593,8 +629,9 @@
       // Subtab filter
       var mst = true;
       if (activeSubtab === 'all') {
-        // "All" hides archived by default — archived must be explicitly selected
         mst = c.client_status !== 'archived';
+      } else if (activeSubtab === 'stone_sourcing') {
+        mst = c.service_type === 'stone_sourcing';
       } else {
         mst = (c.client_status || 'lead') === activeSubtab;
       }
@@ -603,14 +640,16 @@
   }
 
   function updateSubtabCounts() {
-    var counts = { all: 0, active_client: 0, lead: 0, finished: 0, archived: 0 };
+    var counts = { all: 0, active_client: 0, lead: 0, finished: 0, archived: 0, stone_sourcing: 0 };
     allClients.forEach(function(c) {
       var st = c.client_status || 'lead';
       if (counts[st] !== undefined) counts[st]++;
       if (st !== 'archived') counts.all++;
+      if (c.service_type === 'stone_sourcing') counts.stone_sourcing++;
     });
+    var keyMap = { active_client: 'active', stone_sourcing: 'stone' };
     Object.keys(counts).forEach(function(key) {
-      var el = document.getElementById('cnt-' + (key === 'active_client' ? 'active' : key));
+      var el = document.getElementById('cnt-' + (keyMap[key] || key));
       if (el) el.textContent = counts[key] || '';
     });
   }
@@ -781,7 +820,7 @@
       return '<div class="da-client-card" id="card-' + c.id + '">'
         + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
         + '  <div class="da-card-left"><div class="da-card-avatar">' + s(initials(c.full_name)) + '</div>'
-        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>','archived':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
+        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>','archived':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
         + '  <div class="da-card-sub">' + s(c.email || '') + (c.phone ? ' · ' + s(c.phone) : '') + (isContr && g.projects.length > 1 ? ' · ' + g.projects.length + ' projects' : '') + '</div></div></div>'
         + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + s(stage.label) + '</div><div class="da-card-investment">' + s(inv) + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
         + '</div>'
@@ -811,7 +850,9 @@
         + '    <div class="da-section-divider">Design &amp; Permit Phase</div>'
         + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-section-divider">Construction Phase <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none">(set to not_started to hide from client)</span></div>'
-        + '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>'
+        + (c.service_type === 'stone_sourcing'
+          ? '    <div class="da-action-row"><select class="da-select" id="stonesel-' + c.id + '">' + STONE_STAGES.map(function(ss) { return '<option value="' + ss.value + '"' + (c.stone_stage === ss.value ? ' selected' : '') + '>' + ss.label + '</option>'; }).join('') + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'stone_stage\', \'stonesel-' + c.id + '\')">Update</button></div>'
+          : '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>')
         + '    <div class="da-section-divider">Client Status</div>'
         + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Category</div><select class="da-select" id="catsel-' + c.id + '"><option value="">— Not Set —</option><option value="design_only"' + (c.work_category==='design_only'?' selected':'') + '>Design Only</option><option value="build"' + (c.work_category==='build'?' selected':'') + '>Build / Construction</option><option value="full_service"' + (c.work_category==='full_service'?' selected':'') + '>Full Service</option><option value="consultation"' + (c.work_category==='consultation'?' selected':'') + '>Consultation</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'work_category\', \'catsel-' + c.id + '\')">Update</button></div>'
