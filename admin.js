@@ -249,10 +249,6 @@
     '#dd-admin .da-client-card:hover { border-color: var(--gold); }',
     '#dd-admin .da-client-card.archived { opacity: 0.5; }',
     '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
-    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
-    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
-    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
-    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
     '#dd-admin .da-card-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; gap: 16px; cursor: pointer; }',
     '#dd-admin .da-card-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }',
     '#dd-admin .da-card-avatar { width: 36px; height: 36px; background: var(--gold-dim); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: "Cormorant Garamond", serif; font-size: 16px; color: var(--gold); flex-shrink: 0; }',
@@ -875,7 +871,8 @@
           ? '    <div class="da-action-row"><select class="da-select" id="stonesel-' + c.id + '">' + STONE_STAGES.map(function(ss) { return '<option value="' + ss.value + '"' + (c.stone_stage === ss.value ? ' selected' : '') + '>' + ss.label + '</option>'; }).join('') + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'stone_stage\', \'stonesel-' + c.id + '\')">Update</button></div>'
           : '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>')
         + '    <div class="da-section-divider">Client Status</div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="finished"' + (c.client_status==='finished'?' selected':'') + '>Finished</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Contractor</div><select class="da-select" id="contrsel-' + c.id + '"><option value="false"' + (!c.is_contractor?' selected':'') + '>No — Homeowner / Client</option><option value="true"' + (c.is_contractor?' selected':'') + '>Yes — Contractor</option></select><button class="da-update-btn" onclick="window._updateContractor(\'' + c.id + '\', \'contrsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Category</div><select class="da-select" id="catsel-' + c.id + '"><option value="">— Not Set —</option><option value="design_only"' + (c.work_category==='design_only'?' selected':'') + '>Design Only</option><option value="build"' + (c.work_category==='build'?' selected':'') + '>Build / Construction</option><option value="full_service"' + (c.work_category==='full_service'?' selected':'') + '>Full Service</option><option value="consultation"' + (c.work_category==='consultation'?' selected':'') + '>Consultation</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'work_category\', \'catsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Relationship</div><select class="da-select" id="relsel-' + c.id + '"><option value="">— Not Set —</option><option value="owner"' + (c.client_relationship === 'owner' ? ' selected' : '') + '>Owner</option><option value="contractor"' + (c.client_relationship === 'contractor' ? ' selected' : '') + '>Contractor</option><option value="builder"' + (c.client_relationship === 'builder' ? ' selected' : '') + '>Builder</option><option value="designer"' + (c.client_relationship === 'designer' ? ' selected' : '') + '>Designer / Architect</option><option value="property_manager"' + (c.client_relationship === 'property_manager' ? ' selected' : '') + '>Property Manager</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_relationship\', \'relsel-' + c.id + '\')" >Update</button></div>'
         + '    <div class="da-section-divider">Contract &amp; Payment</div>'
@@ -895,9 +892,6 @@
         + '      <a class="da-email-link" href="mailto:' + s(c.email || '') + '">Email Client</a>'
         + '      <button class="da-email-link" style="cursor:pointer;background:none" id="resend-' + c.id + '" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + s(c.email || '') + '\', \'' + s(c.full_name || '') + '\', this)">Resend Portal Link</button>'
         + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._openAddProjectForClient(\'' + c.id + '\', \'' + s(c.full_name || '') + '\')">+ Add Project</button>'
-        + '      <button class="da-email-link" id="contractor-btn-' + c.id + '" style="cursor:pointer;border-color:' + (c.is_contractor ? 'var(--success)' : 'var(--border)') + ';color:' + (c.is_contractor ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + !!c.is_contractor + ')">' + (c.is_contractor ? '✓ Contractor' : 'Mark as Contractor') + '</button>'
-        + (function(){ var cs = c.client_status || 'lead'; var labels = { active_client: '✓ Active', lead: 'Mark Active', archived: '↩ Unarchive', finished: '✓ Finished' }; var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' }; return '<button class="da-email-link" style="cursor:pointer;background:none;color:' + (colors[cs]||'var(--gold)') + ';border-color:' + (colors[cs]||'var(--gold)') + '" id="statusbtn-' + c.id + '" onclick="window._quickStatus(\'' + c.id + '\', \'' + cs + '\')">' + (labels[cs]||'Set Status') + '</button>'; })()
-        + '      <button class="da-email-link" style="cursor:pointer;background:none;color:' + (c.client_status === 'active_client' ? 'var(--success)' : c.client_status === 'archived' ? 'var(--muted)' : 'var(--gold)') + ';border-color:' + (c.client_status === 'active_client' ? 'var(--success)' : c.client_status === 'archived' ? 'var(--border)' : 'var(--gold)') + '" id="statusbtn-' + c.id + '" onclick="window._quickStatus(\'' + c.id + '\', \'' + (c.client_status || 'lead') + '\')">' + (c.client_status === 'active_client' ? '✓ Active Client' : c.client_status === 'archived' ? 'Archived' : c.client_status === 'finished' ? '✓ Finished' : 'Mark Active') + '</button>'
         + '    </div>'
         + '  </div>'
         + '</div>'
@@ -1185,36 +1179,6 @@
     setTimeout(function() { if(btn){ btn.textContent = 'Save Contact Info'; btn.style.background = 'var(--gold)'; btn.disabled = false; } }, 2500);
   };
 
-  window._quickStatus = async function(id, currentStatus) {
-    // Cycle: lead → active_client → finished → archived → lead
-    var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
-    var newStatus = next[currentStatus] || 'active_client';
-    try {
-      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
-        method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ client_status: newStatus })
-      });
-      if (!res.ok) { console.error('_quickStatus error:', await res.text()); return; }
-      var c = allClients.find(function(x) { return x.id === id; });
-      if (c) c.client_status = newStatus;
-      updateSubtabCounts();
-      // Update button
-      var btn = document.getElementById('statusbtn-' + id);
-      var labels = { active_client: '✓ Active', lead: 'Mark Active', archived: '↩ Unarchive', finished: '✓ Finished' };
-      var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' };
-      if (btn) { btn.textContent = labels[newStatus]||newStatus; btn.style.color = colors[newStatus]||'var(--gold)'; btn.style.borderColor = colors[newStatus]||'var(--gold)'; btn.setAttribute('onclick', 'window._quickStatus(\'' + id + '\', \'' + newStatus + '\')'); }
-      // Update archived dim
-      var card = document.getElementById('card-' + id);
-      if (card) card.classList.toggle('archived', newStatus === 'archived');
-      // If current subtab would hide this card, fade it out
-      if (activeSubtab !== 'all' && activeSubtab !== newStatus) {
-        if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(function() { applyFilters(); }, 300); }
-      }
-      // Show toast
-      var statusNames = { active_client: 'Active Client', lead: 'Lead', archived: 'Archived', finished: 'Finished' };
-      showAdminToast('Status updated → ' + (statusNames[newStatus] || newStatus));
-    } catch(e) { console.error('_quickStatus:', e); }
-  };
 
   window._quickStatus = async function(id, currentStatus) {
     var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
