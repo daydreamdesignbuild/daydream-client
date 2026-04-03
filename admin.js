@@ -1,13 +1,8 @@
 (function () {
-  // Prevent double initialization if script loads twice
-  if (window.__ddPortalInit) return;
-  window.__ddPortalInit = true;
 
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
-  var PORTAL_URL   = 'https://daydreamdesignandbuild.com/app/';
-  var CONSULT_URL  = 'https://calendar.app.google/ZjpMu7tf98SSMhMX7';
-  var REVISION_URL = 'https://calendar.app.google/eBvdjy8mdvgMtRHB6';
+  var ADMIN_EMAIL  = 'admin@daydreamdesignandbuild.com'; // FIX 5: no plain text password
 
   // ── FIX 4: XSS sanitization ──────────────────────────────────────
   function s(str) {
@@ -19,21 +14,42 @@
       .replace(/'/g, '&#039;');
   }
 
-  // ── FIX 3: File validation ────────────────────────────────────────
-  var ALLOWED_EXTS = ['jpg','jpeg','png','webp','heic','gif','pdf','mp4','mov','avi','mkv','dwg','dxf','txt','doc','docx'];
-  var MAX_FILE_MB  = 5120; // 5GB — covers drone video and large site plans
-  function validateFile(file) {
-    if (file.size > MAX_FILE_MB * 1024 * 1024) return '"' + file.name + '" is too large (max 5GB)';
-    var ext = (file.name.split('.').pop() || '').toLowerCase();
-    if (!ALLOWED_EXTS.includes(ext)) return '"' + file.name + '" — file type not allowed (' + ext + ')';
-    return null;
-  }
-  function safeName(name) { return name.replace(/[^a-zA-Z0-9._\-]/g, '_'); }
+  var PIPELINE_STAGES = [
+    { value: 'client_inquiry_made',                  label: 'Client Inquiry Made',                  color: '#8a8680' },
+    { value: 'client_qualified',                      label: 'Client Qualified',                      color: '#eeb24a' },
+    { value: 'discovery_call_booked',                 label: 'Discovery Call Booked',                 color: '#eeb24a' },
+    { value: 'discovery_call_completed',              label: 'Discovery Call Completed',              color: '#eeb24a' },
+    { value: 'design_proposal_drafting',              label: 'Design Proposal Drafting',              color: '#7a9e8a' },
+    { value: 'design_proposal_presented',             label: 'Design Proposal Presented',             color: '#7a9e8a' },
+    { value: 'design_proposal_accepted',              label: 'Design Proposal Accepted',              color: '#6a9e7a' },
+    { value: 'site_consultation_scheduled',           label: 'Site Consultation Scheduled',           color: '#7a9e8a' },
+    { value: 'site_consultation_completed',           label: 'Site Consultation Completed',           color: '#6a9e7a' },
+    { value: 'design_phase_started',                  label: 'Design Phase Started',                  color: '#5a8e9e' },
+    { value: 'base_map_complete',                     label: 'Base Map Complete',                     color: '#5a8e9e' },
+    { value: 'base_map_discussion_call',              label: 'Base Map Discussion Call',              color: '#5a8e9e' },
+    { value: 'base_map_approved',                     label: 'Base Map Approved',                     color: '#4a7e8e' },
+    { value: '3d_model_completed',                    label: '3D Model Completed',                    color: '#5a7e9e' },
+    { value: '3d_model_discussion_call',              label: '3D Model Discussion Call',              color: '#5a7e9e' },
+    { value: '3d_model_approved',                     label: '3D Model Approved',                     color: '#4a6e8e' },
+    { value: 'visualizations_started',                label: 'Visualizations Started',                color: '#7a6e9e' },
+    { value: 'visualizations_completed',              label: 'Visualizations Completed',              color: '#7a6e9e' },
+    { value: 'visualizations_approved',               label: 'Visualizations Approved',               color: '#6a5e8e' },
+    { value: 'construction_document_phase_started',   label: 'Construction Document Phase Started',   color: '#9e7a5a' },
+    { value: 'construction_document_phase_complete',  label: 'Construction Document Phase Complete',  color: '#8e6a4a' },
+    { value: 'permit_plans_submitted',                label: 'Permit Plans Submitted',                color: '#9e6a5a' },
+    { value: 'permit_plan_revisions',                 label: 'Permit Plan Revisions',                 color: '#c07a6a' },
+    { value: 'permit_plans_approved',                 label: 'Permit Plans Approved',                 color: '#6a9e7a' },
+    { value: 'construction_started',                  label: 'Construction Started',                  color: '#eeb24a' },
+    { value: 'construction_finished',                 label: 'Construction Finished',                 color: '#6a9e7a' },
+    { value: 'site_photos_to_be_made',                label: 'Site Photos To Be Made',                color: '#8a8680' },
+    { value: 'site_photos_finished',                  label: 'Site Photos Finished',                  color: '#6a9e7a' },
+    { value: 'project_complete',                      label: 'Project Complete',                      color: '#eeb24a' }
+  ];
 
   // Design & Permit Phase Timeline
-  // Design & Permit Phase Timeline — per spec
-  var TIMELINE = [
+  var CLIENT_STAGES = [
     { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
+    { value: 'in_progress',                  label: 'In Progress' },
     { value: 'discovery_call',               label: 'Discovery Call' },
     { value: 'design_proposal',              label: 'Design Proposal' },
     { value: 'contract_signed',              label: 'Contract Signed' },
@@ -47,1244 +63,1671 @@
   ];
 
   // Construction Phase Timeline
-  // Stone Sourcing linear state machine
-  var STONE_TIMELINE = [
-    { value: 'discovery_call',       label: 'Discovery Call' },
-    { value: 'designs_received',     label: 'Designs Received' },
-    { value: 'model_started',        label: '3D Model Started' },
-    { value: 'model_completed',      label: '3D Model Completed' },
-    { value: 'takeoffs_complete',    label: 'Take-offs Complete' },
-    { value: 'proposal_sent',        label: 'Proposal Sent' },
-    { value: 'proposal_accepted',    label: 'Proposal Accepted' },
-    { value: 'payment_sent',         label: 'Payment Sent' },
-    { value: 'payment_received',     label: 'Payment Received' },
-    { value: 'stone_purchased',      label: 'Stone Purchased' },
-    { value: 'stone_ordered',        label: 'Stone Ordered' },
-    { value: 'in_transit',           label: 'In Transit' },
-    { value: 'arrived_at_port',      label: 'Arrived at Port' },
-    { value: 'delivered_to_job_site',label: 'Delivered to Job Site' }
+  var CONSTRUCTION_STAGES = [
+    { value: 'not_started',                  label: 'Not Started' },
+    { value: 'pre_site_visit',               label: 'Pre Site Visit' },
+    { value: 'erosion_control',              label: 'Erosion Control / BMP Installed' },
+    { value: 'construction_scheduled',       label: 'Construction Start Date Scheduled' },
+    { value: 'completion_30',                label: '30% Completion' },
+    { value: 'completion_60',                label: '60% Completion' },
+    { value: 'completion_90',                label: '90% Completion' },
+    { value: 'final_walk_through',           label: 'Final Walk Through' },
+    { value: 'project_complete',             label: '100% Project Complete' }
   ];
 
-  var CONSTRUCTION_TIMELINE = [
-    { value: 'not_started',            label: 'Not Started' },
-    { value: 'pre_site_visit',         label: 'Pre Site Visit' },
-    { value: 'erosion_control',        label: 'Erosion Control / BMP Installed' },
-    { value: 'construction_scheduled', label: 'Construction Start Date Scheduled' },
-    { value: 'completion_30',          label: '30% Completion' },
-    { value: 'completion_60',          label: '60% Completion' },
-    { value: 'completion_90',          label: '90% Completion' },
-    { value: 'final_walk_through',     label: 'Final Walk Through' },
-    { value: 'project_complete',       label: '100% Project Complete' }
+  var STONE_STAGES = [
+    { value: 'discovery_call',        label: 'Discovery Call',         color: '#8a8680' },
+    { value: 'designs_received',      label: 'Designs Received',       color: '#7a9eb8' },
+    { value: 'model_started',         label: '3D Model Started',       color: '#6a8ea8' },
+    { value: 'model_completed',       label: '3D Model Completed',     color: '#5a7e98' },
+    { value: 'takeoffs_complete',     label: 'Take-offs Complete',     color: '#eeb24a' },
+    { value: 'proposal_sent',         label: 'Proposal Sent',          color: '#d4a043' },
+    { value: 'proposal_accepted',     label: 'Proposal Accepted',      color: '#6a9e7a' },
+    { value: 'payment_sent',          label: 'Payment Sent',           color: '#5a8e6a' },
+    { value: 'payment_received',      label: 'Payment Received',       color: '#4a7e5a' },
+    { value: 'stone_purchased',       label: 'Stone Purchased',        color: '#9e7a5a' },
+    { value: 'stone_ordered',         label: 'Stone Ordered',          color: '#8e6a4a' },
+    { value: 'in_transit',            label: 'In Transit',             color: '#7e5a3a' },
+    { value: 'arrived_at_port',       label: 'Arrived at Port',        color: '#6a9e7a' },
+    { value: 'delivered_to_job_site', label: 'Delivered to Job Site',  color: '#4a9e4a' }
   ];
 
-  var CONTRACT_LABELS = {
-    'not_sent':   { label: 'Not Yet Sent',              color: '#8a8680' },
-    'sent':       { label: 'Sent — Awaiting Signature', color: '#eeb24a' },
-    'signed':     { label: 'Signed ✓',                  color: '#6a9e7a' }
-  };
-
-  var PAYMENT_LABELS = {
-    'not_sent':         { label: 'Invoice Not Yet Sent',           color: '#8a8680' },
-    'invoice_sent':     { label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
-    'deposit_paid':     { label: 'Deposit Paid — Balance Due',     color: '#5a8e9e' },
-    'partially_paid':   { label: 'Partially Paid',                 color: '#7a9e8a' },
-    'payment_complete': { label: 'Payment Complete ✓',             color: '#6a9e7a' }
-  };
-
-  var PROJECT_TYPE_LABELS = {
-    'full_yard': 'Full Yard', 'front_yard': 'Front Yard', 'backyard': 'Backyard',
-    'outdoor_living': 'Outdoor Living', 'landscape_construction': 'Landscape Construction',
-    'pool_and_spa': 'Pool & Spa', 'custom': 'Custom / Other'
-  };
-
-  var CHECKLIST_ITEMS = [
-    { key: 'goals',       label: 'Project Goals & Must-Have Features',        desc: 'Tell us the main purpose of the space and any non-negotiable features.', type: 'note', noteKey: 'goals' },
-    { key: 'inspo',       label: 'Inspiration Photos or Boards',              desc: 'Upload your Pinterest boards, AI images, Google saves or any reference images.', type: 'upload', category: 'inspo' },
-    { key: 'photos',      label: 'Detailed Site Photos & Walkthrough Video',  desc: 'Show the entire project area with straight-on shots of the house.', type: 'upload', category: 'photos' },
-    { key: 'survey',      label: 'Property Survey / Site Plat',               desc: 'Crucial for accuracy. Should show topography, property lines and trees.', type: 'upload', category: 'survey' },
-    { key: 'bylaws',      label: 'HOA Bylaws & Neighborhood Covenants',       desc: 'All construction rules and regulations.', type: 'upload', category: 'houseplans' },
-    { key: 'houseplans',  label: 'Existing House Architectural Plans',        desc: 'If available.', type: 'upload', category: 'houseplans' }
+  var CONTRACT_STAGES = [
+    { value: 'not_sent',   label: 'Not Yet Sent',               color: '#8a8680' },
+    { value: 'sent',       label: 'Sent — Awaiting Signature',  color: '#eeb24a' },
+    { value: 'signed',     label: 'Signed ✓',                   color: '#6a9e7a' }
   ];
 
-  function getStageIndex(value) { var i = TIMELINE.findIndex(function(t) { return t.value === value; }); return i === -1 ? 0 : i; }
+  var PAYMENT_STAGES = [
+    { value: 'not_sent',          label: 'Invoice Not Yet Sent',            color: '#8a8680' },
+    { value: 'invoice_sent',      label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
+    { value: 'deposit_paid',      label: 'Deposit Paid — Balance Due',      color: '#5a8e9e' },
+    { value: 'partially_paid',    label: 'Partially Paid',                  color: '#7a9e8a' },
+    { value: 'payment_complete',  label: 'Payment Complete ✓',              color: '#6a9e7a' }
+  ];
+
+  var ALL_SERVICES = [
+    { key: '2d_concept',            label: '2D Concept Phase' },
+    { key: '3d_concept',            label: '3D Concept Phase' },
+    { key: '2d_3d_concept',         label: '2D + 3D Concept Phase' },
+    { key: 'permit_plan',           label: 'Permit Plan Phase' },
+    { key: '2d_3d_permit',          label: '2D + 3D + Permit Plan Phase' },
+    { key: 'site_plans',            label: 'Site Plans' },
+    { key: 'retaining_wall_permit', label: 'Permit Plans — Retaining Walls' },
+    { key: 'deck_permit',           label: 'Permit Plans — Decks' },
+    { key: 'footing_permit',        label: 'Footing Permit Plans' },
+    { key: 'pavilion_permit',       label: 'Permit Plans — Pavilion' },
+    { key: 'shade_structures',      label: 'Shade Structures' },
+    { key: 'pergolas',              label: 'Pergolas' },
+    { key: 'drainage_plans',        label: 'Drainage Plans' },
+    { key: 'planting_plans',        label: 'Planting Plans' },
+    { key: 'irrigation_plans',      label: 'Irrigation Plans' },
+    { key: 'outdoor_audio',         label: 'Outdoor Audio Plans' },
+    { key: 'outdoor_lighting',      label: 'Outdoor Lighting Plans' },
+    { key: 'furniture_layout',      label: 'Outdoor Furniture Layout' },
+    { key: 'grading_plans',         label: 'Grading Plans' },
+    { key: 'stormwater_plans',      label: 'Stormwater Management Plans' },
+    { key: 'site_consultation',     label: 'Site Consultation' }
+  ];
+
+  // Client relationship status
+  var CLIENT_STATUSES = [
+    { value: 'active_client',    label: 'Active Client',        color: '#6a9e7a' },
+    { value: 'lead',             label: 'Lead / Not Converted', color: '#eeb24a' },
+    { value: 'archived',         label: 'Archived',             color: '#8a8680' }
+  ];
+
+  // Work categories
+  var WORK_CATEGORIES = [
+    { value: 'design_only',      label: 'Design Only' },
+    { value: 'build',            label: 'Build / Construction' },
+    { value: 'full_service',     label: 'Full Service' },
+    { value: 'consultation',     label: 'Consultation' }
+  ];
+
+  var PROJECT_TYPES = [
+    { key: 'full_yard',              label: 'Full Yard' },
+    { key: 'front_yard',             label: 'Front Yard' },
+    { key: 'backyard',               label: 'Backyard' },
+    { key: 'outdoor_living',         label: 'Outdoor Living' },
+    { key: 'landscape_construction', label: 'Landscape Construction' },
+    { key: 'pool_and_spa',           label: 'Pool & Spa' },
+    { key: 'custom',                 label: 'Custom / Other' }
+  ];
+
+  var PROJECT_TYPE_LABELS = {};
+  PROJECT_TYPES.forEach(function(t) { PROJECT_TYPE_LABELS[t.key] = t.label; });
+
+  var CHECKLIST_LABELS = {
+    'goals':      'Project Goals & Must-Have Features',
+    'inspo':      'Inspiration Photos or Boards',
+    'photos':     'Site Photos & Walkthrough Video',
+    'survey':     'Property Survey / Site Plat',
+    'bylaws':     'HOA Bylaws & Neighborhood Covenants',
+    'houseplans': 'Existing House Architectural Plans'
+  };
+
+  // Expose globals
+  window._PROJECT_TYPES = PROJECT_TYPES;
+  window._ALL_SERVICES  = ALL_SERVICES;
+
+  function getPipelineStage(value) {
+    return PIPELINE_STAGES.find(function(s) { return s.value === value; }) || { value: value, label: value || 'New Inquiry', color: '#8a8680' };
+  }
 
   // ── FONTS ─────────────────────────────────────────────────────────
   var font = document.createElement('link');
   font.rel = 'stylesheet';
-  font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap';
+  font.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400;500&display=swap';
   document.head.appendChild(font);
 
   // ── STYLES ────────────────────────────────────────────────────────
   var style = document.createElement('style');
   style.textContent = [
-    '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
-    '#dd-portal { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
-    '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
-    '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
-    '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
-    '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
-    '#dd-portal .dd-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 36px 40px; text-align: center; }',
-    '#dd-portal .dd-login-logo { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 400; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }',
-    '#dd-portal .dd-login-sub { font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--muted); }',
-    '#dd-portal .dd-login-body { padding: 36px 40px; }',
-    '#dd-portal .dd-login-title { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 300; font-style: italic; color: var(--text); margin-bottom: 8px; }',
-    '#dd-portal .dd-login-desc { font-size: 12px; color: var(--muted); line-height: 1.8; margin-bottom: 28px; }',
-    '#dd-portal .dd-input-wrap { border: 1px solid var(--border); background: var(--surface-2); margin-bottom: 16px; transition: border-color 0.2s; }',
-    '#dd-portal .dd-input-wrap:focus-within { border-color: var(--gold); background: var(--gold-dim); }',
-    '#dd-portal .dd-input-wrap:focus-within::after { content: ""; display: block; height: 2px; background: var(--gold); }',
-    '#dd-portal .dd-input-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 4px; display: block; }',
-    '#dd-portal .dd-input-wrap:focus-within .dd-input-label { color: var(--gold); }',
-    '#dd-portal .dd-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 14px; font-weight: 300; padding: 4px 16px 12px; }',
-    '#dd-portal .dd-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
-    '#dd-portal .dd-btn:hover { background: var(--gold); color: var(--bg); }',
-    '#dd-portal .dd-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
-    '#dd-portal .dd-msg { font-size: 11px; text-align: center; padding: 10px; margin-top: 12px; display: none; letter-spacing: 0.05em; line-height: 1.8; }',
-    '#dd-portal .dd-msg.visible { display: block; }',
-    '#dd-portal .dd-msg.success { color: var(--success); }',
-    '#dd-portal .dd-msg.error { color: var(--error); }',
-    '#dd-portal .dd-project-selector { display: none; min-height: 100vh; flex-direction: column; }',
-    '#dd-portal .dd-project-selector.visible { display: flex; }',
-    '#dd-portal .dd-selector-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; }',
-    '#dd-portal .dd-selector-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
-    '#dd-portal .dd-selector-content { flex: 1; padding: 48px 32px; max-width: 800px; width: 100%; margin: 0 auto; }',
-    '#dd-portal .dd-selector-title { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
-    '#dd-portal .dd-selector-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 40px; }',
-    '#dd-portal .dd-project-cards { display: flex; flex-direction: column; gap: 12px; }',
-    '#dd-portal .dd-project-card { background: var(--surface); border: 1px solid var(--border); padding: 24px 28px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 20px; }',
-    '#dd-portal .dd-project-card:hover { border-color: var(--gold); background: var(--gold-dim); }',
-    '#dd-portal .dd-project-card-info { flex: 1; }',
-    '#dd-portal .dd-project-card-name { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; color: var(--gold); margin-bottom: 4px; }',
-    '#dd-portal .dd-project-card-address { font-size: 11px; color: var(--muted); margin-bottom: 8px; }',
-    '#dd-portal .dd-project-card-meta { display: flex; gap: 16px; flex-wrap: wrap; }',
-    '#dd-portal .dd-project-card-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; }',
-    '#dd-portal .dd-project-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; }',
-    '#dd-portal .dd-project-card:hover .dd-project-card-arrow { opacity: 1; }',
-    '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
-    '#dd-portal .dd-dashboard.visible { display: flex; }',
-    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
-    '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
-    '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
-    '#dd-portal .dd-nav-project-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 4px 12px; border: 1px solid var(--border); display: none; }',
-    '#dd-portal .dd-nav-project-name.visible { display: block; }',
-    '#dd-portal .dd-nav-right { display: flex; align-items: center; gap: 16px; }',
-    '#dd-portal .dd-nav-user { font-size: 11px; color: var(--muted); }',
-    '#dd-portal .dd-nav-back { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); cursor: pointer; background: none; border: 1px solid var(--gold); padding: 6px 14px; transition: background 0.2s, color 0.2s; display: none; }',
-    '#dd-portal .dd-nav-back:hover { background: var(--gold); color: var(--bg); }',
-    '#dd-portal .dd-nav-back.visible { display: block; }',
-    '#dd-portal .dd-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
-    '#dd-portal .dd-nav-logout:hover { color: var(--gold); }',
-    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; }',
-    '#dd-portal .dd-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 16px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; }',
-    '#dd-portal .dd-tab:hover { color: var(--text); }',
-    '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
-    '#dd-portal .dd-tab-badge { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
-    '#dd-portal .dd-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
-    '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
-    '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
-    '#dd-portal .dd-section-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 32px; }',
-    '#dd-portal .dd-welcome-card { border: 1px solid var(--gold); background: var(--gold-dim); padding: 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }',
-    '#dd-portal .dd-welcome-text h3 { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; color: var(--gold); margin-bottom: 8px; }',
-    '#dd-portal .dd-welcome-text p { font-size: 12px; color: var(--muted); line-height: 1.8; max-width: 400px; }',
-    '#dd-portal .dd-cal-btn { display: inline-block; background: var(--gold); color: var(--bg); text-decoration: none; font-size: 9px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px 28px; font-weight: 500; white-space: nowrap; transition: opacity 0.2s; border: 1px solid var(--gold); cursor: pointer; font-family: Jost, sans-serif; }',
-    '#dd-portal .dd-cal-btn:hover { opacity: 0.85; }',
-    '#dd-portal .dd-cal-btn.outline { background: transparent; color: var(--gold); }',
-    '#dd-portal .dd-cal-btn.outline:hover { background: var(--gold); color: var(--bg); }',
-    '#dd-portal .dd-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 32px; }',
-    '#dd-portal .dd-card { background: var(--surface); padding: 24px; }',
-    '#dd-portal .dd-card-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
-    '#dd-portal .dd-card-value { font-family: "Cormorant Garamond", serif; font-size: 20px; color: var(--gold); font-weight: 400; }',
-    '#dd-portal .dd-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }',
-    '#dd-portal .dd-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 32px; }',
-    '#dd-portal .dd-status-card { background: var(--surface); padding: 20px 24px; }',
-    '#dd-portal .dd-status-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }',
-    '#dd-portal .dd-status-badge { font-size: 11px; letter-spacing: 0.08em; padding: 6px 12px; display: inline-block; border: 1px solid; }',
-    '#dd-portal .dd-services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1px; background: var(--border); }',
-    '#dd-portal .dd-service-tile { background: var(--surface); padding: 20px; display: flex; flex-direction: column; gap: 10px; }',
-    '#dd-portal .dd-service-tile-name { font-size: 12px; color: var(--text); font-weight: 400; line-height: 1.4; flex: 1; }',
-    '#dd-portal .dd-service-tile-status { display: flex; align-items: center; gap: 6px; }',
-    '#dd-portal .dd-service-tile-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }',
-    '#dd-portal .dd-service-tile-label { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }',
-    '#dd-portal .dd-timeline { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
-    '#dd-portal .dd-timeline-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); background: var(--surface-2); }',
-    '#dd-portal .dd-timeline-item { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); }',
-    '#dd-portal .dd-timeline-item:last-child { border-bottom: none; }',
-    '#dd-portal .dd-timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; }',
-    '#dd-portal .dd-timeline-dot.done { background: var(--gold); }',
-    '#dd-portal .dd-timeline-dot.active { background: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }',
-    '#dd-portal .dd-timeline-label { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }',
-    '#dd-portal .dd-timeline-label.muted { color: var(--muted); }',
-    '#dd-portal .dd-timeline-badge { margin-left: auto; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--gold); color: var(--gold); }',
-    '#dd-portal .dd-checklist { border: 1px solid var(--border); background: var(--surface); margin-bottom: 32px; }',
-    '#dd-portal .dd-checklist-header { padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; }',
-    '#dd-portal .dd-checklist-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); }',
-    '#dd-portal .dd-checklist-progress { font-size: 11px; color: var(--muted); }',
-    '#dd-portal .dd-checklist-progress span { color: var(--gold); }',
-    '#dd-portal .dd-checklist-item { border-bottom: 1px solid var(--border); overflow: hidden; }',
-    '#dd-portal .dd-checklist-item:last-child { border-bottom: none; }',
-    '#dd-portal .dd-checklist-row { display: flex; align-items: flex-start; gap: 16px; padding: 18px 24px; cursor: pointer; transition: background 0.2s; }',
-    '#dd-portal .dd-checklist-row:hover { background: var(--gold-dim); }',
-    '#dd-portal .dd-check-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.2s; }',
-    '#dd-portal .dd-check-circle.done { border-color: var(--success); background: var(--success); }',
-    '#dd-portal .dd-check-circle.done::after { content: "✓"; font-size: 11px; color: white; font-weight: 600; }',
-    '#dd-portal .dd-check-info { flex: 1; }',
-    '#dd-portal .dd-check-label { font-size: 13px; color: var(--text); margin-bottom: 3px; font-weight: 400; }',
-    '#dd-portal .dd-check-label.done { text-decoration: line-through; color: var(--muted); }',
-    '#dd-portal .dd-check-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }',
-    '#dd-portal .dd-check-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--border); color: var(--muted); margin-top: 6px; display: inline-block; }',
-    '#dd-portal .dd-note-area { padding: 0 24px 20px; display: none; }',
-    '#dd-portal .dd-note-area.visible { display: block; }',
-    '#dd-portal .dd-note-textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 14px 16px; resize: vertical; min-height: 100px; outline: none; transition: border-color 0.2s; line-height: 1.7; }',
-    '#dd-portal .dd-note-textarea:focus { border-color: var(--gold); }',
-    '#dd-portal .dd-note-textarea::placeholder { color: var(--muted); }',
-    '#dd-portal .dd-note-save { margin-top: 8px; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 10px 24px; cursor: pointer; transition: opacity 0.2s; }',
-    '#dd-portal .dd-note-save:hover { opacity: 0.85; }',
-    '#dd-portal .dd-checklist-complete { text-align: center; padding: 24px; background: var(--gold-dim); border-top: 1px solid var(--gold); display: none; }',
-    '#dd-portal .dd-checklist-complete.visible { display: block; }',
-    '#dd-portal .dd-upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }',
-    '#dd-portal .dd-upload-card { border: 1px solid var(--border); background: var(--surface); overflow: hidden; }',
-    '#dd-portal .dd-upload-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); }',
-    '#dd-portal .dd-upload-card-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }',
-    '#dd-portal .dd-upload-card-desc { font-size: 10px; color: var(--muted); }',
-    '#dd-portal .dd-upload-card-body { padding: 20px; }',
-    '#dd-portal .dd-drop-zone { border: 1px dashed var(--border); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; }',
-    '#dd-portal .dd-drop-zone:hover { border-color: var(--gold); background: var(--gold-dim); }',
-    '#dd-portal .dd-drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }',
-    '#dd-portal .dd-drop-icon { font-size: 20px; color: var(--gold); margin-bottom: 8px; }',
-    '#dd-portal .dd-drop-text { font-size: 11px; color: var(--muted); }',
-    '#dd-portal .dd-upload-status { font-size: 10px; color: var(--success); margin-top: 8px; text-align: center; min-height: 16px; }',
-    '#dd-portal .dd-messages-wrap { border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; height: 500px; }',
-    '#dd-portal .dd-messages-header { padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface-2); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); }',
-    '#dd-portal .dd-messages-list { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }',
-    '#dd-portal .dd-message { display: flex; flex-direction: column; gap: 4px; max-width: 75%; }',
-    '#dd-portal .dd-message.mine { align-self: flex-end; }',
-    '#dd-portal .dd-message.theirs { align-self: flex-start; }',
-    '#dd-portal .dd-message-bubble { padding: 12px 16px; font-size: 13px; line-height: 1.7; }',
-    '#dd-portal .dd-message.mine .dd-message-bubble { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; }',
-    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
-    '#dd-portal .dd-message.theirs .dd-message-bubble { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
-    '#dd-portal .dd-message-meta { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }',
-    '#dd-portal .dd-message.mine .dd-message-meta { text-align: right; }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 11px; padding: 0 4px; opacity: 0; transition: opacity 0.2s, color 0.2s; vertical-align: middle; }',
-    '#dd-portal .dd-message:hover .dd-msg-del-btn { opacity: 1; }',
-    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; opacity: 0.6; }',
-    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); opacity: 1; }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; }',
-    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
-    '#dd-portal .dd-messages-input { border-top: 1px solid var(--border); display: flex; }',
-    '#dd-portal .dd-messages-input textarea { flex: 1; background: var(--surface-2); border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 16px 20px; resize: none; height: 56px; }',
-    '#dd-portal .dd-messages-input textarea::placeholder { color: var(--muted); }',
-    '#dd-portal .dd-send-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 24px; cursor: pointer; transition: opacity 0.2s; }',
-    '#dd-portal .dd-send-btn:hover { opacity: 0.85; }',
-    '#dd-portal .dd-drive-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }',
-    '#dd-portal .dd-drive-item { background: var(--surface); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }',
-    '#dd-portal .dd-drive-item-info { flex: 1; }',
-    '#dd-portal .dd-drive-item-name { font-size: 14px; color: var(--text); margin-bottom: 3px; }',
-    '#dd-portal .dd-drive-item-sub { font-size: 10px; color: var(--muted); }',
-    '#dd-portal .dd-drive-link { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 10px 20px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
-    '#dd-portal .dd-drive-link:hover { background: var(--gold); color: var(--bg); }',
-    '#dd-portal .dd-drive-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; border: 1px solid var(--border); background: var(--surface); }',
-    '#dd-portal .dd-tab-content { display: none; }',
-    '#dd-portal .dd-tab-content.active { display: block; }',
-    '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
-    '#dd-portal .dd-create-project { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); }',
-    '#dd-portal .dd-create-project.visible { display: flex; }',
-    '#dd-portal .dd-create-project-body { flex: 1; padding: 40px 32px; max-width: 860px; width: 100%; margin: 0 auto; }',
-    '#dd-portal .dd-create-section { margin-bottom: 32px; }',
-    '#dd-portal .dd-create-section-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }',
-    '#dd-portal .dd-create-section-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }',
-    '#dd-portal .dd-create-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }',
-    '#dd-portal .dd-create-field { display: flex; flex-direction: column; gap: 6px; }',
-    '#dd-portal .dd-create-full { grid-column: 1 / -1; }',
-    '#dd-portal .dd-create-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
-    '#dd-portal .dd-create-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 12px 14px; outline: none; width: 100%; transition: border-color 0.2s; appearance: none; }',
-    '#dd-portal .dd-create-input:focus { border-color: var(--gold); }',
-    '#dd-portal .dd-create-input::placeholder { color: var(--muted); }',
-    '#dd-portal .dd-create-textarea { resize: vertical; min-height: 120px; line-height: 1.7; }',
-    '#dd-portal .dd-create-msg { font-size: 12px; min-height: 20px; margin-bottom: 12px; }',
-    '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
-    '#dd-portal .dd-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 10px 14px; color: var(--muted); font-size: 20px; line-height: 1; flex-shrink: 0; }',
-    '#dd-portal .dd-active-tab-label { display: none; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); padding: 0 16px; flex: 1; }',
-    '#dd-portal .dd-mobile-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--border); z-index: 200; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }',
-    '#dd-portal .dd-mobile-menu.open { display: flex; }',
-    '#dd-portal .dd-mobile-menu .dd-tab { display: block !important; text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--border); width: 100%; font-size: 9px; }',
-    '@media (max-width: 600px) {',
-    '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
-    '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
-    '  #dd-portal .dd-nav-user { display: none; }',
-    '  #dd-portal #ddRefreshBtn { display: none; }',
-    '  #dd-portal .dd-nav-project-name { display: none !important; }',
-    '  #dd-portal .dd-content { padding: 24px 16px; }',
-    '  #dd-portal .dd-welcome-card { flex-direction: column; }',
-    '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
-    '  #dd-portal .dd-status-grid { grid-template-columns: 1fr; }',
-    '  #dd-portal .dd-selector-content { padding: 24px 16px; }',
-    '  #dd-portal .dd-project-card { flex-direction: column; align-items: flex-start; }',
-    '  #dd-portal .dd-create-grid { grid-template-columns: 1fr; }',
-    '  #dd-portal .dd-create-project-body { padding: 24px 16px; }',
-    '  #dd-portal .dd-tabs .dd-tab { display: none; }',
-    '  #dd-portal .dd-tabs { padding: 0; display: flex; align-items: center; justify-content: space-between; position: relative; }',
-    '  #dd-portal .dd-active-tab-label { display: block; }',
-    '  #dd-portal .dd-hamburger { display: block; }',
+    '#dd-admin * { box-sizing: border-box; margin: 0; padding: 0; }',
+    '#dd-admin { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
+    '#dd-admin .da-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; animation: daFade 0.7s ease both; }',
+    '#dd-admin .da-login-card { width: 100%; max-width: 400px; border: 1px solid var(--border); background: var(--surface); }',
+    '#dd-admin .da-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 28px 32px; text-align: center; }',
+    '#dd-admin .da-login-logo { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 400; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }',
+    '#dd-admin .da-login-sub { font-size: 8px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--muted); }',
+    '#dd-admin .da-login-body { padding: 28px 32px; }',
+    '#dd-admin .da-login-title { font-family: "Cormorant Garamond", serif; font-size: 18px; color: var(--text); font-weight: 300; font-style: italic; margin-bottom: 20px; }',
+    '#dd-admin .da-input-wrap { border: 1px solid var(--border); background: var(--surface-2); margin-bottom: 12px; transition: border-color 0.2s; }',
+    '#dd-admin .da-input-wrap:focus-within { border-color: var(--gold); }',
+    '#dd-admin .da-input-wrap:focus-within::after { content: ""; display: block; height: 2px; background: var(--gold); }',
+    '#dd-admin .da-input-label { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 10px 14px 3px; display: block; }',
+    '#dd-admin .da-input-wrap:focus-within .da-input-label { color: var(--gold); }',
+    '#dd-admin .da-input { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 3px 14px 10px; }',
+    '#dd-admin .da-btn { width: 100%; background: transparent; border: 1px solid var(--gold); color: var(--gold); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: background 0.3s, color 0.3s; margin-top: 8px; }',
+    '#dd-admin .da-btn:hover { background: var(--gold); color: var(--bg); }',
+    '#dd-admin .da-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
+    '#dd-admin .da-login-msg { font-size: 11px; text-align: center; margin-top: 10px; min-height: 18px; }',
+    '#dd-admin .da-login-msg.error { color: var(--error); }',
+    '#dd-admin .da-login-msg.success { color: var(--success); }',
+    '#dd-admin .da-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
+    '#dd-admin .da-dashboard.visible { display: flex; }',
+    '#dd-admin .da-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }',
+    '#dd-admin .da-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
+    '#dd-admin .da-nav-badge { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--bg); background: var(--gold); padding: 3px 8px; margin-left: 12px; }',
+    '#dd-admin .da-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
+    '#dd-admin .da-nav-logout:hover { color: var(--gold); }',
+    '#dd-admin .da-stats { display: flex; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }',
+    '#dd-admin .da-stat { background: var(--surface); padding: 16px 24px; flex: 1; }',
+    '#dd-admin .da-stat-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }',
+    '#dd-admin .da-stat-value { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); font-weight: 400; }',
+    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 32px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; position: relative; }',
+    '#dd-admin .da-tabs::-webkit-scrollbar { display: none; }',
+    '#dd-admin .da-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; }',
+    '#dd-admin .da-tabs-wrap { position: relative; }',
+    '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
+    '#dd-admin .da-tab:hover { color: var(--text); }',
+    '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-admin .da-tab-add { color: var(--gold) !important; font-weight: 500; }',
+    '#dd-admin .da-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
+    '#dd-admin .da-tab-content { display: none; flex: 1; }',
+    '#dd-admin .da-tab-content.active { display: block; }',
+    '#dd-admin .da-client-subtabs { display: flex; background: var(--bg); border-bottom: 2px solid var(--border); padding: 0 32px; gap: 0; overflow-x: auto; }',
+    '#dd-admin .da-client-subtab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }',
+    '#dd-admin .da-client-subtab:hover { color: var(--text); }',
+    '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-admin .da-subtab-count { font-size: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }',
+    '#dd-admin .da-client-subtab.active .da-subtab-count { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
+    '#dd-admin .da-client-subtab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }',
+    '#dd-admin .da-client-subtab:hover { color: var(--text); }',
+    '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '#dd-admin .da-subtab-count { font-size: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }',
+    '#dd-admin .da-client-subtab.active .da-subtab-count { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
+    '#dd-admin .da-toolbar { padding: 20px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }',
+    '#dd-admin .da-search { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 16px; outline: none; flex: 1; min-width: 200px; transition: border-color 0.2s; }',
+    '#dd-admin .da-search:focus { border-color: var(--gold); }',
+    '#dd-admin .da-search::placeholder { color: var(--muted); }',
+    '#dd-admin .da-filter { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 16px; outline: none; cursor: pointer; appearance: none; min-width: 200px; }',
+    '#dd-admin .da-count { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; white-space: nowrap; }',
+    '#dd-admin .da-cards-wrap { padding: 24px 32px; display: flex; flex-direction: column; gap: 12px; }',
+    '#dd-admin .da-client-card { background: var(--surface); border: 1px solid var(--border); transition: border-color 0.2s; }',
+    '#dd-admin .da-client-card:hover { border-color: var(--gold); }',
+    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
+    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
+    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
+    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
+    '#dd-admin .da-client-card.archived { opacity: 0.5; }',
+    '#dd-admin .da-client-card.archived:hover { opacity: 0.8; border-color: var(--muted); }',
+    '#dd-admin .da-card-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; gap: 16px; cursor: pointer; }',
+    '#dd-admin .da-card-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }',
+    '#dd-admin .da-card-avatar { width: 36px; height: 36px; background: var(--gold-dim); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: "Cormorant Garamond", serif; font-size: 16px; color: var(--gold); flex-shrink: 0; }',
+    '#dd-admin .da-card-name { font-size: 14px; color: var(--text); font-weight: 400; margin-bottom: 2px; }',
+    '#dd-admin .da-card-sub { font-size: 10px; color: var(--muted); }',
+    '#dd-admin .da-role-badge { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; padding: 2px 8px; border: 1px solid; margin-left: 8px; vertical-align: middle; }',
+    '#dd-admin .da-role-badge.contractor { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
+    '#dd-admin .da-role-badge.client { background: rgba(106,158,122,0.1); border-color: var(--success); color: var(--success); }',
+    '#dd-admin .da-card-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }',
+    '#dd-admin .da-card-investment { font-size: 13px; color: var(--gold); font-family: "Cormorant Garamond", serif; }',
+    '#dd-admin .da-card-date { font-size: 10px; color: var(--muted); }',
+    '#dd-admin .da-stage-pill { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; padding: 4px 10px; border: 1px solid; white-space: nowrap; }',
+    '#dd-admin .da-expand-icon { font-size: 10px; color: var(--muted); transition: transform 0.2s; }',
+    '#dd-admin .da-expand-icon.open { transform: rotate(180deg); }',
+    '#dd-admin .da-card-details { display: none; border-top: 1px solid var(--border); }',
+    '#dd-admin .da-card-details.visible { display: block; }',
+    '#dd-admin .da-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }',
+    '#dd-admin .da-detail-item { background: var(--surface-2); padding: 12px 20px; }',
+    '#dd-admin .da-detail-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }',
+    '#dd-admin .da-detail-value { font-size: 12px; color: var(--text); }',
+    '#dd-admin .da-card-actions { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }',
+    '#dd-admin .da-action-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }',
+    '#dd-admin .da-action-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); width: 140px; flex-shrink: 0; }',
+    '#dd-admin .da-select { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 8px 12px; outline: none; cursor: pointer; appearance: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }',
+    '#dd-admin .da-select:focus { border-color: var(--gold); }',
+    '#dd-admin .da-text-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 8px 12px; outline: none; flex: 1; min-width: 160px; transition: border-color 0.2s; }',
+    '#dd-admin .da-text-input:focus { border-color: var(--gold); }',
+    '#dd-admin .da-text-input::placeholder { color: var(--muted); }',
+    '#dd-admin .da-update-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; padding: 9px 20px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }',
+    '#dd-admin .da-update-btn:hover { opacity: 0.85; }',
+    '#dd-admin .da-update-btn:disabled { opacity: 0.4; cursor: not-allowed; }',
+    '#dd-admin .da-email-link { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 8px 14px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
+    '#dd-admin .da-email-link:hover { background: var(--gold); color: var(--bg); }',
+    '#dd-admin .da-section-divider { font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); padding: 12px 0 6px; border-top: 1px solid var(--border); margin-top: 4px; }',
+    '#dd-admin .da-contractor-projects { border: 1px solid var(--border); margin: 12px 0 4px; }',
+    '#dd-admin .da-contractor-projects-header { padding: 10px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-admin .da-contractor-project-row { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }',
+    '#dd-admin .da-contractor-project-row:last-child { border-bottom: none; }',
+    '#dd-admin .da-contractor-project-name { font-size: 12px; color: var(--text); flex: 1; }',
+    '#dd-admin .da-contractor-project-address { font-size: 10px; color: var(--muted); }',
+    '#dd-admin .da-services-wrap { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }',
+    '#dd-admin .da-service-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--border); }',
+    '#dd-admin .da-service-name { font-size: 12px; color: var(--text); flex: 1; }',
+    '#dd-admin .da-service-actions { display: flex; align-items: center; gap: 8px; }',
+    '#dd-admin .da-service-status { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 10px; padding: 4px 8px; outline: none; cursor: pointer; appearance: none; transition: border-color 0.2s; }',
+    '#dd-admin .da-service-remove { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 10px; padding: 4px 8px; cursor: pointer; transition: color 0.2s, border-color 0.2s; }',
+    '#dd-admin .da-service-remove:hover { color: var(--error); border-color: var(--error); }',
+    '#dd-admin .da-svc-checklist-wrap { border: 1px solid var(--border); margin-top: 10px; }',
+    '#dd-admin .da-svc-checklist-header { padding: 10px 14px; background: var(--surface-2); cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-admin .da-svc-checklist-header:hover { background: var(--gold-dim); }',
+    '#dd-admin .da-svc-selected-count { font-size: 9px; color: var(--bg); background: var(--gold); padding: 2px 8px; border-radius: 8px; }',
+    '#dd-admin .da-svc-checklist-body { display: none; padding: 12px 14px; border-top: 1px solid var(--border); }',
+    '#dd-admin .da-svc-checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }',
+    '#dd-admin .da-svc-check-label { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text); cursor: pointer; padding: 6px 8px; border: 1px solid var(--border); transition: background 0.15s, border-color 0.15s; }',
+    '#dd-admin .da-svc-check-label:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-admin .da-svc-check-label input { accent-color: var(--gold); width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }',
+    '#dd-admin .da-svc-check-label.da-svc-check-added { opacity: 0.5; cursor: not-allowed; }',
+    '#dd-admin .da-svc-added-tag { margin-left: auto; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--success); }',
+    '#dd-admin .da-svc-custom-row { display: flex; gap: 8px; margin-top: 4px; }',
+    '#dd-admin .da-notes-log { max-height: 260px; overflow-y: auto; border: 1px solid var(--border); background: var(--surface-2); margin-top: 8px; }',
+    '#dd-admin .da-notes-log-empty { padding: 16px; font-size: 11px; color: var(--muted); text-align: center; letter-spacing: 0.08em; }',
+    '#dd-admin .da-note-entry { padding: 12px 16px; border-bottom: 1px solid var(--border); }',
+    '#dd-admin .da-note-entry:last-child { border-bottom: none; }',
+    '#dd-admin .da-note-entry-meta { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }',
+    '#dd-admin .da-note-entry-text { font-size: 12px; color: var(--text); line-height: 1.7; white-space: pre-wrap; }',
+    '#dd-admin .da-notes-new { margin-top: 8px; }',
+    '#dd-admin .da-note-textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-top: none; color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 12px 14px; resize: vertical; min-height: 100px; outline: none; line-height: 1.7; transition: border-color 0.2s; }',
+    '#dd-admin .da-note-textarea:focus { border-color: var(--gold); }',
+    '#dd-admin .da-note-textarea::placeholder { color: var(--muted); }',
+    '#dd-admin .da-add-client-wrap { padding: 32px; max-width: 700px; }',
+    '#dd-admin .da-add-client-form { background: var(--surface); border: 1px solid var(--border); padding: 28px; }',
+    '#dd-admin .da-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }',
+    '#dd-admin .da-modal-field { display: flex; flex-direction: column; gap: 6px; }',
+    '#dd-admin .da-field-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }',
+    '#dd-admin .da-field-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 12px; outline: none; transition: border-color 0.2s; width: 100%; resize: vertical; appearance: none; }',
+    '#dd-admin .da-field-input:focus { border-color: var(--gold); }',
+    '#dd-admin .da-field-input::placeholder { color: var(--muted); }',
+    '#dd-admin #acServicesSelect option { padding: 8px 12px; font-family: Jost, sans-serif; font-size: 12px; color: var(--text); background: var(--surface-2); }',
+    '#dd-admin #acServicesSelect option:checked { background: var(--gold); color: var(--bg); }',
+    '#dd-admin .da-modal-check { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 12px; color: var(--text); }',
+    '#dd-admin .da-modal-check input { accent-color: var(--gold); width: 14px; height: 14px; cursor: pointer; }',
+    '#dd-admin .da-modal-check label { cursor: pointer; }',
+    '#dd-admin .da-modal-msg { font-size: 11px; min-height: 20px; margin-bottom: 12px; }',
+    '#dd-admin .da-modal-msg.success { color: var(--success); }',
+    '#dd-admin .da-modal-msg.error { color: var(--error); }',
+    '#dd-admin .da-modal-submit { width: 100%; background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; padding: 14px; cursor: pointer; transition: opacity 0.2s; }',
+    '#dd-admin .da-modal-submit:hover { opacity: 0.85; }',
+    '#dd-admin .da-modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }',
+    '#dd-admin .da-checklist-wrap { padding: 24px 32px; }',
+    '#dd-admin .da-checklist-search { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; padding: 10px 16px; outline: none; width: 300px; margin-bottom: 20px; transition: border-color 0.2s; }',
+    '#dd-admin .da-checklist-search:focus { border-color: var(--gold); }',
+    '#dd-admin .da-checklist-search::placeholder { color: var(--muted); }',
+    '#dd-admin .da-client-checklist { background: var(--surface); border: 1px solid var(--border); margin-bottom: 16px; }',
+    '#dd-admin .da-client-checklist-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }',
+    '#dd-admin .da-client-checklist-name { font-size: 13px; color: var(--text); font-weight: 400; }',
+    '#dd-admin .da-client-checklist-progress { font-size: 11px; color: var(--muted); }',
+    '#dd-admin .da-client-checklist-progress span { color: var(--gold); }',
+    '#dd-admin .da-client-checklist-body { display: none; }',
+    '#dd-admin .da-client-checklist-body.visible { display: block; }',
+    '#dd-admin .da-check-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); }',
+    '#dd-admin .da-check-row:last-child { border-bottom: none; }',
+    '#dd-admin .da-check-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; margin-top: 4px; }',
+    '#dd-admin .da-check-dot.done { background: var(--success); }',
+    '#dd-admin .da-check-row-label { font-size: 12px; color: var(--text); margin-bottom: 3px; }',
+    '#dd-admin .da-check-row-note { font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; background: var(--surface-2); padding: 8px 12px; border-left: 2px solid var(--gold); }',
+    '#dd-admin .da-messages-wrap { padding: 24px 32px; }',
+    '#dd-admin .da-msg-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; margin-bottom: 12px; }',
+    '#dd-admin .da-msg-card.unread { border-left: 3px solid var(--gold); }',
+    '#dd-admin .da-msg-client { font-size: 13px; color: var(--text); font-weight: 400; margin-bottom: 4px; }',
+    '#dd-admin .da-msg-preview { font-size: 11px; color: var(--muted); margin-bottom: 6px; }',
+    '#dd-admin .da-msg-meta { font-size: 9px; color: var(--muted); }',
+    '#dd-admin .da-msg-thread { display: none; border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; }',
+    '#dd-admin .da-msg-thread.visible { display: block; }',
+    '#dd-admin .da-msg-bubble { padding: 10px 14px; margin-bottom: 8px; font-size: 12px; line-height: 1.7; max-width: 80%; }',
+    '#dd-admin .da-msg-bubble.client { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
+    '#dd-admin .da-msg-bubble.team { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); margin-left: auto; }',
+    '#dd-admin .da-msg-reply { display: flex; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }',
+    '#dd-admin .da-msg-reply textarea { flex: 1; background: var(--surface-2); border: 1px solid var(--border); outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 12px; padding: 10px 14px; resize: none; height: 48px; }',
+    '#dd-admin .da-msg-reply textarea::placeholder { color: var(--muted); }',
+    '#dd-admin .da-reply-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 20px; cursor: pointer; }',
+    '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
+    '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
+    '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
+    '#dd-admin .da-mobile-menu .da-tab { text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--border); border-radius: 0; width: 100%; font-size: 9px; letter-spacing: 0.25em; }',
+    '@media (max-width: 700px) {',
+    '}',
+    '@media (max-width: 700px) {',
+    '  #dd-admin .da-stats { flex-direction: column; }',
+    '  #dd-admin .da-nav { padding: 0 12px; height: 52px; }',
+    '  #dd-admin .da-nav-title { font-size: 12px; }',
+    '  #dd-admin .da-toolbar { padding: 12px; gap: 8px; }',
+    '  #dd-admin .da-toolbar .da-search { width: 100%; }',
+    '  #dd-admin .da-toolbar .da-filter { width: 100%; min-width: unset !important; }',
+    '  #dd-admin .da-cards-wrap { padding: 12px; }',
+    '  #dd-admin .da-card-top { flex-direction: column; align-items: flex-start; gap: 8px; }',
+    '  #dd-admin .da-card-right { width: 100%; justify-content: flex-start; flex-wrap: wrap; }',
+    '  #dd-admin .da-card-name { font-size: 13px; word-break: break-word; }',
+    '  #dd-admin .da-stage-pill { font-size: 9px; }',
+    '  #dd-admin .da-details-grid { grid-template-columns: 1fr; }',
+    '  #dd-admin .da-action-row { flex-direction: column; align-items: flex-start; }',
+    '  #dd-admin .da-action-row .da-select { width: 100%; }',
+    '  #dd-admin .da-action-row .da-update-btn { width: 100%; }',
+    '  #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 12px; }',
+    '  #dd-admin .da-modal-grid { grid-template-columns: 1fr; }',
+    '  #dd-admin .da-add-client-wrap { padding: 16px; }',
+    '  #dd-admin .da-client-subtabs { padding: 0 12px; }',
+    '  #dd-admin .da-client-subtab { padding: 12px 14px; font-size: 8px; }',
+    '  #dd-admin .da-section-title { font-size: 16px; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
 
+  // ── BUILD FILTER OPTIONS ──────────────────────────────────────────
+  var filterOptions = '<option value="">All Pipeline Stages</option>' + PIPELINE_STAGES.map(function(s) {
+    return '<option value="' + s.value + '">' + s.label + '</option>';
+  }).join('');
+
   // ── HTML ──────────────────────────────────────────────────────────
-  var wrap = document.getElementById('dd-portal');
+  var wrap = document.getElementById('dd-admin');
   if (!wrap) return;
 
   wrap.innerHTML = [
-    '<div id="ddLoading" class="dd-loading">Loading your portal...</div>',
-
-    // LOGIN
-    '<div id="ddLoginWrap" class="dd-login-wrap">',
-    '  <div class="dd-login-card">',
-    '    <div class="dd-login-header"><div class="dd-login-logo">Daydream</div><div class="dd-login-sub">Design + Build &mdash; Atlanta, Georgia</div></div>',
-    '    <div class="dd-login-body">',
-    '      <div class="dd-login-title">Welcome Back</div>',
-    '      <div class="dd-login-desc">Sign in to access your client portal.</div>',
-    '      <div class="dd-input-wrap"><label class="dd-input-label">Email Address</label><input class="dd-input" type="email" id="ddLoginEmail" placeholder="youremail@email.com" autocomplete="email" /></div>',
-    '      <div class="dd-input-wrap"><label class="dd-input-label">Password</label><input class="dd-input" type="password" id="ddLoginPassword" placeholder="Enter your password" autocomplete="current-password" /></div>',
-    '      <button class="dd-btn" id="ddLoginBtn">Sign In</button>',
-    '      <div class="dd-msg" id="ddLoginMsg"></div>',
-    '      <div style="text-align:center;margin-top:16px"><button id="ddForgotBtn" style="background:none;border:none;color:var(--muted);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;text-decoration:underline">Forgot password?</button></div>',
-    '      <div id="ddResetWrap" style="display:none;margin-top:12px">',
-    '        <div class="dd-input-wrap"><label class="dd-input-label">Enter your email to reset</label><input class="dd-input" type="email" id="ddResetEmail" placeholder="youremail@email.com" /></div>',
-    '        <button class="dd-btn" id="ddResetBtn" style="margin-top:8px">Send New Password</button>',
-    '        <div class="dd-msg" id="ddResetMsg"></div>',
-    '      </div>',
+    // ── LOGIN — FIX 5: Supabase auth, no plain text password ─────────
+    '<div id="daLoginWrap" class="da-login-wrap">',
+    '  <div class="da-login-card">',
+    '    <div class="da-login-header"><div class="da-login-logo">Daydream</div><div class="da-login-sub">Admin Dashboard</div></div>',
+    '    <div class="da-login-body">',
+    '      <div class="da-login-title">Admin Access</div>',
+    '      <div class="da-input-wrap"><label class="da-input-label">Password</label><input class="da-input" type="password" id="daPassword" placeholder="Enter admin password" /></div>',
+    '      <button class="da-btn" id="daLoginBtn">Sign In</button>',
+    '      <div class="da-login-msg" id="daLoginMsg"></div>',
     '    </div>',
     '  </div>',
     '</div>',
 
-    // PROJECT SELECTOR
-    '<div id="ddProjectSelector" class="dd-project-selector">',
-    '  <nav class="dd-selector-nav">',
-    '    <div class="dd-selector-logo">Daydream</div>',
-    '    <button class="dd-nav-logout" id="ddSelectorLogout">Sign Out</button>',
-    '  </nav>',
-    '  <div class="dd-selector-content">',
-    '    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">',
-    '      <div class="dd-selector-title" id="ddSelectorTitle" style="margin-bottom:0">Your Projects</div>',
-    '      <button class="dd-cal-btn" id="ddSelectorNewProjectBtn" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px;display:none">+ New Project</button>',
-    '    </div>',
-    '    <div class="dd-selector-sub" id="ddSelectorSub">Select a project to view its portal</div>',
-    '    <div class="dd-project-cards" id="ddProjectCards"></div>',
+    // ── DASHBOARD ─────────────────────────────────────────────────────
+    '<div id="daDashboard" class="da-dashboard">',
+    '  <nav class="da-nav"><div style="display:flex;align-items:center"><div class="da-nav-logo">Daydream</div><div class="da-nav-badge">Admin</div></div><button class="da-nav-logout" id="daLogoutBtn">Sign Out</button></nav>',
+    '  <div class="da-stats">',
+    '    <div class="da-stat"><div class="da-stat-label">Total Leads</div><div class="da-stat-value" id="daStatTotal">—</div></div>',
+    '    <div class="da-stat"><div class="da-stat-label">Active Projects</div><div class="da-stat-value" id="daStatActive">—</div></div>',
+    '    <div class="da-stat"><div class="da-stat-label">Completed</div><div class="da-stat-value" id="daStatComplete">—</div></div>',
+    '    <div class="da-stat"><div class="da-stat-label">New This Month</div><div class="da-stat-value" id="daStatMonth">—</div></div>',
     '  </div>',
-    '</div>',
+    '  <div class="da-tabs-wrap"><div class="da-tabs">',
+    '    <button class="da-tab active" data-tab="clients">Clients</button>',
+    '    <button class="da-tab da-tab-add" data-tab="add-client">+ Add Client</button>',
+    '    <button class="da-tab da-tab-add" data-tab="projects">Projects</button>',
+    '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
+    '    <button class="da-tab" data-tab="site-photos">Job Site Photos</button>',
+    '    <button class="da-tab" data-tab="messages">Messages</button>',
+    '  </div></div>',
 
-    // DASHBOARD
-    '<div id="ddDashboard" class="dd-dashboard">',
-    '  <nav class="dd-nav">',
-    '    <div class="dd-nav-left">',
-    '      <div class="dd-nav-logo">Daydream</div>',
-    '      <div class="dd-nav-project-name" id="ddNavProjectName"></div>',
-    '    </div>',
-    '    <div class="dd-nav-right">',
-    '      <span class="dd-nav-user" id="ddNavUser"></span>',
-    '      <button class="dd-nav-logout" id="ddRefreshBtn" title="Refresh project data" style="border:1px solid var(--border);padding:6px 12px;font-size:9px">&#8635; Refresh</button>',
-    '      <button class="dd-nav-back" id="ddNavBack">&#8592; All Projects</button>',
-    '      <button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button>',
-    '    </div>',
-    '  </nav>',
+    // CLIENTS TAB
+    '  <div class="da-tab-content active" id="tab-clients">',
 
-    '  <div class="dd-tabs" id="ddTabBar">',
-    '    <span class="dd-active-tab-label" id="ddActiveTabLabel">Overview</span>',
-    '    <button class="dd-hamburger" id="ddHamburger" onclick="window._toggleMobileMenu()" aria-label="Menu">&#9776;</button>',
-    '    <div class="dd-mobile-menu" id="ddMobileMenu">',
-    '      <button class="dd-tab active" data-tab="overview" onclick="window._selectMobileTab(this)">Overview</button>',
-    '      <button class="dd-tab" data-tab="checklist" onclick="window._selectMobileTab(this)">Checklist</button>',
-    '      <button class="dd-tab" data-tab="uploads" onclick="window._selectMobileTab(this)">Documents</button>',
-    '      <button class="dd-tab" data-tab="messages" onclick="window._selectMobileTab(this)">Messages</button>',
-    '      <button class="dd-tab" data-tab="schedule" onclick="window._selectMobileTab(this)">Schedule</button>',
-    '      <button class="dd-tab" data-tab="drive" onclick="window._selectMobileTab(this)">Project Files</button>',
-    '      <button class="dd-tab" data-tab="settings" onclick="window._selectMobileTab(this)">Settings</button>',
+    '    <!-- Client subtabs -->',
+    '    <div class="da-client-subtabs">',
+    '      <button class="da-client-subtab active" data-status="all">All <span class="da-subtab-count" id="cnt-all"></span></button>',
+    '      <button class="da-client-subtab" data-status="active_client">Active <span class="da-subtab-count" id="cnt-active"></span></button>',
+    '      <button class="da-client-subtab" data-status="lead">Leads <span class="da-subtab-count" id="cnt-lead"></span></button>',
+    '      <button class="da-client-subtab" data-status="finished">Finished <span class="da-subtab-count" id="cnt-finished"></span></button>',
+    '      <button class="da-client-subtab" data-status="archived">Archived <span class="da-subtab-count" id="cnt-archived"></span></button>',
+    '      <button class="da-client-subtab" data-status="stone_sourcing" style="border-left:1px solid var(--border);margin-left:8px">Stone Sourcing <span class="da-subtab-count" id="cnt-stone"></span></button>',
     '    </div>',
-    '    <button class="dd-tab active" data-tab="overview">Overview</button>',
-    '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
-    '    <button class="dd-tab" data-tab="uploads">Documents</button>',
-    '    <button class="dd-tab" data-tab="messages">Messages</button>',
-    '    <button class="dd-tab" data-tab="settings">Settings</button>',
 
-    '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
-    '    <button class="dd-tab" data-tab="drive">Project Files</button>',
+    '    <div class="da-toolbar">',
+    '      <input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." />',
+    '      <select class="da-filter" id="daFilter">' + filterOptions + '</select>',
+    '      <select class="da-filter" id="daCategoryFilter" style="min-width:160px"><option value="">All Categories</option><option value="design_only">Design Only</option><option value="build">Build / Construction</option><option value="full_service">Full Service</option><option value="consultation">Consultation</option></select>',
+    '      <div class="da-count" id="daCount"></div>',
+    '    </div>',
+    '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
     '  </div>',
-    '  <div class="dd-content">',
 
-    // OVERVIEW
-    '    <div class="dd-tab-content active" id="tab-overview">',
-    '      <div class="dd-section-title" id="ddProjectTitle">Your Project</div>',
-    '      <div class="dd-section-sub" id="ddProjectAddress">Welcome to your Daydream client portal</div>',
-    '      <div class="dd-welcome-card">',
-    '        <div class="dd-welcome-text"><h3>Book Your Discovery Call</h3><p>Schedule a consultation with our design team to discuss your vision, timeline and investment.</p></div>',
-    '        <div style="display:flex;flex-direction:column;gap:8px">',
-    '          <a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn">Book Consultation</a>',
-    '          <button class="dd-cal-btn outline" id="ddDashNewProjectBtn" onclick="window._showCreateProject()" style="font-size:9px;padding:12px 20px;display:none">+ New Project</button>',
-    '        </div>',
-    '      </div>',
-    '      <div class="dd-cards">',
-    '        <div class="dd-card"><div class="dd-card-label">Project Status</div><div class="dd-card-value" id="ddStatus">New Inquiry</div></div>',
-    '        <div class="dd-card"><div class="dd-card-label">Project Type</div><div class="dd-card-value" id="ddProjectType" style="font-size:14px">—</div></div>',
-    '        <div class="dd-card"><div class="dd-card-label">Member Since</div><div class="dd-card-value" id="ddSince" style="font-size:14px">—</div></div>',
-    '      </div>',
-    '      <div id="ddContactCard" style="display:none;margin-bottom:32px">',
-    '        <div style="border:1px solid var(--border)">',
-    '          <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Contact Info</div>',
-    '          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)">',
-    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Name</div><div style="font-size:13px;color:var(--text)" id="ddContactName">—</div></div>',
-    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Email</div><div style="font-size:13px;color:var(--text)" id="ddContactEmail">—</div></div>',
-    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Phone</div><div style="font-size:13px;color:var(--text)" id="ddContactPhone">—</div></div>',
-    '            <div style="background:var(--surface);padding:16px 24px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Address</div><div style="font-size:13px;color:var(--text)" id="ddContactAddress">—</div></div>',
+    // ADD CLIENT TAB
+    '  <div class="da-tab-content" id="tab-add-client">',
+    '    <div class="da-add-client-wrap">',
+    '      <div class="da-section-title">Add New Client</div>',
+    '      <div class="da-add-client-form">',
+    '        <div class="da-modal-grid">',
+    '          <div class="da-modal-field"><label class="da-field-label">Full Name *</label><input class="da-field-input" type="text" id="acName" placeholder="Jesse House" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Email *</label><input class="da-field-input" type="email" id="acEmail" placeholder="client@email.com" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Phone</label><input class="da-field-input" type="text" id="acPhone" placeholder="404-555-0123" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">How Did They Hear About Us?</label><select class="da-field-input" id="acReferral"><option value="">Select...</option><option>Google Search</option><option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>YouTube</option><option>Houzz</option><option>Nextdoor</option><option>Referral — Friend or Family</option><option>Referral — Past Client</option><option>Yard Sign / Drove By</option><option>Home Show / Event</option><option>Other</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Service Type</label><select class="da-field-input" id="acServiceType"><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="both">Both (Design, Build &amp; Stone)</option></select></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1">',
+    '            <label class="da-field-label" style="margin-bottom:8px;display:block">Project Services <span style="color:var(--muted);font-size:9px;letter-spacing:0.1em;text-transform:none">(hold Ctrl / Cmd to select multiple)</span></label>',
+    '            <select class="da-field-input" id="acServicesSelect" multiple size="7" style="height:auto;padding:0">' + ALL_SERVICES.map(function(sv) { return '<option value="' + sv.key + '" data-label="' + sv.label + '">' + sv.label + '</option>'; }).join('') + '</select>',
+    '            <input class="da-field-input" id="acCustomService" type="text" placeholder="Custom service (optional)..." style="margin-top:8px" />',
     '          </div>',
     '        </div>',
+    '        <div class="da-modal-check"><input type="checkbox" id="acContractor" /><label for="acContractor">This is a contractor (will have multiple projects)</label></div>',
+    '        <div class="da-modal-check"><input type="checkbox" id="acSendEmail" checked /><label for="acSendEmail">Send welcome email with portal access link</label></div>',
+    '        <div class="da-modal-msg" id="acMsg"></div>',
+    '        <button class="da-modal-submit" id="acSubmit">Add Client</button>',
     '      </div>',
-    '      <div class="dd-status-grid">',
-    '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div></div>',
-    '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div></div>',
+    '    </div>',
+    '  </div>',
+
+    // PROJECTS TAB
+    '  <div class="da-tab-content" id="tab-projects">',
+    '    <div class="da-add-client-wrap" style="max-width:900px">',
+    '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">',
+    '        <div class="da-section-title" style="margin-bottom:0">Projects</div>',
+    '        <button class="da-update-btn" onclick="window._showAddProjectForm()">+ Add Project</button>',
     '      </div>',
-    '      <div id="ddProjectGoals" style="display:none;margin-bottom:32px">',
-    '        <div style="border:1px solid var(--border);">',
-    '          <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Project Goals &amp; Notes</div>',
-    '          <div id="ddProjectGoalsText" style="padding:20px 24px;font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap"></div>',
+    '      <div id="daAddProjectForm" style="display:none;background:var(--surface);border:1px solid var(--gold);padding:28px;margin-bottom:24px">',
+    '        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:20px">Create New Project</div>',
+    '        <div class="da-modal-grid">',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Project Address *</label><input class="da-field-input" type="text" id="apAddress" placeholder="123 Main St, Atlanta GA" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Client *</label><select class="da-field-input" id="apClientId"><option value="">Select client...</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Client Name *</label><input class="da-field-input" type="text" id="apClientName" placeholder="Full name on the project" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Project Name *</label><input class="da-field-input" type="text" id="apProjectName" placeholder="e.g. Backyard Renovation" /></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Project Type</label><select class="da-field-input" id="apProjectType"><option value="">Select type...</option>' + PROJECT_TYPES.map(function(t) { return '<option value="' + t.key + '">' + t.label + '</option>'; }).join('') + '</select></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Anything Else We Need to Know?</label><textarea class="da-field-input" id="apAnything" rows="2" placeholder="Constraints, HOA rules, access details, or important context..."></textarea></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Goals and Notes</label><textarea class="da-field-input" id="apGoals" rows="3" placeholder="Goals, must-have features, vision..."></textarea></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">What Level of Investment Are You Preparing for This Project? *</label><input class="da-field-input" type="text" id="apInvestment" placeholder="e.g. $75,000 or $100k–$150k" /></div>',
+    '        </div>',
+    '        <div class="da-modal-msg" id="apMsg"></div>',
+    '        <div style="display:flex;gap:12px;margin-top:16px">',
+    '          <button class="da-modal-submit" id="apSubmit" style="flex:1" onclick="window._submitAddProject()">Create Project</button>',
+    '          <button class="da-modal-submit" style="background:var(--surface);color:var(--muted);border:1px solid var(--border);flex:0 0 auto;width:120px" onclick="window._hideAddProjectForm()">Cancel</button>',
     '        </div>',
     '      </div>',
-    '      <div id="ddServicesCard" style="display:none;margin-bottom:32px">',
-    '        <div style="border:1px solid var(--border);">',
-    '          <div style="padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Services</div>',
-    '          <div id="ddServicesList"></div>',
+    '      <div id="daProjectsList"></div>',
+    '    </div>',
+    '  </div>',
+
+    // CHECKLIST TAB
+    '  <div class="da-tab-content" id="tab-site-photos">',
+    '    <div class="da-add-client-wrap" style="max-width:900px">',
+    '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">',
+    '        <div class="da-section-title" style="margin-bottom:0">Job Site Photos</div>',
+    '        <div style="display:flex;gap:12px;align-items:center">',
+    '          <select class="da-filter" id="daPhotoClientFilter" style="min-width:200px"><option value="">All Clients</option></select>',
+    '          <button class="da-update-btn" onclick="window._showAdminPhotoUpload()">+ Upload Photos</button>',
     '        </div>',
     '      </div>',
-    '      <div class="dd-timeline" id="ddDesignTimeline">',
-    '        <div class="dd-timeline-header">Design &amp; Permit Phase</div>',
-    '        <div id="ddTimeline"></div>',
-    '      </div>',
-    '      <div id="ddConstructionTimeline" style="margin-top:24px;display:none">',
-    '        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--success);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--success)">Construction Phase</div>',
-    '        <div class="dd-timeline" style="margin-bottom:0">',
-    '          <div id="ddConstructionTimelineItems"></div>',
-    '        </div>',
-    '      </div>',
-    '    </div>',
-
-    // CHECKLIST
-    '    <div class="dd-tab-content" id="tab-checklist">',
-    '      <div class="dd-section-title">Getting Started</div>',
-    '      <div class="dd-section-sub">Complete these items to help us get started on your project.</div>',
-    '      <div class="dd-checklist" id="ddChecklist">',
-    '        <div class="dd-checklist-header"><div class="dd-checklist-title">Onboarding Checklist</div><div class="dd-checklist-progress"><span id="ddCheckCount">0</span> of ' + CHECKLIST_ITEMS.length + ' complete</div></div>',
-    '        <div id="ddChecklistItems"></div>',
-    '        <div class="dd-checklist-complete" id="ddChecklistComplete"><p>&#10003; &nbsp; All items complete — thank you! Our team will be in touch shortly.</p></div>',
-    '      </div>',
-    '    </div>',
-
-    // UPLOADS
-    '    <div class="dd-tab-content" id="tab-uploads">',
-    '      <div class="dd-section-title">Documents</div>',
-    '      <div class="dd-section-sub">Upload your project documents below. Videos up to 5GB supported.</div>',
-    '      <div class="dd-upload-grid">',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Upload here — view in Job Site Photos tab</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" id="clientSitePhotoInput" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, reference photos</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans & HOA Bylaws</div><div class="dd-upload-card-desc">Architectural plans, drawings, HOA rules</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Plans</div><div class="dd-upload-card-desc">Existing site plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="siteplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-siteplans"></div></div></div>',
-    '      </div>',
-    '    </div>',
-
-    // MESSAGES
-    '    <div class="dd-tab-content" id="tab-site-photos">',
-    '      <div class="dd-section-title">Job Site Photos</div>',
-    '      <div class="dd-section-sub">Photos from your project site, grouped by visit date.</div>',
-    '      <div id="ddSitePhotosList"><div class="dd-empty">Loading photos...</div></div>',
-    '    </div>',
-
-    '    <div class="dd-tab-content" id="tab-messages">',
-    '      <div class="dd-section-title">Messages</div>',
-    '      <div class="dd-section-sub">Communicate directly with the Daydream team</div>',
-    '      <div class="dd-messages-wrap">',
-    '        <div class="dd-messages-header">Project Messages</div>',
-    '        <div class="dd-messages-list" id="ddMessagesList"><div class="dd-empty">No messages yet. Send us a message below.</div></div>',
-    '        <div class="dd-messages-input"><textarea id="ddMessageInput" placeholder="Type your message..."></textarea><button class="dd-send-btn" id="ddSendBtn">Send</button></div>',
-    '      </div>',
-    '    </div>',
-
-    // SCHEDULE
-    '    <div class="dd-tab-content" id="tab-schedule">',
-    '      <div class="dd-section-title">Schedule a Meeting</div>',
-    '      <div class="dd-section-sub">Book time with the Daydream team</div>',
-    '      <div class="dd-cards">',
-    '        <div class="dd-card"><div class="dd-card-label">Discovery Consultation</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Initial project discussion</div><a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px">Book Consultation</a></div>',
-    '        <div class="dd-card"><div class="dd-card-label">Design Revision Meeting</div><div class="dd-card-sub" style="color:var(--muted);margin-bottom:16px">Review and discuss design changes</div><a href="' + REVISION_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px">Book Revision Call</a></div>',
-    '      </div>',
-    '    </div>',
-
-    // PROJECT FILES
-    '    <div class="dd-tab-content" id="tab-drive">',
-    '      <div class="dd-section-title">Project Files</div>',
-    '      <div class="dd-section-sub">Access your shared project folders</div>',
-    '      <div id="ddDriveList"></div>',
-    '    </div>',
-    '    <div class="dd-tab-content" id="tab-settings">',
-    '      <div class="dd-section-title">Account Settings</div>',
-    '      <div class="dd-section-sub">Manage your account and password</div>',
-    '      <div style="max-width:420px;margin-top:24px">',
-    '        <div style="background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:16px">',
-    '          <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Change Password</div>',
-    '          <div style="display:flex;flex-direction:column;gap:10px">',
-    '            <input type="password" id="ddNewPass" placeholder="New password (min 6 characters)" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
-    '            <input type="password" id="ddConfirmPass" placeholder="Confirm new password" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
-    '            <button class="dd-btn" onclick="window._saveNewPassword()" style="padding:12px 24px;font-size:9px;align-self:flex-start">Update Password</button>',
-    '            <div id="ddChangePassMsg" style="font-size:11px;min-height:16px"></div>',
+    '      <div id="daAdminPhotoUploadForm" style="display:none;background:var(--surface);border:1px solid var(--gold);padding:24px;margin-bottom:24px">',
+    '        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Upload Job Site Photos</div>',
+    '        <div class="da-modal-grid">',
+    '          <div class="da-modal-field"><label class="da-field-label">Client *</label><select class="da-field-input" id="daPhotoUploadClient"><option value="">Select client...</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Visit Date</label><input class="da-field-input" type="date" id="daPhotoVisitDate" /></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes / Description</label><textarea class="da-field-input" id="daPhotoNotes" rows="2" placeholder="Describe what was photographed, progress made, etc..."></textarea></div>',
+    '          <div class="da-modal-field" style="grid-column:1/-1">',
+    '            <label class="da-field-label">Photos *</label>',
+    '            <div class="dd-drop-zone" style="border:1px dashed var(--border);padding:24px;text-align:center;cursor:pointer;position:relative;background:var(--surface-2)">',
+    '              <input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" id="daPhotoFiles" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" />',
+    '              <div style="font-size:20px;color:var(--gold);margin-bottom:8px">&#8679;</div>',
+    '              <div style="font-size:11px;color:var(--muted)">Drop photos or click to upload</div>',
+    '            </div>',
+    '            <div id="daPhotoUploadStatus" style="font-size:11px;color:var(--success);margin-top:8px;min-height:16px"></div>',
     '          </div>',
     '        </div>',
-    '        <div style="background:var(--surface);border:1px solid var(--border);padding:24px">',
-    '          <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Account</div>',
-    '          <div style="font-size:13px;color:var(--muted);margin-bottom:20px" id="ddSettingsEmail"></div>',
-    '          <button onclick="doLogout()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;padding:10px 20px;cursor:pointer;font-family:Jost,sans-serif">Sign Out</button>',
+    '        <div class="da-modal-msg" id="daPhotoMsg"></div>',
+    '        <div style="display:flex;gap:12px;margin-top:12px">',
+    '          <button class="da-modal-submit" id="daPhotoSubmit" style="flex:1" onclick="window._submitAdminPhotos()">Upload to Drive &amp; Save</button>',
+    '          <button class="da-modal-submit" style="background:var(--surface);color:var(--muted);border:1px solid var(--border);flex:0 0 auto;width:120px" onclick="window._hideAdminPhotoUpload()">Cancel</button>',
     '        </div>',
     '      </div>',
+    '      <div id="daPhotosList"></div>',
     '    </div>',
-
-
     '  </div>',
-    '</div>',
 
-    // CREATE PROJECT PANEL
-    '<div id="ddCreateProject" class="dd-create-project">',
-    '  <nav class="dd-nav">',
-    '    <div class="dd-nav-left"><div class="dd-nav-logo">Daydream</div></div>',
-    '    <div class="dd-nav-right"><button class="dd-nav-logout" onclick="window._hideCreateProject()">&#8592; Back to Projects</button></div>',
-    '  </nav>',
-    '  <div class="dd-create-project-body">',
-    '    <div class="dd-section-title">Create New Project</div>',
-    '    <div class="dd-section-sub">Fill in the details below. Required fields are marked *.</div>',
 
-    '    <div class="dd-create-section">',
-    '      <div class="dd-create-section-title">Project Details</div>',
-    '      <div class="dd-create-grid">',
+    '  <div class="da-tab-content" id="tab-checklist">',
+    '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
+    '  </div>',
 
-    '        <div class="dd-create-field dd-create-full">',
-    '          <div class="dd-create-label">Project Address *</div>',
-    '          <input class="dd-create-input" id="cpAddress" type="text" placeholder="123 Main St, Atlanta GA" />',
-    '        </div>',
-
-    '        <div class="dd-create-field dd-create-full">',
-    '          <div class="dd-create-label">Client Name *</div>',
-    '          <input class="dd-create-input" id="cpClientName" type="text" placeholder="Full name on the project" />',
-    '        </div>',
-
-    '        <div class="dd-create-field">',
-    '          <div class="dd-create-label">Project Name *</div>',
-    '          <input class="dd-create-input" id="cpName" type="text" placeholder="e.g. Backyard Renovation" />',
-    '        </div>',
-
-    '        <div class="dd-create-field">',
-    '          <div class="dd-create-label">Project Type</div>',
-    '          <select class="dd-create-input" id="cpType">',
-    '            <option value="">Select type...</option>',
-    '            <option value="full_yard">Full Yard</option>',
-    '            <option value="front_yard">Front Yard</option>',
-    '            <option value="backyard">Backyard</option>',
-    '            <option value="outdoor_living">Outdoor Living</option>',
-    '            <option value="landscape_construction">Landscape Construction</option>',
-    '            <option value="pool_and_spa">Pool &amp; Spa</option>',
-    '            <option value="custom">Custom / Other</option>',
-    '          </select>',
-    '        </div>',
-
-    '        <div class="dd-create-field dd-create-full">',
-    '          <div class="dd-create-label">Anything Else We Need to Know?</div>',
-    '          <textarea class="dd-create-input dd-create-textarea" id="cpAnything" style="min-height:80px" placeholder="Any constraints, HOA rules, access details, or important context..."></textarea>',
-    '        </div>',
-
-    '        <div class="dd-create-field dd-create-full">',
-    '          <div class="dd-create-label">Goals and Notes</div>',
-    '          <textarea class="dd-create-input dd-create-textarea" id="cpGoals" placeholder="Project goals, must-have features, vision, and priorities..."></textarea>',
-    '        </div>',
-
-    '        <div class="dd-create-field dd-create-full">',
-    '          <div class="dd-create-label">What Level of Investment Are You Preparing for This Project? *</div>',
-    '          <input class="dd-create-input" id="cpBudget" type="text" placeholder="e.g. $75,000 or $100k–$150k" />',
-    '        </div>',
-
-    '      </div>',
-    '    </div>',
-
-    '    <div class="dd-create-section">',
-    '      <div class="dd-create-section-title">File Uploads <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none;font-weight:300">— Optional</span></div>',
-    '      <div class="dd-create-section-sub">You can upload more files after the project is created. Videos up to 5GB supported.</div>',
-    '      <div class="dd-upload-grid">',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-survey"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos & Videos</div><div class="dd-upload-card-desc">Current site conditions</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.mp4,.mov,.heic" data-category="photos" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-photos"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Existing Plans</div><div class="dd-upload-card-desc">Architectural drawings, house plans</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-houseplans"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest, AI images, references</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-inspo"></div></div></div>',
-    '      </div>',
-    '    </div>',
-
-    '    <div id="cpSuccessMsg" style="display:none;background:var(--gold-dim);border:1px solid var(--gold);padding:24px;text-align:center;margin-bottom:24px">',
-    '      <div style="font-size:20px;color:var(--gold);margin-bottom:8px">&#10003; Project Created Successfully!</div>',
-    '      <div style="font-size:13px;color:var(--muted)">Your project has been saved. Redirecting to your project list...</div>',
-    '    </div>',
-    '    <div class="dd-create-msg" id="cpMsg"></div>',
-    '    <button class="dd-btn" id="cpSubmit" onclick="window._submitCreateProject()">Create Project</button>',
-    '    <div style="height:60px"></div>',
+    // MESSAGES TAB
+    '  <div class="da-tab-content" id="tab-messages">',
+    '    <div class="da-messages-wrap"><div class="da-section-title">Client Messages</div><div id="daMsgList"></div></div>',
     '  </div>',
     '</div>'
   ].join('\n');
 
   // ── STATE ─────────────────────────────────────────────────────────
-  var currentUser    = null;
-  var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing'
+  var allClients  = [];
+  var allMessages = [];
+  var allChecklists = {};
+  var allNotes = {};
 
-  window._setPortalType = function(type) {
-    portalType = type;
-    var dBtn = document.getElementById('ddPortalTypeDesign');
-    var sBtn = document.getElementById('ddPortalTypeStone');
-    if (dBtn && sBtn) {
-      if (type === 'design_build') {
-        dBtn.style.background = 'var(--gold)'; dBtn.style.color = 'var(--bg)';
-        sBtn.style.background = 'var(--surface-2)'; sBtn.style.color = 'var(--muted)';
-      } else {
-        sBtn.style.background = 'var(--gold)'; sBtn.style.color = 'var(--bg)';
-        dBtn.style.background = 'var(--surface-2)'; dBtn.style.color = 'var(--muted)';
-      }
-    }
-  };
-
-  var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing'
-
-
-  var currentClient  = null;
-  var allClientProjects = [];
-  var currentProject = null;
-  var isContractor   = false;
-  var checklistState = {};
-  var notesState     = {};
-
-  // ── HELPERS ───────────────────────────────────────────────────────
-  function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
-  function showLogin()   { hideLoading(); document.getElementById('ddLoginWrap').classList.add('visible'); }
-
-  function showProjectSelector() {
-    hideLoading();
-    document.getElementById('ddLoginWrap').classList.remove('visible');
-    document.getElementById('ddDashboard').classList.remove('visible');
-    document.getElementById('ddCreateProject').classList.remove('visible');
-    document.getElementById('ddProjectSelector').classList.add('visible');
-    // Only show New Project button for contractors
-    var selectorBtn = document.getElementById('ddSelectorNewProjectBtn');
-    if (selectorBtn) selectorBtn.style.display = isContractor ? 'block' : 'none';
+  // ── API ───────────────────────────────────────────────────────────
+  function getAdminToken() {
+    try { return localStorage.getItem('dd_admin_token') || sessionStorage.getItem('dd_admin_token') || SUPABASE_KEY; } catch(e) { return SUPABASE_KEY; }
   }
-
-  function showDashboard() {
-    hideLoading();
-    document.getElementById('ddLoginWrap').classList.remove('visible');
-    document.getElementById('ddProjectSelector').classList.remove('visible');
-    document.getElementById('ddCreateProject').classList.remove('visible');
-    document.getElementById('ddDashboard').classList.add('visible');
-    // Start live WebSocket subscriptions
-    startRealtime();
-    var backBtn = document.getElementById('ddNavBack');
-    if (isContractor && backBtn) backBtn.classList.add('visible');
-    // Only show New Project button for contractors
-    var dashBtn = document.getElementById('ddDashNewProjectBtn');
-    if (dashBtn) dashBtn.style.display = isContractor ? 'block' : 'none';
-    var navUser = document.getElementById('ddNavUser');
-    if (navUser) navUser.textContent = currentClient ? (currentClient.full_name || currentUser.email) : currentUser.email;
-    var settingsEmail = document.getElementById('ddSettingsEmail');
-    if (settingsEmail) settingsEmail.textContent = 'Signed in as: ' + currentUser.email;
-    var settingsEmail = document.getElementById('ddSettingsEmail');
-    if (settingsEmail) settingsEmail.textContent = 'Signed in as: ' + currentUser.email;
-    var navProject = document.getElementById('ddNavProjectName');
-    if (navProject && isContractor && allClientProjects.length > 1) {
-      navProject.textContent = currentClient ? (currentClient.full_name || '') : '';
-      navProject.classList.add('visible');
-    }
-  }
-
-  function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
-  function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
-  function serviceLabel(key) { return key || '—'; }
 
   function apiFetch(path, options) {
     var opts = options || {};
     opts.headers = opts.headers || {};
     opts.headers['apikey'] = SUPABASE_KEY;
-    opts.headers['Authorization'] = 'Bearer ' + (currentUser ? currentUser.access_token : SUPABASE_KEY);
+    opts.headers['Authorization'] = 'Bearer ' + getAdminToken();
     opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json';
     return fetch(SUPABASE_URL + path, opts);
   }
+  window._apiFetch = apiFetch;
 
-  // ── RENDER ────────────────────────────────────────────────────────
-  function renderTimeline(clientStage, constructionStage) {
-    // Design & Permit timeline
-    var currentIdx = getStageIndex(clientStage || 'inquiry_submitted');
-    document.getElementById('ddTimeline').innerHTML = TIMELINE.map(function(stage, idx) {
-      var isDone = idx < currentIdx, isActive = idx === currentIdx;
-      var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
-      var labelClass = (isDone || isActive) ? '' : 'muted';
-      var badge = isActive ? '<div class="dd-timeline-badge">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
-      return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + dotClass + '"></div><div class="dd-timeline-label ' + labelClass + '">' + s(stage.label) + '</div>' + badge + '</div>';
-    }).join('');
+  function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+  function serviceLabel(key) { var found = ALL_SERVICES.find(function(sv) { return sv.key === key; }); return found ? found.label : (key || '—'); }
+  function initials(name) { if (!name) return '?'; var p = name.trim().split(' '); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase(); }
+  function formatInvestment(inv) { if (!inv) return ''; var n = (inv || '').replace(/[^0-9.]/g, ''); return n && !isNaN(n) ? '$' + Number(n).toLocaleString() : inv; }
 
-    // Construction timeline — only show if construction has started
-    var conTimeline = document.getElementById('ddConstructionTimeline');
-    var conItems = document.getElementById('ddConstructionTimelineItems');
-    if (!conTimeline || !conItems) return;
-    // Stone sourcing timeline
-    var stoneTimeline = document.getElementById('ddStoneTimeline');
-    var stoneItems    = document.getElementById('ddStoneTimelineItems');
-    if (stoneTimeline && stoneItems && currentClient && currentClient.service_type === 'stone_sourcing') {
-      stoneTimeline.style.display = 'block';
-      if (conTimeline) conTimeline.style.display = 'none'; // hide construction for stone clients
-      var stoneStage = currentClient.stone_stage || 'discovery_call';
-      var stoneIdx   = STONE_TIMELINE.findIndex(function(t) { return t.value === stoneStage; });
-      if (stoneIdx === -1) stoneIdx = 0;
-      stoneItems.innerHTML = STONE_TIMELINE.map(function(stage, idx) {
-        var isDone = idx < stoneIdx, isActive = idx === stoneIdx;
-        var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
-        var badge = isActive ? '<div class="dd-timeline-badge" style="border-color:var(--gold);color:var(--gold)">In Progress</div>'
-                  : (isDone  ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
-        return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + dotClass + '" style="' + (isDone || isActive ? 'background:var(--gold)' : '') + '"></div><div class="dd-timeline-label ' + (isDone || isActive ? '' : 'muted') + '">' + stage.label + '</div>' + badge + '</div>';
-      }).join('');
-    } else if (stoneTimeline) {
-      stoneTimeline.style.display = 'none';
-    }
+  // FIX 6: Debounced search ──────────────────────────────────────────
+  var searchTimeout;
+  var activeSubtab = 'all'; // tracks which subtab is active
 
-    // Stone sourcing timeline
-    var stoneTimeline = document.getElementById('ddStoneTimeline');
-    var stoneItems    = document.getElementById('ddStoneTimelineItems');
-    if (stoneTimeline && stoneItems && currentClient && currentClient.service_type === 'stone_sourcing') {
-      stoneTimeline.style.display = 'block';
-      if (conTimeline) conTimeline.style.display = 'none';
-      var stoneStage = currentClient.stone_stage || 'discovery_call';
-      var stoneIdx   = STONE_TIMELINE.findIndex(function(t) { return t.value === stoneStage; });
-      if (stoneIdx === -1) stoneIdx = 0;
-      stoneItems.innerHTML = STONE_TIMELINE.map(function(stage, idx) {
-        var isDone = idx < stoneIdx, isActive = idx === stoneIdx;
-        var dotStyle = (isDone || isActive) ? 'background:var(--gold)' : '';
-        var badge = isActive ? '<div class="dd-timeline-badge" style="border-color:var(--gold);color:var(--gold)">In Progress</div>'
-                  : (isDone  ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
-        return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + (isDone?'done':isActive?'active':'') + '" style="' + dotStyle + '"></div><div class="dd-timeline-label ' + (isDone||isActive?'':'muted') + '">' + stage.label + '</div>' + badge + '</div>';
-      }).join('');
-    } else if (stoneTimeline) {
-      stoneTimeline.style.display = 'none';
-    }
-
-    if (constructionStage && constructionStage !== 'not_started') {
-      conTimeline.style.display = 'block';
-      var conIdx = CONSTRUCTION_TIMELINE.findIndex(function(t) { return t.value === constructionStage; });
-      if (conIdx === -1) conIdx = 0;
-      conItems.innerHTML = CONSTRUCTION_TIMELINE.map(function(stage, idx) {
-        var isDone = idx < conIdx, isActive = idx === conIdx;
-        var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
-        var labelClass = (isDone || isActive) ? '' : 'muted';
-        var badge = isActive ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
-        return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + (isDone ? 'done' : (isActive ? 'active' : '')) + '" style="' + (isDone || isActive ? 'background:var(--success)' : '') + '"></div><div class="dd-timeline-label ' + labelClass + '">' + s(stage.label) + '</div>' + badge + '</div>';
-      }).join('');
-    } else {
-      conTimeline.style.display = 'none';
-    }
+  function applyFilters() {
+    var q     = (document.getElementById('daSearch').value || '').toLowerCase();
+    var stage = document.getElementById('daFilter').value;
+    var cCat  = (document.getElementById('daCategoryFilter') || {}).value || '';
+    renderCards(allClients.filter(function(c) {
+      var mq  = !q     || (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q) || (c.company_name||'').toLowerCase().includes(q);
+      var ms  = !stage || c.status === stage;
+      var mcat = !cCat || c.work_category === cCat;
+      // Subtab filter
+      var mst = true;
+      if (activeSubtab === 'all') {
+        mst = c.client_status !== 'archived';
+      } else if (activeSubtab === 'stone_sourcing') {
+        mst = c.service_type === 'stone_sourcing';
+      } else {
+        mst = (c.client_status || 'lead') === activeSubtab;
+      }
+      return mq && ms && mcat && mst;
+    }));
   }
 
-  function renderStatusBadges(client) {
-    var ck = (client && client.contract_status) || 'not_sent';
-    var pk = (client && client.payment_status) || 'not_sent';
-    var contract = CONTRACT_LABELS[ck] || CONTRACT_LABELS['not_sent'];
-    var payment  = PAYMENT_LABELS[pk] || PAYMENT_LABELS['not_sent'];
-    document.getElementById('ddContractStatus').innerHTML = '<span class="dd-status-badge" style="color:' + contract.color + ';border-color:' + contract.color + ';background:' + contract.color + '18">' + s(contract.label) + '</span>';
-    document.getElementById('ddPaymentStatus').innerHTML  = '<span class="dd-status-badge" style="color:' + payment.color + ';border-color:' + payment.color + ';background:' + payment.color + '18">' + s(payment.label) + '</span>';
-  }
-
-  function renderDriveLinks(client) {
-    var container = document.getElementById('ddDriveList');
-    var links = [
-      { key: 'drive_design_link',       label: 'Design Folder',       sub: 'Base maps, 3D models, renders and design deliverables' },
-      { key: 'drive_permit_link',        label: 'Permit Folder',        sub: 'Permit plans, structural documents and approvals' },
-      { key: 'drive_construction_link',  label: 'Construction Folder',  sub: 'Construction documents and site data' }
-    ].filter(function(l) { return client && client[l.key]; });
-    if (!links.length) { container.innerHTML = '<div class="dd-drive-empty">Your project files will appear here once your project is active.</div>'; return; }
-    container.innerHTML = '<div class="dd-drive-list">' + links.map(function(l) {
-      return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + s(l.label) + '</div><div class="dd-drive-item-sub">' + s(l.sub) + '</div></div><a href="' + s(client[l.key]) + '" target="_blank" class="dd-drive-link">Open Folder</a></div>';
-    }).join('') + '</div>';
-  }
-
-  function renderServices(services) {
-    var card = document.getElementById('ddServicesCard');
-    var list = document.getElementById('ddServicesList');
-    if (!card || !list) return;
-    if (!services || !services.length) { card.style.display = 'none'; return; }
-    card.style.display = 'block';
-    var STATUS_COLORS = { 'pending': '#8a8680', 'in_progress': '#eeb24a', 'complete': '#6a9e7a' };
-    var STATUS_LABELS = { 'pending': 'Pending', 'in_progress': 'In Progress', 'complete': 'Complete' };
-    list.innerHTML = '<div class="dd-services-grid">' + services.map(function(sv) {
-      var color = STATUS_COLORS[sv.status] || '#8a8680';
-      return '<div class="dd-service-tile"><div class="dd-service-tile-name">' + s(sv.service_name) + '</div><div class="dd-service-tile-status"><div class="dd-service-tile-dot" style="background:' + color + '"></div><div class="dd-service-tile-label" style="color:' + color + '">' + s(STATUS_LABELS[sv.status] || sv.status) + '</div></div></div>';
-    }).join('') + '</div>';
-  }
-
-  function renderChecklist() {
-    var container = document.getElementById('ddChecklistItems');
-    var doneCount = 0;
-    container.innerHTML = CHECKLIST_ITEMS.map(function(item) {
-      var isDone = checklistState[item.key] === true;
-      if (isDone) doneCount++;
-      var noteContent = s(notesState[item.key] || '');
-      var noteArea = item.type === 'note'
-        ? '<div class="dd-note-area" id="note-area-' + item.key + '"><textarea class="dd-note-textarea" id="note-' + item.key + '" placeholder="Share your project goals...">' + noteContent + '</textarea><button class="dd-note-save" onclick="window._saveNote(\'' + item.key + '\')">Save</button></div>'
-        : '';
-      return '<div class="dd-checklist-item"><div class="dd-checklist-row" onclick="window._toggleCheckItem(\'' + item.key + '\')"><div class="dd-check-circle' + (isDone ? ' done' : '') + '" id="check-circle-' + item.key + '"></div><div class="dd-check-info"><div class="dd-check-label' + (isDone ? ' done' : '') + '" id="check-label-' + item.key + '">' + s(item.label) + '</div><div class="dd-check-desc">' + s(item.desc) + '</div>' + (item.type === 'upload' ? '<div class="dd-check-tag">Upload in Documents tab</div>' : '<div class="dd-check-tag">Fill in below</div>') + '</div></div>' + noteArea + '</div>';
-    }).join('');
-    document.getElementById('ddCheckCount').textContent = doneCount;
-    if (doneCount === CHECKLIST_ITEMS.length) document.getElementById('ddChecklistComplete').classList.add('visible');
-    else document.getElementById('ddChecklistComplete').classList.remove('visible');
-    CHECKLIST_ITEMS.forEach(function(item) {
-      if (item.type === 'note') { var area = document.getElementById('note-area-' + item.key); if (area) area.classList.add('visible'); }
+  function updateSubtabCounts() {
+    var counts = { all: 0, active_client: 0, lead: 0, finished: 0, archived: 0, stone_sourcing: 0 };
+    allClients.forEach(function(c) {
+      var st = c.client_status || 'lead';
+      if (counts[st] !== undefined) counts[st]++;
+      if (st !== 'archived') counts.all++;
+      if (c.service_type === 'stone_sourcing') counts.stone_sourcing++;
     });
-    var remaining = CHECKLIST_ITEMS.length - doneCount;
-    var tab = document.querySelector('[data-tab="checklist"]');
-    if (tab) { var badge = tab.querySelector('.dd-tab-badge'); if (remaining > 0) { if (!badge) { badge = document.createElement('span'); badge.className = 'dd-tab-badge'; tab.appendChild(badge); } badge.textContent = remaining; } else if (badge) badge.remove(); }
+    var keyMap = { active_client: 'active', stone_sourcing: 'stone' };
+    Object.keys(counts).forEach(function(key) {
+      var el = document.getElementById('cnt-' + (keyMap[key] || key));
+      if (el) el.textContent = counts[key] || '';
+    });
   }
+  document.getElementById('daSearch').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(applyFilters, 300);
+  });
+  document.getElementById('daFilter').addEventListener('change', applyFilters);
+  document.getElementById('daCategoryFilter').addEventListener('change', applyFilters);
 
-  // ── PROJECT SELECTOR ──────────────────────────────────────────────
-  async function loadContractorProjects() {
-    try {
-      // FIX: case-insensitive email lookup
-      var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email.toLowerCase()) + '&order=created_at.desc');
-      var clients = await res.json() || [];
-      allClientProjects = clients;
-
-      if (!allClientProjects.length) {
-        document.getElementById('ddProjectCards').innerHTML = '<div class="dd-empty" style="padding:40px 0">No active projects yet. Your Daydream team will set these up for you.</div>';
-        showProjectSelector(); return;
-      }
-
-      // Also load from projects table
-      var allProjects = [];
-      for (var i = 0; i < allClientProjects.length; i++) {
-        try {
-          var pRes = await apiFetch('/rest/v1/projects?client_id=eq.' + allClientProjects[i].id + '&order=created_at.desc');
-          var projs = await pRes.json() || [];
-          projs.forEach(function(p) { p._clientRecord = allClientProjects[i]; p._isProjectRecord = true; allProjects.push(p); });
-        } catch(e) { console.error('Load projects for client:', e); }
-      }
-
-      if (allClientProjects.length === 1 && !isContractor && !allProjects.length) {
-        await loadProjectDashboard(allClientProjects[0]); return;
-      }
-
-      var name = allClientProjects[0].full_name || currentUser.email;
-      var company = allClientProjects[0].company_name;
-      document.getElementById('ddSelectorTitle').textContent = company ? company : name + '\'s Projects';
-      document.getElementById('ddSelectorSub').textContent = 'Select a project to view its full portal';
-
-      var cards = '';
-      allProjects.forEach(function(p) {
-        var typeLabel = PROJECT_TYPE_LABELS[p.project_type] || p.project_type || '—';
-        cards += '<div class="dd-project-card" onclick="window._selectProjectRecord(\'' + p.id + '\')">'
-          + '<div class="dd-project-card-info"><div class="dd-project-card-name">' + s(p.project_name || 'Project') + '</div>'
-          + (p.project_address ? '<div class="dd-project-card-address">&#128205; ' + s(p.project_address) + '</div>' : '')
-          + '<div class="dd-project-card-meta"><div class="dd-project-card-tag">' + s(typeLabel) + '</div>' + (p.status ? '<div class="dd-project-card-tag">' + s(p.status) + '</div>' : '') + '</div></div>'
-          + '<div class="dd-project-card-arrow">&#8594;</div></div>';
-      });
-      allClientProjects.forEach(function(c) {
-        var address = [c.street, c.city, c.state].filter(Boolean).join(', ') || '';
-        cards += '<div class="dd-project-card" onclick="window._selectProject(\'' + c.id + '\')">'
-          + '<div class="dd-project-card-info"><div class="dd-project-card-name">' + s(c.full_name || 'Project') + '</div>'
-          + (address ? '<div class="dd-project-card-address">&#128205; ' + s(address) + '</div>' : '')
-          + '<div class="dd-project-card-meta"><div class="dd-project-card-tag">' + s(serviceLabel(c.project_type)) + '</div>' + (c.investment ? '<div class="dd-project-card-tag">' + s(c.investment) + '</div>' : '') + '</div></div>'
-          + '<div class="dd-project-card-arrow">&#8594;</div></div>';
-      });
-
-      document.getElementById('ddProjectCards').innerHTML = cards || '<div class="dd-empty" style="padding:40px 0">No projects found.</div>';
-      showProjectSelector();
-    } catch(e) { console.error('loadContractorProjects:', e); showLogin(); }
-  }
-
-  window._selectProject = async function(clientId) {
-    var client = allClientProjects.find(function(c) { return c.id === clientId; });
-    if (!client) return;
-    await loadProjectDashboard(client);
-  };
-
-  window._selectProjectRecord = async function(projectId) {
-    try {
-      var res = await fetch(SUPABASE_URL + '/rest/v1/projects?id=eq.' + projectId + '&select=*,clients(*)', {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (currentUser.access_token || SUPABASE_KEY) }
-      });
-      var data = await res.json() || [];
-      if (data[0]) {
-        var proj = data[0];
-        var client = proj.clients;
-        var merged = Object.assign({}, client, {
-          full_name: proj.project_name || client.full_name,
-          street: proj.project_address || client.street,
-          project_type_category: proj.project_type,
-          drive_design_link: proj.drive_design_link || client.drive_design_link,
-          drive_permit_link: proj.drive_permit_link || client.drive_permit_link,
-          drive_construction_link: proj.drive_construction_link || client.drive_construction_link,
-          _projectId: proj.id
-        });
-        currentProject = proj;
-        await loadProjectDashboard(merged);
-      }
-    } catch(e) { console.error('_selectProjectRecord:', e); }
-  };
-
-  document.getElementById('ddNavBack').addEventListener('click', function() {
-    stopRealtime(); // Stop subscriptions for this project before switching
-  // ── MOBILE HAMBURGER MENU ─────────────────────────────────────────
-  window._toggleMobileMenu = function() {
-    var menu = document.getElementById('ddMobileMenu');
-    if (menu) menu.classList.toggle('open');
-  };
-
-  window._selectMobileTab = function(btn) {
-    var tab = btn.getAttribute('data-tab');
-    // Close menu
-    var menu = document.getElementById('ddMobileMenu');
-    if (menu) menu.classList.remove('open');
-    // Update active label
-    var label = document.getElementById('ddActiveTabLabel');
-    if (label) label.textContent = btn.textContent;
-    // Trigger normal tab switch
-    var desktopTab = document.querySelector('#dd-portal .dd-tabs > .dd-tab[data-tab="' + tab + '"]');
-    if (desktopTab) desktopTab.click();
-    else {
-      // Direct tab switch
-      document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
-      var content = document.getElementById('tab-' + tab);
-      if (content) content.classList.add('active');
-    }
-  };
-
-  // Close hamburger menu when clicking outside
-  document.addEventListener('click', function(e) {
-    var menu = document.getElementById('ddMobileMenu');
-    var hamburger = document.getElementById('ddHamburger');
-    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== hamburger) {
-      menu.classList.remove('open');
-    }
+  // Subtab click handlers
+  document.querySelectorAll('#dd-admin .da-client-subtab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('#dd-admin .da-client-subtab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      activeSubtab = tab.dataset.status;
+      applyFilters();
+    });
   });
 
-    document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
-    document.querySelector('[data-tab="overview"]').classList.add('active');
-    document.getElementById('tab-overview').classList.add('active');
-    document.getElementById('ddDashboard').classList.remove('visible');
-    showProjectSelector();
+  // ── TABS ──────────────────────────────────────────────────────────
+  document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = document.getElementById('tab-' + tab.dataset.tab);
+      if (target) target.classList.add('active');
+      if (tab.dataset.tab === 'projects') loadProjects();
+      if (tab.dataset.tab === 'checklist') loadAllChecklists();
+      if (tab.dataset.tab === 'messages') {
+        loadMessages();
+        apiFetch('/rest/v1/messages?sender=neq.daydream_team&is_read=eq.false', { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_read: true }) }).catch(function() {});
+        var dot = tab.querySelector('.da-msg-dot'); if (dot) dot.remove();
+      }
+    });
   });
 
-  // ── LOAD PROJECT DASHBOARD ────────────────────────────────────────
-  async function loadProjectDashboard(client) {
-    currentClient = client;
+  // ── FIX 5: LOGIN via Supabase Auth ────────────────────────────────
+  document.getElementById('daLoginBtn').addEventListener('click', async function() {
+    var password = document.getElementById('daPassword').value;
+    var msg = document.getElementById('daLoginMsg');
+    if (!password) { msg.textContent = 'Please enter your password.'; msg.className = 'da-login-msg error'; return; }
+    this.disabled = true; this.textContent = 'Signing in...'; msg.textContent = '';
     try {
-      // Always fetch fresh data to reflect admin changes
-      var freshRes = await apiFetch('/rest/v1/clients?id=eq.' + client.id);
-      var freshData = await freshRes.json() || [];
-      if (freshData[0]) {
-        // Preserve project-specific overrides from projects table (name, address, drive links)
-        client = Object.assign({}, freshData[0], {
-          _projectId: client._projectId,
-          _projectGoals: client._projectGoals,
-          // Always use fresh construction_stage from database
-          construction_stage: freshData[0].construction_stage || client.construction_stage,
-          // Keep project-table values if they were set
-          full_name: client._projectId ? client.full_name : (freshData[0].full_name || client.full_name),
-          street: client._projectId ? client.street : (freshData[0].street || client.street),
-          drive_design_link: client._projectId ? (client.drive_design_link || freshData[0].drive_design_link) : freshData[0].drive_design_link,
-          drive_permit_link: client._projectId ? (client.drive_permit_link || freshData[0].drive_permit_link) : freshData[0].drive_permit_link,
-          drive_construction_link: client._projectId ? (client.drive_construction_link || freshData[0].drive_construction_link) : freshData[0].drive_construction_link
-        });
-        currentClient = client;
-        var idx = allClientProjects.findIndex(function(c) { return c.id === client.id; });
-        if (idx > -1) allClientProjects[idx] = client;
-      }
-    } catch(e) { console.error('Fresh client fetch:', e); }
-
-    try {
-      var title = document.getElementById('ddProjectTitle');
-      var addrEl = document.getElementById('ddProjectAddress');
-      if (title) title.textContent = client.full_name || 'Your Project';
-      if (addrEl) { var addr = [client.street, client.city, client.state].filter(Boolean).join(', '); addrEl.textContent = addr || 'Welcome to your Daydream client portal'; }
-      // Map raw DB pipeline key to human-readable label
-      var PIPELINE_LABELS = {
-        'client_inquiry_made': 'New Inquiry', 'client_qualified': 'Qualified',
-        'discovery_call_booked': 'Discovery Call Booked', 'discovery_call_completed': 'Discovery Call Complete',
-        'design_proposal_drafting': 'Proposal Drafting', 'design_proposal_presented': 'Proposal Presented',
-        'design_proposal_accepted': 'Proposal Accepted', 'site_consultation_scheduled': 'Site Consultation Scheduled',
-        'site_consultation_completed': 'Site Consultation Complete', 'design_phase_started': 'Design Phase Started',
-        'base_map_complete': 'Base Map Complete', 'base_map_discussion_call': 'Base Map Discussion',
-        'base_map_approved': 'Base Map Approved', '3d_model_completed': '3D Model Complete',
-        '3d_model_discussion_call': '3D Model Discussion', '3d_model_approved': '3D Model Approved',
-        'visualizations_started': 'Visualizations Started', 'visualizations_completed': 'Visualizations Complete',
-        'visualizations_approved': 'Visualizations Approved',
-        'construction_document_phase_started': 'Construction Documents Started',
-        'construction_document_phase_complete': 'Construction Documents Complete',
-        'permit_plans_submitted': 'Permit Plans Submitted', 'permit_plan_revisions': 'Permit Plan Revisions',
-        'permit_plans_approved': 'Permit Plans Approved', 'construction_started': 'Construction Started',
-        'construction_finished': 'Construction Finished', 'site_photos_to_be_made': 'Site Photos Pending',
-        'site_photos_finished': 'Site Photos Complete', 'project_complete': 'Project Complete'
-      };
-      var statusEl = document.getElementById('ddStatus');
-      if (statusEl) statusEl.textContent = PIPELINE_LABELS[client.status] || client.status || 'New Inquiry';
-      document.getElementById('ddSince').textContent = formatDate(client.created_at);
-      // Populate contact info card
-      var contactCard = document.getElementById('ddContactCard');
-      var cName  = document.getElementById('ddContactName');
-      var cEmail = document.getElementById('ddContactEmail');
-      var cPhone = document.getElementById('ddContactPhone');
-      var cAddr  = document.getElementById('ddContactAddress');
-      if (contactCard && (client.full_name || client.email || client.phone)) {
-        if (cName)  cName.textContent  = client.full_name || '—';
-        if (cEmail) cEmail.textContent = client.email     || '—';
-        if (cPhone) cPhone.textContent = client.phone     || '—';
-        if (cAddr)  cAddr.textContent  = [client.street, client.city, client.state, client.zip].filter(Boolean).join(', ') || '—';
-        contactCard.style.display = 'block';
-      }
-      var ptEl = document.getElementById('ddProjectType');
-      if (ptEl) ptEl.textContent = PROJECT_TYPE_LABELS[client.project_type_category] || client.project_type_category || '—';
-      renderTimeline(client.client_stage || 'inquiry_submitted', client.construction_stage);
-      renderStatusBadges(client);
-      renderDriveLinks(client);
-      // Load discussion link if set
-      if (client.discussion_link) {
-        showDiscussionLink(client.discussion_link);
-        var urlInput = document.getElementById('ddDiscussionUrl');
-        if (urlInput) urlInput.value = client.discussion_link;
-      }
-      // Show project goals/description if set
-      var goalsCard = document.getElementById('ddProjectGoals');
-      var goalsText = document.getElementById('ddProjectGoalsText');
-      var projectDesc = (currentProject && currentProject.description) || client._projectGoals || '';
-      if (goalsCard && goalsText) {
-        if (projectDesc) {
-          goalsText.textContent = projectDesc;
-          goalsCard.style.display = 'block';
-        } else {
-          goalsCard.style.display = 'none';
-        }
-      }
-      try {
-        var svcRes = await apiFetch('/rest/v1/client_services?client_id=eq.' + client.id + '&order=created_at.asc');
-        renderServices(await svcRes.json() || []);
-      } catch(e) { console.error('Load services:', e); }
-      await loadChecklistData();
-      var projRes = await apiFetch('/rest/v1/projects?client_id=eq.' + client.id + '&limit=1');
-      var projData = await projRes.json() || [];
-      if (projData[0]) currentProject = projData[0];
-      loadMessages();
-      showDashboard();
-    } catch(e) { console.error('loadProjectDashboard:', e); }
-  }
-
-  async function loadChecklistData() {
-    if (!currentClient) return;
-    try {
-      var [checkRes, noteRes] = await Promise.all([
-        apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id),
-        apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id)
-      ]);
-      var checks = await checkRes.json() || [];
-      var notes  = await noteRes.json() || [];
-      checklistState = {}; notesState = {};
-      checks.forEach(function(c) { checklistState[c.item_key] = c.completed; });
-      notes.forEach(function(n)  { notesState[n.note_key] = n.content; });
-      renderChecklist();
-    } catch(e) { renderChecklist(); }
-  }
-
-  async function loadMessages() {
-    try {
-      var url = '/rest/v1/messages?client_id=eq.' + (currentClient ? currentClient.id : '') + '&order=created_at.asc';
-      var res = await apiFetch(url);
-      var msgs = await res.json() || [];
-      var list = document.getElementById('ddMessagesList');
-      if (!msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send us a message below.</div>'; return; }
-      list.innerHTML = msgs.map(function(m) {
-        var isMe = m.sender !== 'daydream_team';
-        var deleteBtn = isMe ? '<button onclick="window._deleteMessage(\'' + m.id + '\')" class="dd-msg-del-btn" title="Delete this message">&#10005;</button>' : '';
-        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '" id="msg-' + m.id + '">'
-          + '<div class="dd-message-bubble">' + s(m.content) + (isMe ? '<span style="margin-left:8px">' + deleteBtn + '</span>' : '') + '</div>'
-          + '<div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div>'
-          + '</div>';
-      }).join('');
-      list.scrollTop = list.scrollHeight;
-      var lastRead = 0;
-      try { lastRead = parseInt(sessionStorage.getItem('dd_msgs_last_read') || '0'); } catch(e) {}
-      var unread = msgs.filter(function(m) { return m.sender === 'daydream_team' && new Date(m.created_at).getTime() > lastRead; }).length;
-      var tab = document.querySelector('[data-tab="messages"]');
-      if (tab) { var dot = tab.querySelector('.dd-msg-dot'); if (unread > 0) { if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; tab.appendChild(dot); } dot.textContent = unread; } else if (dot) dot.remove(); }
-    } catch(e) { console.error('loadMessages:', e); }
-  }
-
-  // ── TOKEN HANDLING ─────────────────────────────────────────────────
-  async function tryTokenFromUrl() {
-    // Check both hash fragment (#access_token=) and query params (?access_token=)
-    // Supabase delivers the token in the hash after verifying the magic link
-    var hash   = window.location.hash   || '';
-    var search = window.location.search || '';
-    var hashParams  = new URLSearchParams(hash.replace('#', ''));
-    var queryParams = new URLSearchParams(search.replace('?', ''));
-    var accessToken = hashParams.get('access_token') || queryParams.get('access_token');
-
-    // Also handle Supabase PKCE flow — token_hash in query params
-    var tokenHash = queryParams.get('token_hash') || queryParams.get('token');
-    var tokenType = queryParams.get('type');
-
-    // If we have a token_hash (confirmation flow), exchange it for a session
-    if (tokenHash && tokenType) {
-      try {
-        var verifyRes = await fetch(SUPABASE_URL + '/auth/v1/verify', {
-          method: 'POST',
-          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token_hash: tokenHash, type: tokenType })
-        });
-        var verifyData = await verifyRes.json();
-        if (verifyData.access_token) {
-          accessToken = verifyData.access_token;
-        }
-      } catch(e) { console.error('tryTokenFromUrl verify:', e); }
-    }
-
-    if (accessToken && accessToken.length > 20) {
-      try {
-        var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
-        });
-        var user = await res.json();
-        if (user && user.email) {
-          currentUser = { access_token: accessToken, email: user.email, id: user.id };
-          try { localStorage.setItem('dd_token', accessToken); sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
-          // Clean URL — remove token params
-          history.replaceState(null, '', window.location.pathname);
-          return true;
-        }
-      } catch(e) { console.error('tryTokenFromUrl:', e); }
-    }
-    return false;
-  }
-
-  async function tryTokenFromSession() {
-    var token = null;
-    try { token = localStorage.getItem('dd_token') || sessionStorage.getItem('dd_token'); } catch(e) {}
-    if (!token) return false;
-    try {
-      var res = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token } });
-      var user = await res.json();
-      if (user && user.email) { currentUser = { access_token: token, email: user.email, id: user.id }; return true; }
-    } catch(e) {}
-    try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
-    return false;
-  }
-
-  // ── INIT ──────────────────────────────────────────────────────────
-  async function init() {
-    var fromUrl = await tryTokenFromUrl();
-    if (!fromUrl) { var fromSession = await tryTokenFromSession(); if (!fromSession) { showLogin(); return; } }
-    var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email.toLowerCase()) + '&order=created_at.desc');
-    var clients = await res.json() || [];
-    allClientProjects = clients;
-    if (!allClientProjects.length) { showLogin(); return; }
-    // Only treat as contractor if explicitly flagged — don't assume multiple records = contractor
-    isContractor = allClientProjects.some(function(c) { return c.is_contractor; });
-    if (isContractor || allClientProjects.length > 1) await loadContractorProjects();
-    else await loadProjectDashboard(allClientProjects[0]);
-  }
-  init();
-
-  // ── LOGIN ─────────────────────────────────────────────────────────
-  // ── EMAIL + PASSWORD LOGIN ──────────────────────────────────────
-  document.getElementById('ddLoginBtn').addEventListener('click', async function() {
-    var email    = (document.getElementById('ddLoginEmail').value    || '').trim().toLowerCase();
-    var password = (document.getElementById('ddLoginPassword').value || '').trim();
-    var msg      = document.getElementById('ddLoginMsg');
-    if (!email)    { showMsg(msg, 'Please enter your email address.', 'error'); return; }
-    if (!password) { showMsg(msg, 'Please enter your password.', 'error'); return; }
-    this.disabled = true; this.textContent = 'Signing in...';
-    try {
-      var res  = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+      var res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
         method: 'POST',
         headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, password: password })
+        body: JSON.stringify({ email: ADMIN_EMAIL, password: password })
       });
       var data = await res.json();
       if (data.access_token) {
-        try {
-          localStorage.setItem('dd_token', data.access_token);
-          sessionStorage.setItem('dd_token', data.access_token);
-        } catch(e) {}
-        // Use the existing init() flow — it reads the token from storage
-        // and handles showing login vs dashboard correctly
-        await init();
+        try { localStorage.setItem('dd_admin_token', data.access_token); sessionStorage.setItem('dd_admin_token', data.access_token); } catch(e) {}
+        document.getElementById('daLoginWrap').style.display = 'none';
+        document.getElementById('daDashboard').classList.add('visible');
+        loadClients();
+        startAdminRealtime(); // Start live updates
       } else {
-        var errMsg = data.error_description || data.msg || '';
-        if (errMsg.toLowerCase().includes('invalid') || errMsg.toLowerCase().includes('credentials')) {
-          showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
-        } else {
-          showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
-        }
+        msg.textContent = 'Incorrect password. Please try again.'; msg.className = 'da-login-msg error';
       }
-    } catch(e) {
-      showMsg(msg, 'Connection error. Please try again.', 'error');
-    }
+    } catch(e) { msg.textContent = 'Connection error. Please try again.'; msg.className = 'da-login-msg error'; }
     this.disabled = false; this.textContent = 'Sign In';
   });
-
-  document.getElementById('ddLoginEmail').addEventListener('keydown',    function(e) { if (e.key === 'Enter') document.getElementById('ddLoginPassword').focus(); });
-  document.getElementById('ddLoginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
-
-  // ── FORGOT PASSWORD ──────────────────────────────────────────────
-  document.getElementById('ddForgotBtn').addEventListener('click', function() {
-    var wrap = document.getElementById('ddResetWrap');
-    var email = document.getElementById('ddLoginEmail').value.trim();
-    if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
-    var resetInput = document.getElementById('ddResetEmail');
-    if (resetInput && email) resetInput.value = email;
+  document.getElementById('daPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('daLoginBtn').click(); });
+  document.getElementById('daLogoutBtn').addEventListener('click', function() {
+    stopAdminRealtime(); // Clean up WebSocket connections
+    try { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); } catch(e) {}
+    document.getElementById('daDashboard').classList.remove('visible');
+    document.getElementById('daLoginWrap').style.display = 'flex';
   });
-
-  document.getElementById('ddResetBtn').addEventListener('click', async function() {
-    var email = (document.getElementById('ddResetEmail').value || '').trim().toLowerCase();
-    var msg   = document.getElementById('ddResetMsg');
-    if (!email) { showMsg(msg, 'Please enter your email.', 'error'); return; }
-    this.disabled = true; this.textContent = 'Sending...';
-    try {
-      // Use invite-client to send a fresh password — more reliable than Supabase's built-in recovery
-      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({ email: email, full_name: '' })
-      });
-      var data = await res.json().catch(function() { return {}; });
-      if (res.ok) {
-        showMsg(msg, 'New login credentials sent — check your inbox.', 'success');
-      } else {
-        showMsg(msg, 'Could not send reset. Please contact us at start@daydreamdesignandbuild.com', 'error');
-      }
-    } catch(e) {
-      showMsg(msg, 'Connection error. Please try again.', 'error');
+  // Auto-login from session
+  try {
+    var savedToken = localStorage.getItem('dd_admin_token') || sessionStorage.getItem('dd_admin_token');
+    if (savedToken) {
+      fetch(SUPABASE_URL + '/auth/v1/user', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + savedToken } })
+        .then(function(r) { return r.json(); })
+        .then(function(u) {
+          if (u && u.email === ADMIN_EMAIL) {
+            document.getElementById('daLoginWrap').style.display = 'none';
+            document.getElementById('daDashboard').classList.add('visible');
+            loadClients();
+            startAdminRealtime();
+          } else {
+            // Token invalid — clear it and show login
+            localStorage.removeItem('dd_admin_token');
+            sessionStorage.removeItem('dd_admin_token');
+            document.getElementById('daLoginWrap').style.display = 'flex';
+          }
+        }).catch(function() {
+          localStorage.removeItem('dd_admin_token');
+          sessionStorage.removeItem('dd_admin_token');
+          document.getElementById('daLoginWrap').style.display = 'flex';
+        });
+    } else {
+      // No saved token — ensure login is visible
+      document.getElementById('daLoginWrap').style.display = 'flex';
     }
-    this.disabled = false; this.textContent = 'Send Reset Link';
-  });
-  document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
+  } catch(e) {
+    document.getElementById('daLoginWrap').style.display = 'flex';
+  }
 
-  // ── LOGOUT ────────────────────────────────────────────────────────
-  // ── CLIENT SITE PHOTOS — Load and display grouped by date ─────────
-  async function loadClientSitePhotos() {
-    var container = document.getElementById('ddSitePhotosList');
-    if (!container || !currentClient) return;
-    container.innerHTML = '<div class="dd-empty">Loading photos...</div>';
+  // ── LOAD CLIENTS ──────────────────────────────────────────────────
+  async function loadClients() {
     try {
-      // Load ALL photos for this client (uploaded by client AND admin)
-      var res = await apiFetch('/rest/v1/documents?client_id=eq.' + currentClient.id + '&photo_category=eq.site_photos&order=visit_date.desc,created_at.desc');
-      var photos = await res.json() || [];
+      var res = await apiFetch('/rest/v1/clients?order=created_at.desc');
+      allClients = await res.json() || [];
+      updateStats();
+      updateSubtabCounts();
+      renderCards(allClients);
+      checkUnreadMessages();
+    } catch(e) { console.error('loadClients error:', e); }
+  }
 
-      if (!photos.length) {
-        container.innerHTML = '<div class="dd-empty" style="padding:48px 0">No site photos yet.<br><span style="font-size:10px;color:var(--muted)">Upload photos in the Documents tab or ask your Daydream team.</span></div>';
+  async function checkUnreadMessages() {
+    try {
+      var res = await apiFetch('/rest/v1/messages?is_read=eq.false&order=created_at.desc&limit=50');
+      var msgs = await res.json() || [];
+      var unread = msgs.filter(function(m) { return m.sender !== 'daydream_team'; }).length;
+      var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
+      if (msgTab && unread > 0) {
+        var dot = msgTab.querySelector('.da-msg-dot');
+        if (!dot) { dot = document.createElement('span'); dot.className = 'da-msg-dot'; msgTab.appendChild(dot); }
+        dot.textContent = unread;
+      }
+    } catch(e) { console.error('checkUnreadMessages:', e); }
+  }
+
+  function updateStats() {
+    document.getElementById('daStatTotal').textContent = allClients.length;
+    var active = allClients.filter(function(c) { return c.status && c.status !== 'client_inquiry_made' && c.status !== 'project_complete'; }).length;
+    var complete = allClients.filter(function(c) { return c.status === 'project_complete'; }).length;
+    var now = new Date();
+    var month = allClients.filter(function(c) { var d = new Date(c.created_at); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length;
+    document.getElementById('daStatActive').textContent = active;
+    document.getElementById('daStatComplete').textContent = complete;
+    document.getElementById('daStatMonth').textContent = month;
+  }
+
+  // ── RENDER CARDS ──────────────────────────────────────────────────
+  function renderCards(clients) {
+    var container = document.getElementById('daCardsWrap');
+    document.getElementById('daCount').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
+    if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients found</div>'; return; }
+
+    // Group contractors by email
+    var seen = {};
+    var grouped = [];
+    clients.forEach(function(c) {
+      if (c.is_contractor) {
+        if (!seen[c.email]) { seen[c.email] = { lead: c, projects: [] }; grouped.push(seen[c.email]); }
+        seen[c.email].projects.push(c);
+      } else {
+        grouped.push({ lead: c, projects: [] });
+      }
+    });
+
+    container.innerHTML = grouped.map(function(g) {
+      var c = g.lead;
+      var isContr = c.is_contractor && g.projects.length > 0;
+      var stage = getPipelineStage(c.status || 'client_inquiry_made');
+      var inv = formatInvestment(c.investment || '');
+
+      var pOpts = PIPELINE_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
+      var cOpts = CLIENT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.client_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+      var conOpts = CONSTRUCTION_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.construction_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+      var contractOpts = CONTRACT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.contract_status === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+      var paymentOpts = PAYMENT_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.payment_status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
+      var ptOpts = (window._PROJECT_TYPES || []).map(function(t) { return '<option value="' + t.key + '"' + (c.project_type_category === t.key ? ' selected' : '') + '>' + t.label + '</option>'; }).join('');
+
+      var contractorProjectsHtml = '';
+      if (isContr && g.projects.length > 1) {
+        contractorProjectsHtml = '<div class="da-contractor-projects"><div class="da-contractor-projects-header">All Projects (' + g.projects.length + ')</div>'
+          + g.projects.map(function(p) {
+            var addr = [p.street, p.city, p.state].filter(Boolean).join(', ');
+            var pStage = getPipelineStage(p.status);
+            return '<div class="da-contractor-project-row"><div><div class="da-contractor-project-name">' + s(p.full_name || 'Project') + '</div><div class="da-contractor-project-address">' + s(addr || '—') + '</div></div><div class="da-stage-pill" style="color:' + pStage.color + ';border-color:' + pStage.color + ';background:' + pStage.color + '18;font-size:7px">' + s(pStage.label) + '</div></div>';
+          }).join('')
+          + '</div>';
+      }
+
+      return '<div class="da-client-card" id="card-' + c.id + '">'
+        + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
+        + '  <div class="da-card-left"><div class="da-card-avatar">' + s(initials(c.full_name)) + '</div>'
+        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>','archived':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
+        + '  <div class="da-card-sub">' + s(c.email || '') + (c.phone ? ' · ' + s(c.phone) : '') + (isContr && g.projects.length > 1 ? ' · ' + g.projects.length + ' projects' : '') + '</div></div></div>'
+        + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + s(stage.label) + '</div><div class="da-card-investment">' + s(inv) + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
+        + '</div>'
+        + '<div class="da-card-details" id="det-' + c.id + '">'
+        + '  <div class="da-details-grid">'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Service</div><div class="da-detail-value">' + s(serviceLabel(c.project_type)) + '</div></div>'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Investment</div><div class="da-detail-value">' + s(inv || '—') + '</div></div>'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + s([c.street, c.city, c.state, c.zip].filter(Boolean).join(', ') || '—') + '</div></div>'
+        + '    <div class="da-detail-item"><div class="da-detail-label">Referral</div><div class="da-detail-value">' + s(c.referral || '—') + '</div></div>'
+        + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + s(c.notes || '—') + '</div></div>'
+        + '  </div>'
+        + '  <div class="da-card-actions" style="border-top:1px solid var(--border)">'
+        + '    <div class="da-section-divider">Edit Contact Info</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Name</div><input class="da-text-input" id="edit-name-' + c.id + '" type="text" value="' + s(c.full_name || '') + '" placeholder="Full name" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Phone</div><input class="da-text-input" id="edit-phone-' + c.id + '" type="text" value="' + s(c.phone || '') + '" placeholder="Phone number" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Address</div><input class="da-text-input" id="edit-street-' + c.id + '" type="text" value="' + s(c.street || '') + '" placeholder="Street address" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Investment</div><input class="da-text-input" id="edit-investment-' + c.id + '" type="text" value="' + s(c.investment || '') + '" placeholder="e.g. $75,000" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Notes</div><input class="da-text-input" id="edit-notes-' + c.id + '" type="text" value="' + s(c.notes || '') + '" placeholder="Internal notes" /></div>'
+        + '    <button class="da-update-btn" onclick="window._saveContactInfo(\'' + c.id + '\')">Save Contact Info</button>'
+        + '  </div>'
+        + contractorProjectsHtml
+        + '  <div class="da-card-actions">'
+        + '    <div class="da-section-divider">Internal Pipeline</div>'
+        + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'status\', \'psel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-section-divider">Project Type</div>'
+        + '    <div class="da-action-row"><select class="da-select" id="ptypesel-' + c.id + '"><option value="">Select project type...</option>' + ptOpts + '</select><button class="da-update-btn" id="ptypebtn-' + c.id + '" onclick="window._updateProjType(\'' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-section-divider">Design &amp; Permit Phase</div>'
+        + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-section-divider">Construction Phase <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none">(set to not_started to hide from client)</span></div>'
+        + (c.service_type === 'stone_sourcing'
+          ? '    <div class="da-action-row"><select class="da-select" id="stonesel-' + c.id + '">' + STONE_STAGES.map(function(ss) { return '<option value="' + ss.value + '"' + (c.stone_stage === ss.value ? ' selected' : '') + '>' + ss.label + '</option>'; }).join('') + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'stone_stage\', \'stonesel-' + c.id + '\')">Update</button></div>'
+          : '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>')
+        + '    <div class="da-section-divider">Client Status</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Category</div><select class="da-select" id="catsel-' + c.id + '"><option value="">— Not Set —</option><option value="design_only"' + (c.work_category==='design_only'?' selected':'') + '>Design Only</option><option value="build"' + (c.work_category==='build'?' selected':'') + '>Build / Construction</option><option value="full_service"' + (c.work_category==='full_service'?' selected':'') + '>Full Service</option><option value="consultation"' + (c.work_category==='consultation'?' selected':'') + '>Consultation</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'work_category\', \'catsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Relationship</div><select class="da-select" id="relsel-' + c.id + '"><option value="">— Not Set —</option><option value="owner"' + (c.client_relationship === 'owner' ? ' selected' : '') + '>Owner</option><option value="contractor"' + (c.client_relationship === 'contractor' ? ' selected' : '') + '>Contractor</option><option value="builder"' + (c.client_relationship === 'builder' ? ' selected' : '') + '>Builder</option><option value="designer"' + (c.client_relationship === 'designer' ? ' selected' : '') + '>Designer / Architect</option><option value="property_manager"' + (c.client_relationship === 'property_manager' ? ' selected' : '') + '>Property Manager</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_relationship\', \'relsel-' + c.id + '\')" >Update</button></div>'
+        + '    <div class="da-section-divider">Contract &amp; Payment</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'contract_status\', \'contractsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'payment_status\', \'paymentsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-section-divider">Client Drive Links</div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Design</div><input class="da-text-input" id="dlink-design-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_design_link || '') + '" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Permit</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_permit_link || '') + '" /></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_construction_link || '') + '" /></div>'
+        + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
+        + '    <div class="da-section-divider">Services</div>'
+        + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
+        + '    <div class="da-section-divider">Admin Notes</div>'
+        + '    <div class="da-notes-log" id="notes-log-' + c.id + '"><div class="da-notes-log-empty">No notes yet</div></div>'
+        + '    <div class="da-notes-new"><textarea class="da-note-textarea" id="note-new-' + c.id + '" placeholder="Write a note..."></textarea><button class="da-update-btn" style="margin-top:8px;width:100%" id="note-add-btn-' + c.id + '" onclick="window._saveNewNote(\'' + c.id + '\')">Add Note</button></div>'
+        + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
+        + '      <a class="da-email-link" href="mailto:' + s(c.email || '') + '">Email Client</a>'
+        + '      <button class="da-email-link" style="cursor:pointer;background:none" id="resend-' + c.id + '" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + s(c.email || '') + '\', \'' + s(c.full_name || '') + '\', this)">Resend Portal Link</button>'
+        + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._openAddProjectForClient(\'' + c.id + '\', \'' + s(c.full_name || '') + '\')">+ Add Project</button>'
+        + '      <button class="da-email-link" id="contractor-btn-' + c.id + '" style="cursor:pointer;border-color:' + (c.is_contractor ? 'var(--success)' : 'var(--border)') + ';color:' + (c.is_contractor ? 'var(--success)' : 'var(--muted)') + '" onclick="window._toggleContractor(\'' + c.id + '\', ' + !!c.is_contractor + ')">' + (c.is_contractor ? '✓ Contractor' : 'Mark as Contractor') + '</button>'
+        + (function(){ var cs = c.client_status || 'lead'; var labels = { active_client: '✓ Active', lead: 'Mark Active', archived: '↩ Unarchive', finished: '✓ Finished' }; var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' }; return '<button class="da-email-link" style="cursor:pointer;background:none;color:' + (colors[cs]||'var(--gold)') + ';border-color:' + (colors[cs]||'var(--gold)') + '" id="statusbtn-' + c.id + '" onclick="window._quickStatus(\'' + c.id + '\', \'' + cs + '\')">' + (labels[cs]||'Set Status') + '</button>'; })()
+        + '      <button class="da-email-link" style="cursor:pointer;background:none;color:' + (c.client_status === 'active_client' ? 'var(--success)' : c.client_status === 'archived' ? 'var(--muted)' : 'var(--gold)') + ';border-color:' + (c.client_status === 'active_client' ? 'var(--success)' : c.client_status === 'archived' ? 'var(--border)' : 'var(--gold)') + '" id="statusbtn-' + c.id + '" onclick="window._quickStatus(\'' + c.id + '\', \'' + (c.client_status || 'lead') + '\')">' + (c.client_status === 'active_client' ? '✓ Active Client' : c.client_status === 'archived' ? 'Archived' : c.client_status === 'finished' ? '✓ Finished' : 'Mark Active') + '</button>'
+        + '    </div>'
+        + '  </div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ── TOGGLE CARD ───────────────────────────────────────────────────
+  window._toggleCard = function(id) {
+    var det = document.getElementById('det-' + id);
+    var exp = document.getElementById('exp-' + id);
+    if (det.classList.contains('visible')) { det.classList.remove('visible'); exp.classList.remove('open'); }
+    else { det.classList.add('visible'); exp.classList.add('open'); loadClientServices(id); window._loadNotesLog(id); }
+  };
+
+  // ── UPDATE FIELDS (all use direct fetch for reliability) ──────────
+  window._updateField = async function(id, field, selectId) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    var val = sel.value;
+    // Find the Update button — it may not be the direct next sibling if there's a label div
+    var row = sel.closest('.da-action-row');
+    var btn = row ? row.querySelector('.da-update-btn') : sel.nextElementSibling;
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    try {
+      var body = {}; body[field] = val || null;
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
+      if (!res.ok) {
+        var errText = await res.text();
+        console.error('_updateField error [' + field + ']:', errText);
+        if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
         return;
       }
+      // Update local cache
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c[field] = val;
+      // Special UI updates per field
+      if (field === 'status') {
+        var stage = getPipelineStage(val);
+        var card = document.getElementById('card-' + id);
+        if (card) { var pill = card.querySelector('.da-stage-pill'); if (pill) { pill.textContent = stage.label; pill.style.color = stage.color; pill.style.borderColor = stage.color; pill.style.background = stage.color + '18'; } }
+        updateStats();
+      }
+      if (field === 'client_status') {
+        // Update subtab counts
+        updateSubtabCounts();
+        // Update archived dimming
+        var card2 = document.getElementById('card-' + id);
+        if (card2) { card2.classList.toggle('archived', val === 'archived'); }
+        // Update badge in card name
+        var nameDiv = card2 ? card2.querySelector('.da-card-name') : null;
+        if (nameDiv) {
+          var existingBadge = nameDiv.querySelector('.da-status-badge-inline');
+          if (existingBadge) existingBadge.remove();
+          if (val === 'lead') {
+            nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>');
+          } else if (val === 'archived') {
+            nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>');
+          }
+        }
+      }
+      if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2000); }
+    } catch(e) {
+      console.error('_updateField exception [' + field + ']:', e);
+      if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
+    }
+  };
+
+  window._updateDriveLinks = async function(id) {
+    var design = (document.getElementById('dlink-design-' + id) || {}).value || '';
+    var permit = (document.getElementById('dlink-permit-' + id) || {}).value || '';
+    var construction = (document.getElementById('dlink-construction-' + id) || {}).value || '';
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ drive_design_link: design.trim() || null, drive_permit_link: permit.trim() || null, drive_construction_link: construction.trim() || null }) });
+      var card = document.getElementById('card-' + id);
+      var btn = card ? card.querySelector('[onclick*="_updateDriveLinks"]') : null;
+      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Save Drive Links'; btn.style.background='var(--gold)';} }, 2000); }
+      if (!res.ok) console.error('_updateDriveLinks error:', await res.text());
+    } catch(e) { console.error('_updateDriveLinks exception:', e); }
+  };
+
+  window._updateProjType = async function(id) {
+    var val = (document.getElementById('ptypesel-' + id) || {}).value;
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_type_category: val || null }) });
+      var btn = document.getElementById('ptypebtn-' + id);
+      if (btn) { btn.textContent = res.ok ? 'Saved ✓' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update'; btn.style.background='var(--gold)';} }, 2000); }
+      if (!res.ok) console.error('_updateProjType error:', await res.text());
+    } catch(e) { console.error('_updateProjType exception:', e); }
+  };
+
+  function flashSaved(selectId) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    var btn = sel.nextElementSibling;
+    if (!btn || btn.tagName !== 'BUTTON') return;
+    var orig = btn.textContent;
+    btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)';
+    setTimeout(function() { if (btn) { btn.textContent = orig; btn.style.background = 'var(--gold)'; } }, 2000);
+  }
+
+  // ── SERVICES ─────────────────────────────────────────────────────
+  async function loadClientServices(clientId) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Loading...</div>';
+    try {
+      var res = await apiFetch('/rest/v1/client_services?client_id=eq.' + clientId + '&order=created_at.asc');
+      var services = await res.json() || [];
+      renderClientServices(clientId, services);
+    } catch(e) { console.error('loadClientServices:', e); wrap.innerHTML = '<div style="font-size:11px;color:var(--error);padding:8px 0">Error loading services</div>'; }
+  }
+  window.loadClientServices = loadClientServices;
+
+  function renderClientServices(clientId, services) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+    var addedKeys = {};
+    services.forEach(function(sv) { if (sv.service_key) addedKeys[sv.service_key] = true; });
+
+    var existingHtml = services.length
+      ? services.map(function(sv) {
+          return '<div class="da-service-item" id="svc-' + sv.id + '">'
+            + '<div class="da-service-name">' + s(sv.service_name) + '</div>'
+            + '<div class="da-service-actions"><select class="da-service-status" onchange="window._updateServiceStatus(\'' + sv.id + '\', this.value)"><option value="pending"' + (sv.status==='pending'?' selected':'') + '>Pending</option><option value="in_progress"' + (sv.status==='in_progress'?' selected':'') + '>In Progress</option><option value="complete"' + (sv.status==='complete'?' selected':'') + '>Complete</option></select>'
+            + '<button class="da-service-remove" onclick="window._removeService(\'' + sv.id + '\', \'' + clientId + '\')">&#10005;</button></div></div>';
+        }).join('')
+      : '<div style="font-size:11px;color:var(--muted);padding:4px 0 8px">No services added yet</div>';
+
+    var checklistHtml = (window._ALL_SERVICES || []).map(function(sv) {
+      var added = addedKeys[sv.key];
+      return '<label class="da-svc-check-label' + (added ? ' da-svc-check-added' : '') + '">'
+        + '<input type="checkbox" class="da-svc-checkbox" value="' + sv.key + '" data-label="' + sv.label + '"' + (added ? ' disabled checked' : '') + ' />'
+        + '<span>' + s(sv.label) + '</span>'
+        + (added ? '<span class="da-svc-added-tag">Added</span>' : '')
+        + '</label>';
+    }).join('');
+
+    wrap.innerHTML = existingHtml
+      + '<div class="da-svc-checklist-wrap" id="svc-checklist-' + clientId + '">'
+      + '  <div class="da-svc-checklist-header" onclick="window._toggleSvcChecklist(\'' + clientId + '\')">'
+      + '    <span id="svc-checklist-label-' + clientId + '">+ Add Services</span>'
+      + '    <span class="da-svc-selected-count" id="svc-count-' + clientId + '"></span>'
+      + '  </div>'
+      + '  <div class="da-svc-checklist-body" id="svc-checklist-body-' + clientId + '">'
+      + '    <div class="da-svc-checklist-grid">' + checklistHtml + '</div>'
+      + '    <div class="da-svc-custom-row"><input class="da-text-input" id="svc-custom-input-' + clientId + '" type="text" placeholder="Custom service..." style="flex:1" /></div>'
+      + '    <button class="da-update-btn" style="margin-top:8px;width:100%" onclick="window._addSelectedServices(\'' + clientId + '\')">Add Selected Services</button>'
+      + '  </div>'
+      + '</div>';
+
+    var checkboxes = wrap.querySelectorAll('.da-svc-checkbox:not(:disabled)');
+    checkboxes.forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var checked = wrap.querySelectorAll('.da-svc-checkbox:not(:disabled):checked').length;
+        var countEl = document.getElementById('svc-count-' + clientId);
+        if (countEl) countEl.textContent = checked > 0 ? checked + ' selected' : '';
+      });
+    });
+  }
+
+  window._toggleSvcChecklist = function(clientId) {
+    var body = document.getElementById('svc-checklist-body-' + clientId);
+    var label = document.getElementById('svc-checklist-label-' + clientId);
+    if (body) {
+      var isOpen = body.style.display === 'block';
+      body.style.display = isOpen ? 'none' : 'block';
+      if (label) label.textContent = isOpen ? '+ Add Services' : '− Close';
+    }
+  };
+
+  window._addSelectedServices = async function(clientId) {
+    var wrap = document.getElementById('services-' + clientId);
+    if (!wrap) return;
+    var checked = wrap.querySelectorAll('.da-svc-checkbox:not(:disabled):checked');
+    var customInput = document.getElementById('svc-custom-input-' + clientId);
+    var customName = customInput ? customInput.value.trim() : '';
+    var toAdd = [];
+    checked.forEach(function(cb) { toAdd.push({ key: cb.value, label: cb.dataset.label }); });
+    if (customName) toAdd.push({ key: null, label: customName });
+    if (!toAdd.length) return;
+    try {
+      for (var i = 0; i < toAdd.length; i++) {
+        var res = await apiFetch('/rest/v1/client_services', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, service_name: toAdd[i].label, service_key: toAdd[i].key, status: 'pending' }) });
+        if (!res.ok) console.error('Add service error:', await res.text());
+      }
+      if (customInput) customInput.value = '';
+      await loadClientServices(clientId);
+    } catch(e) { console.error('_addSelectedServices:', e); }
+  };
+
+  window._updateServiceStatus = async function(serviceId, status) {
+    try {
+      var res = await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) });
+      if (!res.ok) console.error('_updateServiceStatus error:', await res.text());
+    } catch(e) { console.error('_updateServiceStatus:', e); }
+  };
+
+  window._removeService = async function(serviceId, clientId) {
+    try {
+      var res = await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' });
+      if (res.ok) await loadClientServices(clientId);
+      else console.error('_removeService error:', await res.text());
+    } catch(e) { console.error('_removeService:', e); }
+  };
+
+  // ── NOTES ─────────────────────────────────────────────────────────
+  window._saveNewNote = async function(id) {
+    var textarea = document.getElementById('note-new-' + id);
+    if (!textarea || !textarea.value.trim()) return;
+    var noteText = textarea.value.trim();
+    var btn = document.getElementById('note-add-btn-' + id);
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    try {
+      var res = await apiFetch('/rest/v1/admin_notes', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: id, note: noteText }) });
+      if (res.ok) {
+        textarea.value = '';
+        if (btn) { btn.textContent = 'Note Added!'; btn.style.background = 'var(--success)'; }
+        window._loadNotesLog(id);
+      } else {
+        var errText = await res.text();
+        console.error('_saveNewNote error:', res.status, errText);
+        if (btn) { btn.textContent = 'Error — check console'; btn.style.background = 'var(--error)'; }
+      }
+    } catch(e) { console.error('_saveNewNote exception:', e); if(btn){btn.textContent='Error';btn.style.background='var(--error)';} }
+    setTimeout(function() { if(btn){btn.textContent='Add Note'; btn.style.background='var(--gold)'; btn.disabled=false;} }, 2500);
+  };
+
+  window._loadNotesLog = async function(id) {
+    var log = document.getElementById('notes-log-' + id);
+    if (!log) return;
+    try {
+      var res = await apiFetch('/rest/v1/admin_notes?client_id=eq.' + id + '&order=created_at.desc');
+      var notes = await res.json() || [];
+      if (!notes.length) { log.innerHTML = '<div class="da-notes-log-empty">No notes yet</div>'; return; }
+      log.innerHTML = notes.map(function(n) {
+        var d = new Date(n.created_at);
+        var dateStr = d.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+        // FIX 4: full XSS sanitization on note content
+        return '<div class="da-note-entry"><div class="da-note-entry-meta">' + dateStr + '</div><div class="da-note-entry-text">' + s(n.note) + '</div></div>';
+      }).join('');
+    } catch(e) { log.innerHTML = '<div class="da-notes-log-empty">Could not load notes</div>'; }
+  };
+
+  // ── CONTRACTOR TOGGLE ─────────────────────────────────────────────
+  window._saveContactInfo = async function(id) {
+    var name       = (document.getElementById('edit-name-' + id) || {}).value || '';
+    var phone      = (document.getElementById('edit-phone-' + id) || {}).value || '';
+    var street     = (document.getElementById('edit-street-' + id) || {}).value || '';
+    var investment = (document.getElementById('edit-investment-' + id) || {}).value || '';
+    var notes      = (document.getElementById('edit-notes-' + id) || {}).value || '';
+    var btn = document.querySelector('[onclick*="_saveContactInfo(\'' + id + '\')"]');
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          full_name: name || null,
+          phone: phone || null,
+          street: street || null,
+          investment: investment || null,
+          notes: notes || null
+        })
+      });
+      if (res.ok) {
+        // Update local cache
+        var c = allClients.find(function(x) { return x.id === id; });
+        if (c) { c.full_name = name; c.phone = phone; c.street = street; c.investment = investment; c.notes = notes; }
+        // Update visible card name + sub
+        var cardName = document.querySelector('#card-' + id + ' .da-card-name');
+        if (cardName && name) cardName.childNodes[0].textContent = name;
+        if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; }
+      } else {
+        var err = await res.text();
+        console.error('_saveContactInfo error:', err);
+        if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; }
+      }
+    } catch(e) {
+      console.error('_saveContactInfo exception:', e);
+      if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; }
+    }
+    setTimeout(function() { if(btn){ btn.textContent = 'Save Contact Info'; btn.style.background = 'var(--gold)'; btn.disabled = false; } }, 2500);
+  };
+
+  window._quickStatus = async function(id, currentStatus) {
+    // Cycle: lead → active_client → finished → archived → lead
+    var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
+    var newStatus = next[currentStatus] || 'active_client';
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_status: newStatus })
+      });
+      if (!res.ok) { console.error('_quickStatus error:', await res.text()); return; }
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.client_status = newStatus;
+      updateSubtabCounts();
+      // Update button
+      var btn = document.getElementById('statusbtn-' + id);
+      var labels = { active_client: '✓ Active', lead: 'Mark Active', archived: '↩ Unarchive', finished: '✓ Finished' };
+      var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' };
+      if (btn) { btn.textContent = labels[newStatus]||newStatus; btn.style.color = colors[newStatus]||'var(--gold)'; btn.style.borderColor = colors[newStatus]||'var(--gold)'; btn.setAttribute('onclick', 'window._quickStatus(\'' + id + '\', \'' + newStatus + '\')'); }
+      // Update archived dim
+      var card = document.getElementById('card-' + id);
+      if (card) card.classList.toggle('archived', newStatus === 'archived');
+      // If current subtab would hide this card, fade it out
+      if (activeSubtab !== 'all' && activeSubtab !== newStatus) {
+        if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(function() { applyFilters(); }, 300); }
+      }
+      // Show toast
+      var statusNames = { active_client: 'Active Client', lead: 'Lead', archived: 'Archived', finished: 'Finished' };
+      showAdminToast('Status updated → ' + (statusNames[newStatus] || newStatus));
+    } catch(e) { console.error('_quickStatus:', e); }
+  };
+
+  window._quickStatus = async function(id, currentStatus) {
+    var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
+    var newStatus = next[currentStatus] || 'active_client';
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
+        method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_status: newStatus })
+      });
+      if (!res.ok) { console.error('_quickStatus error:', await res.text()); return; }
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.client_status = newStatus;
+      updateSubtabCounts();
+      var btn = document.getElementById('statusbtn-' + id);
+      var labels = { active_client: '\u2713 Active', lead: 'Mark Active', archived: '\u21a9 Unarchive', finished: '\u2713 Finished' };
+      var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' };
+      if (btn) {
+        btn.textContent = labels[newStatus] || newStatus;
+        btn.style.color = colors[newStatus] || 'var(--gold)';
+        btn.style.borderColor = colors[newStatus] || 'var(--gold)';
+        btn.setAttribute('onclick', "window._quickStatus('" + id + "', '" + newStatus + "')");
+      }
+      var card = document.getElementById('card-' + id);
+      if (card) card.classList.toggle('archived', newStatus === 'archived');
+      if (activeSubtab !== 'all' && activeSubtab !== newStatus) {
+        if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(function() { applyFilters(); }, 300); }
+      }
+      var statusNames = { active_client: 'Active Client', lead: 'Lead', archived: 'Archived', finished: 'Finished' };
+      showAdminToast('Status updated → ' + (statusNames[newStatus] || newStatus));
+    } catch(e) { console.error('_quickStatus:', e); }
+  };
+
+  window._toggleContractor = async function(id, currentState) {
+    var newState = !currentState;
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_contractor: newState }) });
+      if (!res.ok) { console.error('_toggleContractor error:', await res.text()); return; }
+      var c = allClients.find(function(x) { return x.id === id; }); if (c) c.is_contractor = newState;
+      var btn = document.getElementById('contractor-btn-' + id);
+      if (btn) {
+        btn.textContent = newState ? '✓ Contractor' : 'Mark as Contractor';
+        btn.style.color = newState ? 'var(--success)' : 'var(--muted)';
+        btn.style.borderColor = newState ? 'var(--success)' : 'var(--border)';
+        btn.setAttribute('onclick', 'window._toggleContractor("' + id + '", ' + newState + ')');
+      }
+      var badge = document.querySelector('#card-' + id + ' .da-role-badge');
+      if (badge) { badge.textContent = newState ? 'Contractor' : 'Client'; badge.className = 'da-role-badge ' + (newState ? 'contractor' : 'client'); }
+    } catch(e) { console.error('_toggleContractor exception:', e); }
+  };
+
+  // ── RESEND PORTAL ACCESS ──────────────────────────────────────────
+  window._resendPortalAccess = async function(id, email, name, btn) {
+    // Decode HTML entities from escaped strings (fixes mobile payload issue)
+    email = (email || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
+    name  = (name  || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
+    if (!email) { alert('No email address on file for this client.'); return; }
+    if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+    try {
+      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'apikey': SUPABASE_KEY
+        },
+        body: JSON.stringify({ email: email.toLowerCase().trim(), full_name: name })
+      });
+      var data = await res.json();
+      if (btn) { btn.textContent = data.success ? 'Link Sent!' : 'Error'; btn.style.color = data.success ? 'var(--success)' : 'var(--error)'; }
+    } catch(e) { if (btn) { btn.textContent = 'Error'; btn.style.color = 'var(--error)'; } }
+    setTimeout(function() { if(btn){btn.textContent='Resend Portal Link'; btn.style.color='var(--gold)'; btn.disabled=false;} }, 3000);
+  };
+
+  // ── ADD CLIENT ────────────────────────────────────────────────────
+  document.getElementById('acSubmit').addEventListener('click', async function() {
+    var name = document.getElementById('acName').value.trim();
+    var email = document.getElementById('acEmail').value.trim();
+    var phone = document.getElementById('acPhone').value.trim();
+    var company = document.getElementById('acCompany').value.trim();
+    var investment = document.getElementById('acInvestment').value.trim();
+    var referral = document.getElementById('acReferral').value;
+    var street = document.getElementById('acStreet').value.trim();
+    var notes = document.getElementById('acNotes').value.trim();
+    var isContr = document.getElementById('acContractor').checked;
+    var customService = document.getElementById('acCustomService') ? document.getElementById('acCustomService').value.trim() : '';
+    var selectedServices = Array.from(document.querySelectorAll('#acServicesSelect option:checked')).map(function(o) { return { key: o.value, label: o.dataset.label || o.text }; });
+    if (customService) selectedServices.push({ key: null, label: customService });
+    var msg = document.getElementById('acMsg');
+    if (!name || !email) { msg.textContent = 'Name and email are required.'; msg.className = 'da-modal-msg error'; return; }
+    this.disabled = true; this.textContent = 'Adding...'; msg.textContent = '';
+    try {
+      var serviceType = (document.getElementById('acServiceType') || {}).value || 'design_build';
+      var res = await apiFetch('/rest/v1/clients', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ full_name: name, email: email, phone: phone||null, company_name: company||null, investment: investment||null, referral: referral||null, street: street||null, notes: notes||null, status: 'client_inquiry_made', client_stage: 'inquiry_submitted', is_contractor: isContr, service_type: serviceType }) });
+      if (res.ok) {
+        var newClient = await res.json();
+        var newClientId = newClient && newClient[0] ? newClient[0].id : null;
+        // Add services
+        if (newClientId && selectedServices.length) {
+          for (var si = 0; si < selectedServices.length; si++) {
+            await apiFetch('/rest/v1/client_services', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: newClientId, service_name: selectedServices[si].label, service_key: selectedServices[si].key, status: 'pending' }) }).catch(function(){});
+          }
+        }
+        // Send welcome email
+        if (document.getElementById('acSendEmail').checked && email) {
+          try {
+            await fetch(SUPABASE_URL + '/functions/v1/invite-client', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY }, body: JSON.stringify({ email: email, full_name: name }) });
+            msg.textContent = 'Client added and welcome email sent!';
+          } catch(e) { msg.textContent = 'Client added! (Email send failed)'; }
+        } else { msg.textContent = 'Client added successfully!'; }
+        msg.className = 'da-modal-msg success';
+        // Reset form
+        ['acName','acEmail','acPhone','acCompany','acInvestment','acStreet','acNotes'].forEach(function(fid) { var el = document.getElementById(fid); if (el) el.value = ''; });
+        if (document.getElementById('acCustomService')) document.getElementById('acCustomService').value = '';
+        document.getElementById('acContractor').checked = false;
+        document.getElementById('acReferral').value = '';
+        var svcSel = document.getElementById('acServicesSelect');
+        if (svcSel) Array.from(svcSel.options).forEach(function(o) { o.selected = false; });
+        // Switch to clients tab then reload
+        document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+        document.querySelector('[data-tab="clients"]').classList.add('active');
+        document.getElementById('tab-clients').classList.add('active');
+        msg.textContent = '';
+        await loadClients();
+      } else { var et = await res.text(); msg.textContent = 'Error: ' + et.substring(0,100); msg.className = 'da-modal-msg error'; }
+    } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; console.error('acSubmit:', e); }
+    this.disabled = false; this.textContent = 'Add Client';
+  });
+
+  // ── PROJECTS ─────────────────────────────────────────────────────
+  window._showAddProjectForm = function() {
+    var form = document.getElementById('daAddProjectForm');
+    if (!form) return;
+    form.style.display = 'block';
+    var sel = document.getElementById('apClientId');
+    if (sel && allClients.length) {
+      sel.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
+        return '<option value="' + c.id + '" data-name="' + s(c.full_name || '') + '">' + s(c.full_name || c.email) + '</option>';
+      }).join('');
+    }
+    // Auto-fill client name when client is selected
+    if (sel) {
+      sel.onchange = function() {
+        var opt = sel.options[sel.selectedIndex];
+        var nameInput = document.getElementById('apClientName');
+        if (nameInput && opt) nameInput.value = opt.dataset.name || '';
+      };
+    }
+  };
+
+  window._hideAddProjectForm = function() {
+    var form = document.getElementById('daAddProjectForm'); if (form) form.style.display = 'none';
+  };
+
+  window._openAddProjectForClient = function(clientId, clientName) {
+    document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(c) { c.classList.remove('active'); });
+    document.querySelector('[data-tab="projects"]').classList.add('active');
+    document.getElementById('tab-projects').classList.add('active');
+    window._showAddProjectForm();
+    setTimeout(function() {
+      var sel = document.getElementById('apClientId');
+      if (sel) sel.value = clientId;
+      var nameInput = document.getElementById('apClientName');
+      if (nameInput && clientName) nameInput.value = clientName;
+    }, 150);
+    loadProjects();
+  };
+
+  window._submitAddProject = async function() {
+    var clientId    = document.getElementById('apClientId').value;
+    var clientName  = (document.getElementById('apClientName') || {}).value ? document.getElementById('apClientName').value.trim() : '';
+    var address     = document.getElementById('apAddress').value.trim();
+    var name        = document.getElementById('apProjectName').value.trim();
+    var type        = document.getElementById('apProjectType').value;
+    var anything    = (document.getElementById('apAnything') || {}).value ? document.getElementById('apAnything').value.trim() : '';
+    var goals       = document.getElementById('apGoals').value.trim();
+    var investment  = document.getElementById('apInvestment').value;
+    var msg         = document.getElementById('apMsg');
+
+    // Validation — unified required fields
+    if (!clientId)  { msg.textContent = 'Please select a client.';         msg.className = 'da-modal-msg error'; return; }
+    if (!address)   { msg.textContent = 'Project address is required.';    msg.className = 'da-modal-msg error'; document.getElementById('apAddress').focus(); return; }
+    if (!name)      { msg.textContent = 'Project name is required.';       msg.className = 'da-modal-msg error'; document.getElementById('apProjectName').focus(); return; }
+    if (!investment){ msg.textContent = 'Please enter an investment / budget level.'; msg.className = 'da-modal-msg error'; document.getElementById('apInvestment').focus(); return; }
+
+    var btn = document.getElementById('apSubmit');
+    btn.disabled = true; btn.textContent = 'Creating...'; msg.textContent = '';
+
+    // Combine goals + anything into description
+    var description = [goals, anything ? 'Additional notes: ' + anything : ''].filter(Boolean).join('\n\n');
+
+    try {
+      var res = await apiFetch('/rest/v1/projects', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          client_id: clientId,
+          project_name: name,
+          project_type: type || null,
+          project_address: address || null,
+          description: description || null,
+          status: 'active'
+        })
+      });
+      // Also update investment on client record
+      if (investment) {
+        apiFetch('/rest/v1/clients?id=eq.' + clientId, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ investment: investment })
+        }).catch(function(e) { console.error('investment patch:', e); });
+      }
+      if (res.ok) {
+        msg.textContent = 'Project created successfully!'; msg.className = 'da-modal-msg success';
+        // Reset all unified fields
+        ['apClientName','apAddress','apProjectName','apAnything','apGoals'].forEach(function(fid) {
+          var el = document.getElementById(fid); if (el) el.value = '';
+        });
+        ['apProjectType','apClientId'].forEach(function(fid) {
+          var el = document.getElementById(fid); if (el) el.value = '';
+        });
+        var inv = document.getElementById('apInvestment'); if (inv) inv.value = '';
+        setTimeout(function() { window._hideAddProjectForm(); msg.textContent = ''; loadProjects(); }, 1500);
+      } else {
+        var et = await res.text();
+        msg.textContent = 'Error: ' + et.substring(0,120); msg.className = 'da-modal-msg error';
+      }
+    } catch(e) {
+      msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error';
+      console.error('_submitAddProject:', e);
+    }
+    btn.disabled = false; btn.textContent = 'Create Project';
+  };
+
+  async function loadProjects() {
+    var container = document.getElementById('daProjectsList');
+    if (!container) return;
+    container.innerHTML = '<div class="da-empty">Loading projects...</div>';
+    try {
+      var res = await apiFetch('/rest/v1/projects?order=created_at.desc&select=*,clients(full_name,email)');
+      var projects = await res.json() || [];
+      if (!projects.length) { container.innerHTML = '<div class="da-empty">No projects yet. Click + Add Project to create one.</div>'; return; }
+      container.innerHTML = projects.map(function(p) {
+        var clientName = p.clients ? s(p.clients.full_name || p.clients.email) : 'Unknown';
+        var typeLabel = s(PROJECT_TYPE_LABELS[p.project_type] || p.project_type || '—');
+        var startStr = p.start_date ? new Date(p.start_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+        var endStr = p.end_date ? new Date(p.end_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+        return '<div class="da-client-card" style="margin-bottom:8px">'
+          + '<div class="da-card-top" onclick="window._toggleProjectCard(\'' + p.id + '\')">'
+          + '  <div class="da-card-left"><div class="da-card-avatar" style="font-size:11px">' + s((p.project_name||'P').charAt(0).toUpperCase()) + '</div>'
+          + '  <div><div class="da-card-name">' + s(p.project_name || 'Unnamed Project') + '</div><div class="da-card-sub">' + clientName + ' · ' + typeLabel + '</div></div></div>'
+          + '  <div class="da-card-right"><div class="da-stage-pill" style="color:var(--gold);border-color:var(--gold);background:var(--gold-dim)">' + s(p.status||'active') + '</div><div class="da-card-date">' + startStr + ' → ' + endStr + '</div><div class="da-expand-icon" id="proj-exp-' + p.id + '">&#9660;</div></div>'
+          + '</div>'
+          + '<div class="da-card-details" id="proj-det-' + p.id + '">'
+          + '  <div class="da-details-grid">'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Client</div><div class="da-detail-value">' + clientName + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Type</div><div class="da-detail-value">' + typeLabel + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + s(p.project_address||'—') + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Status</div><div class="da-detail-value">' + s(p.status||'active') + '</div></div>'
+          + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Goals</div><div class="da-detail-value">' + s(p.description||'—') + '</div></div>'
+          + '  </div>'
+          + '  <div class="da-card-actions">'
+          + '    <div class="da-section-divider">Drive Links</div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Design</div><input class="da-text-input" id="plink-design-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + s(p.drive_design_link||'') + '" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Permit</div><input class="da-text-input" id="plink-permit-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + s(p.drive_permit_link||'') + '" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="plink-const-' + p.id + '" type="text" placeholder="Google Drive link..." value="' + s(p.drive_construction_link||'') + '" /></div>'
+          + '    <button class="da-update-btn" id="plinkbtn-' + p.id + '" onclick="window._saveProjectLinks(\'' + p.id + '\', this)">Save Links</button>'
+          + '    <div class="da-section-divider">Status</div>'
+          + '    <div class="da-action-row"><select class="da-select" id="pstatus-' + p.id + '"><option value="active"' + (p.status==='active'?' selected':'') + '>Active</option><option value="on_hold"' + (p.status==='on_hold'?' selected':'') + '>On Hold</option><option value="complete"' + (p.status==='complete'?' selected':'') + '>Complete</option><option value="cancelled"' + (p.status==='cancelled'?' selected':'') + '>Cancelled</option></select><button class="da-update-btn" id="pstatusbtn-' + p.id + '" onclick="window._updateProjectStatus(\'' + p.id + '\', this)">Update</button></div>'
+          + '    <div class="da-section-divider">Danger Zone</div>'
+          + '    <div class="da-action-row"><button class="da-update-btn" style="background:var(--error);border-color:var(--error)" onclick="window._deleteProject(\'' + p.id + '\')">Delete Project</button></div>'
+          + '  </div>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading projects</div>'; console.error('loadProjects:', e); }
+  }
+
+  window._toggleProjectCard = function(id) {
+    var det = document.getElementById('proj-det-' + id); var exp = document.getElementById('proj-exp-' + id);
+    if (det) det.classList.toggle('visible'); if (exp) exp.classList.toggle('open');
+  };
+
+  window._saveProjectLinks = async function(id, btn) {
+    var design = (document.getElementById('plink-design-' + id)||{}).value||'';
+    var permit = (document.getElementById('plink-permit-' + id)||{}).value||'';
+    var cons   = (document.getElementById('plink-const-' + id)||{}).value||'';
+    try {
+      var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ drive_design_link: design.trim()||null, drive_permit_link: permit.trim()||null, drive_construction_link: cons.trim()||null }) });
+      if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function(){if(btn){btn.textContent='Save Links';btn.style.background='var(--gold)';}},2000); }
+      if (!res.ok) console.error('_saveProjectLinks error:', await res.text());
+    } catch(e) { console.error('_saveProjectLinks exception:', e); }
+  };
+
+  window._updateProjectStatus = async function(id, btn) {
+    var val = (document.getElementById('pstatus-' + id)||{}).value;
+    try {
+      var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: val }) });
+      if (btn) { btn.textContent = res.ok ? 'Saved ✓' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function(){if(btn){btn.textContent='Update';btn.style.background='var(--gold)';} loadProjects();},1500); }
+      if (!res.ok) console.error('_updateProjectStatus error:', await res.text());
+    } catch(e) { console.error('_updateProjectStatus:', e); }
+  };
+
+  window._deleteProject = async function(id) {
+    if (!confirm('Delete this project? This cannot be undone.')) return;
+    try {
+      var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'DELETE' });
+      if (res.ok) loadProjects(); else console.error('_deleteProject error:', await res.text());
+    } catch(e) { console.error('_deleteProject:', e); }
+  };
+
+  // ── CHECKLIST TAB ─────────────────────────────────────────────────
+  async function loadAllChecklists() {
+    try {
+      var [checkRes, noteRes] = await Promise.all([apiFetch('/rest/v1/checklist_items?select=*'), apiFetch('/rest/v1/client_notes?select=*')]);
+      var checks = await checkRes.json() || [];
+      var notes = await noteRes.json() || [];
+      allChecklists = {}; allNotes = {};
+      checks.forEach(function(c) { if (!allChecklists[c.client_id]) allChecklists[c.client_id] = {}; allChecklists[c.client_id][c.item_key] = c.completed; });
+      notes.forEach(function(n) { if (!allNotes[n.client_id]) allNotes[n.client_id] = {}; allNotes[n.client_id][n.note_key] = n.content; });
+      renderChecklistTab(allClients);
+    } catch(e) { console.error('loadAllChecklists:', e); }
+  }
+
+  function renderChecklistTab(clients) {
+    var container = document.getElementById('daChecklistWrap');
+    if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients yet</div>'; return; }
+    var KEYS = ['goals','inspo','photos','survey','bylaws','houseplans'];
+    container.innerHTML = clients.map(function(c) {
+      var cc = allChecklists[c.id] || {};
+      var cn = allNotes[c.id] || {};
+      var done = KEYS.filter(function(k) { return cc[k]; }).length;
+      var items = KEYS.map(function(key) {
+        var isDone = cc[key] === true;
+        var note = cn[key] || '';
+        return '<div class="da-check-row"><div class="da-check-dot' + (isDone?' done':'') + '"></div><div style="flex:1"><div class="da-check-row-label">' + s(CHECKLIST_LABELS[key]||key) + (isDone?' <span style="color:var(--success);font-size:10px">✓</span>':'') + '</div>' + (note ? '<div class="da-check-row-note">' + s(note) + '</div>' : '') + '</div></div>';
+      }).join('');
+      return '<div class="da-client-checklist"><div class="da-client-checklist-header" onclick="window._toggleClientChecklist(\'' + c.id + '\')"><div class="da-client-checklist-name">' + s(c.full_name||'Unknown') + ' <span style="font-size:10px;color:var(--muted)">' + s(c.email||'') + '</span></div><div class="da-client-checklist-progress"><span>' + done + '</span> / ' + KEYS.length + '</div></div><div class="da-client-checklist-body" id="client-checklist-' + c.id + '">' + items + '</div></div>';
+    }).join('');
+  }
+
+  window._toggleClientChecklist = function(id) { var b = document.getElementById('client-checklist-' + id); if (b) b.classList.toggle('visible'); };
+
+  // FIX 6: Debounced checklist search
+  var checkSearchTimeout;
+  document.getElementById('daCheckSearch').addEventListener('input', function() {
+    var q = this.value.toLowerCase();
+    clearTimeout(checkSearchTimeout);
+    checkSearchTimeout = setTimeout(function() {
+      renderChecklistTab(allClients.filter(function(c) { return (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q); }));
+    }, 300);
+  });
+
+  // ── MESSAGES ─────────────────────────────────────────────────────
+  async function loadMessages() {
+    try {
+      var res = await apiFetch('/rest/v1/messages?order=created_at.asc&limit=200');
+      allMessages = await res.json() || [];
+      renderMessages();
+    } catch(e) { console.error('loadMessages:', e); }
+  }
+
+  function renderMessages() {
+    var container = document.getElementById('daMsgList');
+    if (!allMessages.length) { container.innerHTML = '<div class="da-empty">No messages yet</div>'; return; }
+    var groups = {};
+    allMessages.forEach(function(m) { var key = m.client_id || m.sender || 'unknown'; if (!groups[key]) groups[key] = []; groups[key].push(m); });
+    container.innerHTML = Object.keys(groups).map(function(key) {
+      var msgs = groups[key];
+      var latest = msgs[msgs.length - 1];
+      var client = allClients.find(function(c) { return c.id === key || c.email === msgs[0].sender; });
+      var name = s(client ? client.full_name : (msgs[0].sender || 'Unknown'));
+      var clientId = client ? client.id : key;
+      var hasUnread = msgs.some(function(m) { return !m.is_read && m.sender !== 'daydream_team'; });
+      var threadHtml = msgs.map(function(m) {
+        var isTeam = m.sender === 'daydream_team';
+        return '<div style="display:flex;flex-direction:column;margin-bottom:8px;align-items:' + (isTeam ? 'flex-end' : 'flex-start') + '"><div class="da-msg-bubble ' + (isTeam ? 'team' : 'client') + '">' + s(m.content) + '</div><div style="font-size:9px;color:var(--muted);margin-top:2px' + (isTeam?';text-align:right':'') + '">' + (isTeam ? 'Daydream Team' : name) + ' · ' + formatDate(m.created_at) + '</div></div>';
+      }).join('');
+      return '<div class="da-msg-card' + (hasUnread?' unread':'') + '"><div style="cursor:pointer" onclick="window._toggleThread(\'' + clientId + '\')"><div class="da-msg-client">' + name + '</div><div class="da-msg-preview">' + s((latest.content||'').substring(0,100)) + '</div><div class="da-msg-meta">' + msgs.length + ' message(s) · ' + formatDate(latest.created_at) + '</div></div><div class="da-msg-thread" id="thread-' + clientId + '"><div style="max-height:300px;overflow-y:auto;padding:8px 0">' + threadHtml + '</div><div class="da-msg-reply"><textarea id="reply-' + clientId + '" placeholder="Type your reply..."></textarea><button class="da-reply-btn" onclick="window._sendReply(\'' + clientId + '\', \'' + (msgs[0].project_id||'') + '\')">Send</button></div></div></div>';
+    }).join('');
+  }
+
+  window._toggleThread = function(id) { var t = document.getElementById('thread-' + id); if (t) t.classList.toggle('visible'); };
+  window._sendReply = async function(clientId, projectId) {
+    var textarea = document.getElementById('reply-' + clientId);
+    var content = textarea ? textarea.value.trim() : '';
+    if (!content) return;
+    try {
+      var res = await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: projectId||null, client_id: clientId||null, sender: 'daydream_team', content: content, is_read: true }) });
+      if (res.ok) { textarea.value = ''; await loadMessages(); }
+      else console.error('_sendReply error:', await res.text());
+    } catch(e) { console.error('_sendReply:', e); }
+  };
+
+  // ── JOB SITE PHOTOS ──────────────────────────────────────────────
+  var SIX_MB = 6 * 1024 * 1024;
+
+  function populatePhotoClientFilter() {
+    var filter = document.getElementById('daPhotoClientFilter');
+    var uploadSel = document.getElementById('daPhotoUploadClient');
+    if (!filter || !allClients.length) return;
+    var opts = '<option value="">All Clients</option>' + allClients.map(function(c) {
+      return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
+    }).join('');
+    filter.innerHTML = opts;
+    if (uploadSel) uploadSel.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
+      return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
+    }).join('');
+    filter.onchange = function() { loadAdminPhotos(filter.value); };
+  }
+
+  window._showAdminPhotoUpload = function() {
+    var form = document.getElementById('daAdminPhotoUploadForm');
+    if (form) form.style.display = 'block';
+    // Default visit date to today
+    var dateInput = document.getElementById('daPhotoVisitDate');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    // Populate client selector
+    var uploadClient = document.getElementById('daPhotoUploadClient');
+    if (uploadClient && allClients.length && uploadClient.options.length <= 1) {
+      uploadClient.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
+        return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
+      }).join('');
+    }
+    populatePhotoClientFilter();
+    // Default visit date to today
+    var dateInput = document.getElementById('daPhotoVisitDate');
+    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+  };
+
+  window._hideAdminPhotoUpload = function() {
+    var form = document.getElementById('daAdminPhotoUploadForm');
+    if (form) form.style.display = 'none';
+    var msg = document.getElementById('daPhotoMsg');
+    if (msg) msg.textContent = '';
+  };
+
+  window._submitAdminPhotos = async function() {
+    var clientId = (document.getElementById('daPhotoUploadClient') || {}).value;
+    var visitDate = (document.getElementById('daPhotoVisitDate') || {}).value || new Date().toISOString().split('T')[0];
+    var notes = (document.getElementById('daPhotoNotes') || {}).value || '';
+    var fileInput = document.getElementById('daPhotoFiles');
+    var files = fileInput ? Array.from(fileInput.files) : [];
+    var msg = document.getElementById('daPhotoMsg');
+    var btn = document.getElementById('daPhotoSubmit');
+    var statusEl = document.getElementById('daPhotoUploadStatus');
+
+    if (!clientId) { msg.textContent = 'Please select a client.'; msg.className = 'da-modal-msg error'; return; }
+    if (!files.length) { msg.textContent = 'Please select at least one photo.'; msg.className = 'da-modal-msg error'; return; }
+
+    btn.disabled = true; btn.textContent = 'Uploading...'; msg.textContent = '';
+    var client = allClients.find(function(c) { return c.id === clientId; });
+    var clientName = client ? (client.full_name || client.email) : clientId;
+    var folderPath = clientName + '/site-photos/' + visitDate + ' Site Visit';
+
+    // Upload all photos in parallel
+    var uploadResults = await Promise.all(files.map(async function(file) {
+      var safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
+      var path = folderPath + '/' + Date.now() + '_' + safeName;
+      try {
+        var ok = false;
+        if (file.size > SIX_MB) {
+          ok = await adminUploadResumable(file, path);
+        } else {
+          var res = await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/client-documents/' + path, {
+            method: 'POST',
+            headers: { 'apikey': 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Authorization': 'Bearer ' + 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Content-Type': file.type },
+            body: file
+          });
+          ok = res.ok;
+        }
+        if (ok) {
+          await apiFetch('/rest/v1/documents', {
+            method: 'POST',
+            headers: { 'Prefer': 'return=minimal' },
+            body: JSON.stringify({
+              client_id: clientId,
+              file_name: file.name,
+              file_url: path,
+              uploaded_by: 'daydream_team',
+              photo_category: 'site_photos',
+              photo_notes: notes,
+              visit_date: visitDate
+            })
+          });
+        }
+        return ok;
+      } catch(e) { console.error('Admin photo upload error:', e); return false; }
+    }));
+
+    var uploaded = uploadResults.filter(Boolean).length;
+    if (statusEl) statusEl.textContent = uploaded + ' of ' + files.length + ' photo(s) uploaded';
+    if (uploaded > 0) {
+      msg.textContent = uploaded + ' photo(s) saved successfully!'; msg.className = 'da-modal-msg success';
+      if (fileInput) fileInput.value = '';
+      setTimeout(function() { window._hideAdminPhotoUpload(); loadAdminPhotos(clientId); }, 1500);
+    } else {
+      msg.textContent = 'Upload failed. Please try again.'; msg.className = 'da-modal-msg error';
+    }
+    btn.disabled = false; btn.textContent = 'Upload & Save';
+  };
+
+  async function adminUploadResumable(file, path) {
+    var CHUNK = 6 * 1024 * 1024;
+    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
+    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
+    try {
+      var createRes = await fetch(SURL + '/storage/v1/upload/resumable', {
+        method: 'POST',
+        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/offset+octet-stream', 'Upload-Length': file.size, 'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'), 'Tus-Resumable': '1.0.0' }
+      });
+      if (!createRes.ok && createRes.status !== 201) return false;
+      var uploadUrl = createRes.headers.get('Location');
+      if (!uploadUrl) return false;
+      if (uploadUrl.startsWith('/')) uploadUrl = SURL + uploadUrl;
+      var offset = 0;
+      while (offset < file.size) {
+        var chunk = file.slice(offset, offset + CHUNK);
+        var patchRes = await fetch(uploadUrl, { method: 'PATCH', headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/offset+octet-stream', 'Upload-Offset': offset, 'Tus-Resumable': '1.0.0' }, body: chunk });
+        if (!patchRes.ok) return false;
+        offset += CHUNK;
+      }
+      return true;
+    } catch(e) { return false; }
+  }
+
+  async function loadAdminPhotos(clientIdFilter) {
+    var container = document.getElementById('daPhotosList');
+    if (!container) return;
+    container.innerHTML = '<div class="da-empty">Loading photos...</div>';
+    try {
+      var url = '/rest/v1/documents?photo_category=eq.site_photos&order=visit_date.desc,created_at.desc';
+      if (clientIdFilter) url += '&client_id=eq.' + clientIdFilter;
+      var res = await apiFetch(url);
+      var photos = await res.json() || [];
+      if (!photos.length) { container.innerHTML = '<div class="da-empty">No site photos yet. Click + Upload Photos to add some.</div>'; return; }
 
       // Group by visit date
       var groups = {};
@@ -1296,318 +1739,46 @@
 
       container.innerHTML = Object.keys(groups).sort(function(a,b) { return b.localeCompare(a); }).map(function(date) {
         var datePhotos = groups[date];
+        var client = allClients.find(function(c) { return c.id === datePhotos[0].client_id; });
+        var clientName = client ? s(client.full_name || client.email) : 'Unknown Client';
         var d = new Date(date + 'T12:00:00');
         var dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
         var notes = datePhotos[0].photo_notes || '';
-        var uploadedBy = datePhotos[0].uploaded_by === 'daydream_team' ? 'Daydream Team' : 'You';
-        return '<div style="margin-bottom:24px">'
-          + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:2px solid var(--gold);margin-bottom:12px">'
-          + '  <div><div style="font-family:Cormorant Garamond,serif;font-size:18px;color:var(--gold)">' + dateStr + '</div>'
-          + '  <div style="font-size:10px;color:var(--muted);margin-top:2px">' + datePhotos.length + ' photo(s) · Uploaded by ' + s(uploadedBy) + '</div></div>'
+        return '<div class="da-client-card" style="margin-bottom:16px">'
+          + '<div style="padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:space-between">'
+          + '  <div><div class="da-card-name">' + dateStr + ' Site Visit</div><div class="da-card-sub">' + clientName + ' · ' + datePhotos.length + ' photo(s) · Uploaded by ' + s(datePhotos[0].uploaded_by === 'daydream_team' ? 'Daydream Team' : 'Client') + '</div></div>'
           + '</div>'
-          + (notes ? '<div style="font-size:12px;color:var(--muted);padding:10px 14px;background:var(--surface);border-left:2px solid var(--gold);margin-bottom:12px;line-height:1.7">' + s(notes) + '</div>' : '')
-          + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">'
+          + (notes ? '<div style="padding:12px 20px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);border-left:3px solid var(--gold)">' + s(notes) + '</div>' : '')
+          + '<div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'
           + datePhotos.map(function(p) {
-              var url = 'https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/public/client-documents/' + p.file_url;
-              return '<div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface-2);border:1px solid var(--border);cursor:pointer" onclick="window.open(\'' + url + '\',\'_blank\')">'
-                + '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML=\'<div style=\\"display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:var(--muted)\\">No preview</div>\'" />'
+              var signedUrl = 'https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/public/client-documents/' + p.file_url;
+              return '<div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface-2);border:1px solid var(--border)">'
+                + '<img src="' + signedUrl + '" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="window.open(\'' + signedUrl + '\', \'_blank\')" onerror="this.parentNode.innerHTML=\'<div style=\\"display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--muted);\\">No preview</div>\'" />'
+                + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);padding:4px 6px;font-size:9px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + s(p.file_name) + '</div>'
                 + '</div>';
             }).join('')
-          + '</div></div>';
+          + '</div>'
+          + '</div>';
       }).join('');
-    } catch(e) {
-      container.innerHTML = '<div class="dd-empty">Error loading photos. Please refresh.</div>';
-      console.error('loadClientSitePhotos:', e);
-    }
+    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading photos</div>'; console.error('loadAdminPhotos:', e); }
   }
 
-  function doLogout() {
-    stopRealtime(); // Clean up WebSocket connections
-    try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
-    currentUser = null; currentClient = null; currentProject = null; isContractor = false;
-    document.getElementById('ddDashboard').classList.remove('visible');
-    document.getElementById('ddProjectSelector').classList.remove('visible');
-    document.getElementById('ddCreateProject').classList.remove('visible');
-    showLogin();
-  }
-  // ── CHANGE PASSWORD ──────────────────────────────────────────────
-  window._toggleChangePass = function() {
-    var panel = document.getElementById('ddChangePassPanel');
-    if (!panel) return;
-    var isHidden = panel.style.display === 'none';
-    panel.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) {
-      document.getElementById('ddNewPass').value = '';
-      document.getElementById('ddConfirmPass').value = '';
-      document.getElementById('ddChangePassMsg').textContent = '';
-      document.getElementById('ddNewPass').focus();
-    }
-  };
+  // ── ADMIN REALTIME — Live updates when clients act ────────────────
+  var adminRealtimeChannels = [];
 
-  window._saveNewPassword = async function() {
-    var newPass     = (document.getElementById('ddNewPass').value     || '').trim();
-    var confirmPass = (document.getElementById('ddConfirmPass').value || '').trim();
-    var msg         = document.getElementById('ddChangePassMsg');
-    if (!newPass)                { msg.textContent = 'Please enter a new password.';        msg.style.color = 'var(--error)';   return; }
-    if (newPass.length < 6)      { msg.textContent = 'Password must be at least 6 characters.'; msg.style.color = 'var(--error)';   return; }
-    if (newPass !== confirmPass)  { msg.textContent = 'Passwords do not match.';             msg.style.color = 'var(--error)';   return; }
-    msg.textContent = 'Updating...'; msg.style.color = 'var(--muted)';
-    try {
-      var token = null;
-      try { token = localStorage.getItem('dd_token') || sessionStorage.getItem('dd_token'); } catch(e) {}
-      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-        method: 'PUT',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ password: newPass })
-      });
-      var data = await res.json().catch(function() { return {}; });
-      if (res.ok) {
-        msg.textContent = 'Password updated successfully!';
-        msg.style.color = 'var(--success)';
-        document.getElementById('ddNewPass').value     = '';
-        document.getElementById('ddConfirmPass').value = '';
-        setTimeout(function() { window._toggleChangePass(); }, 2000);
-      } else {
-        msg.textContent = data.msg || data.message || 'Could not update password. Please try again.';
-        msg.style.color = 'var(--error)';
-      }
-    } catch(e) {
-      msg.textContent = 'Connection error. Please try again.';
-      msg.style.color = 'var(--error)';
-    }
-  };
+  function startAdminRealtime() {
+    stopAdminRealtime();
 
-  // ── CHANGE PASSWORD ──────────────────────────────────────────────
-  document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
-  document.getElementById('ddRefreshBtn').addEventListener('click', async function() {
-    if (!currentClient) return;
-    var btn = this;
-    btn.textContent = '⟳ Refreshing...'; btn.disabled = true;
-    await loadProjectDashboard(currentClient);
-    btn.textContent = '⟳ Refresh'; btn.disabled = false;
-  });
-  document.getElementById('ddSelectorLogout').addEventListener('click', doLogout);
-
-  // ── TABS ──────────────────────────────────────────────────────────
-  document.querySelectorAll('#dd-portal .dd-tab').forEach(function(tab) {
-    tab.addEventListener('click', function() {
-      document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
-      document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
-      tab.classList.add('active');
-      var target = document.getElementById('tab-' + tab.dataset.tab);
-      if (target) target.classList.add('active');
-
-      if (tab.dataset.tab === 'messages') {
-        try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
-        var dot = tab.querySelector('.dd-msg-dot'); if (dot) dot.remove();
-      }
-    });
-  });
-
-  // ── CHECKLIST ─────────────────────────────────────────────────────
-  // ── RESUMABLE UPLOAD (TUS) for files > 6MB ───────────────────────
-  // Uses Supabase's TUS endpoint — survives network interruptions
-  async function uploadResumable(file, path, token) {
-    var CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunks
-    var endpoint = SUPABASE_URL + '/storage/v1/upload/resumable';
-    // Step 1: Create upload session
-    var createRes = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/offset+octet-stream',
-        'Upload-Length': file.size,
-        'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'),
-        'Tus-Resumable': '1.0.0'
-      }
-    });
-    if (!createRes.ok && createRes.status !== 201) {
-      console.error('TUS create failed:', createRes.status, await createRes.text());
-      return false;
-    }
-    var uploadUrl = createRes.headers.get('Location');
-    if (!uploadUrl) { console.error('No TUS upload URL returned'); return false; }
-    // Make absolute if relative
-    if (uploadUrl.startsWith('/')) uploadUrl = SUPABASE_URL + uploadUrl;
-    // Step 2: Upload in chunks
-    var offset = 0;
-    while (offset < file.size) {
-      var chunk = file.slice(offset, offset + CHUNK_SIZE);
-      var patchRes = await fetch(uploadUrl, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/offset+octet-stream',
-          'Upload-Offset': offset,
-          'Tus-Resumable': '1.0.0'
-        },
-        body: chunk
-      });
-      if (!patchRes.ok) { console.error('TUS chunk failed at offset', offset, patchRes.status); return false; }
-      offset += CHUNK_SIZE;
-    }
-    return true;
-  }
-
-  window._toggleCheckItem = async function(key) {
-    var item = CHECKLIST_ITEMS.find(function(i) { return i.key === key; });
-    if (!item || !currentClient) return;
-    if (item.type === 'note') { var area = document.getElementById('note-area-' + key); if (area) { area.classList.toggle('visible'); return; } }
-    var newState = !checklistState[key];
-    checklistState[key] = newState;
-    try {
-      var existing = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
-      var data = await existing.json() || [];
-      if (data.length > 0) {
-        await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
-      } else {
-        await apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
-      }
-    } catch(e) { console.error('_toggleCheckItem:', e); }
-    renderChecklist();
-  };
-
-  window._saveNote = async function(key) {
-    if (!currentClient) return;
-    var textarea = document.getElementById('note-' + key);
-    var content = textarea ? textarea.value.trim() : '';
-    notesState[key] = content;
-    if (content && !checklistState[key]) checklistState[key] = true;
-    try {
-      var existing = await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key);
-      var data = await existing.json() || [];
-      if (data.length > 0) {
-        await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ content: content, updated_at: new Date().toISOString() }) });
-      } else {
-        await apiFetch('/rest/v1/client_notes', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, note_key: key, content: content }) });
-      }
-      var saveBtn = document.querySelector('#note-area-' + key + ' .dd-note-save');
-      if (saveBtn) { saveBtn.textContent = 'Saved!'; saveBtn.style.background = 'var(--success)'; setTimeout(function() { if(saveBtn){saveBtn.textContent='Save'; saveBtn.style.background='var(--gold)';} }, 2000); }
-      renderChecklist();
-      var ta = document.getElementById('note-' + key); if (ta) ta.value = content;
-      var area = document.getElementById('note-area-' + key); if (area) area.classList.add('visible');
-    } catch(e) { console.error('_saveNote:', e); }
-  };
-
-  // ── FILE UPLOADS — FIX 3: Validation + FIX 7: Parallel uploads ───
-  document.querySelectorAll('#dd-portal .dd-file-input').forEach(function(input) {
-    input.addEventListener('change', async function() {
-      var files = Array.from(this.files);
-      var category = this.dataset.category;
-      var statusEl = document.getElementById('status-' + category);
-      if (!files.length || !currentUser) return;
-      // Validate all files first
-      for (var vi = 0; vi < files.length; vi++) {
-        var err = validateFile(files[vi]);
-        if (err) { statusEl.textContent = err; statusEl.style.color = 'var(--error)'; return; }
-      }
-      statusEl.textContent = 'Uploading ' + files.length + ' file(s)...';
-      statusEl.style.color = 'var(--muted)';
-      var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
-
-      // Parallel uploads — resumable TUS for large files, standard for small
-      var SIX_MB = 6 * 1024 * 1024;
-      var uploaded = 0;
-      var total = files.length;
-
-      var uploadResults = await Promise.all(files.map(async function(file) {
-        var path = clientName + '/' + category + '/' + Date.now() + '_' + safeName(file.name);
-        var token = currentUser.access_token || SUPABASE_KEY;
-        try {
-          var ok = false;
-          if (file.size > SIX_MB) {
-            // ── Resumable TUS upload for videos and large files ──
-            ok = await uploadResumable(file, path, token);
-          } else {
-            // ── Standard upload for small files ──
-            var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
-              method: 'POST',
-              headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': file.type },
-              body: file
-            });
-            ok = res.ok;
-          }
-          if (ok) {
-            await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email, photo_category: category === 'photos' ? 'site_photos' : null, visit_date: category === 'photos' ? new Date().toISOString().split('T')[0] : null }) });
-            // Auto-complete checklist item
-            var checkItem = CHECKLIST_ITEMS.find(function(ci) { return ci.category === category; });
-            if (checkItem && currentClient && !checklistState[checkItem.key]) {
-              checklistState[checkItem.key] = true;
-              apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: checkItem.key, completed: true, completed_at: new Date().toISOString() }) }).catch(function() {
-                return apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + checkItem.key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: true, completed_at: new Date().toISOString() }) });
-              });
-              renderChecklist();
-            }
-          }
-          return ok;
-        } catch(e) { console.error('Upload error:', file.name, e); return false; }
-      }));
-
-      uploaded = uploadResults.filter(Boolean).length;
-      statusEl.textContent = uploaded === total ? uploaded + ' file(s) uploaded successfully' : uploaded + ' of ' + total + ' uploaded';
-      statusEl.style.color = uploaded === total ? 'var(--success)' : 'var(--error)';
-    });
-  });
-
-  // ── MESSAGES ──────────────────────────────────────────────────────
-  window._deleteMessage = async function(id) {
-    if (!confirm('Delete this message?')) return;
-    try {
-      var res = await apiFetch('/rest/v1/messages?id=eq.' + id, { method: 'DELETE' });
-      if (res.ok) {
-        var el = document.getElementById('msg-' + id);
-        if (el) { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(function() { if(el.parentNode) el.remove(); }, 300); }
-      } else { console.error('Delete message error:', await res.text()); }
-    } catch(e) { console.error('_deleteMessage:', e); }
-  };
-
-  window._deleteMessage = async function(id) {
-    if (!confirm('Delete this message?')) return;
-    try {
-      var res = await apiFetch('/rest/v1/messages?id=eq.' + id, { method: 'DELETE' });
-      if (res.ok) {
-        var el = document.getElementById('msg-' + id);
-        if (el) el.remove();
-      } else { console.error('Delete message error:', await res.text()); }
-    } catch(e) { console.error('_deleteMessage:', e); }
-  };
-
-  document.getElementById('ddSendBtn').addEventListener('click', async function() {
-    var input = document.getElementById('ddMessageInput');
-    var content = input.value.trim();
-    if (!content || !currentUser) return;
-    input.value = '';
-    try {
-      await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, sender: currentUser.email, content: content, is_read: false }) });
-      await loadMessages();
-    } catch(e) { console.error('Send message:', e); }
-  });
-  document.getElementById('ddMessageInput').addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); } });
-
-  // ── SUPABASE REALTIME — Live updates without refresh ─────────────
-  var realtimeChannels = [];
-
-  function startRealtime() {
-    // Clean up any existing subscriptions first
-    stopRealtime();
-    if (!currentClient) return;
-
-    // ── 1. LIVE MESSAGES ─────────────────────────────────────────
-    // Fires instantly when admin sends a reply
+    // ── 1. LIVE NEW MESSAGES from clients ─────────────────────────
+    // Admin sees gold dot and unread count update the moment a client sends a message
     var msgChannel = new WebSocket(
       'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
     );
 
     msgChannel.onopen = function() {
-      // Join the messages channel filtered to this client
+      // Subscribe to ALL new messages (admin sees everything)
       msgChannel.send(JSON.stringify({
-        topic: 'realtime:public:messages:client_id=eq.' + currentClient.id,
+        topic: 'realtime:public:messages',
         event: 'phx_join',
         payload: {},
         ref: '1'
@@ -1617,33 +1788,41 @@
     msgChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
-        // New message inserted
-        if (data.event === 'INSERT' || data.payload && data.payload.data) {
-          loadMessages();
-          // Flash the messages tab if not active
-          var msgTab = document.querySelector('[data-tab="messages"]');
-          var activeTab = document.querySelector('#dd-portal .dd-tab.active');
-          if (msgTab && activeTab && activeTab.dataset.tab !== 'messages') {
-            var dot = msgTab.querySelector('.dd-msg-dot');
-            if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; msgTab.appendChild(dot); }
-            dot.textContent = '●';
+        if (data.event === 'INSERT' && data.payload && data.payload.record) {
+          var msg = data.payload.record;
+          // Only react to client messages, not admin replies
+          if (msg.sender === 'daydream_team') return;
+          // Update unread dot on Messages tab
+          var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
+          if (msgTab) {
+            var dot = msgTab.querySelector('.da-msg-dot');
+            if (!dot) { dot = document.createElement('span'); dot.className = 'da-msg-dot'; msgTab.appendChild(dot); }
+            var currentCount = parseInt(dot.textContent) || 0;
+            dot.textContent = currentCount + 1;
           }
+          // If messages tab is open, reload it live
+          var msgsTab = document.getElementById('tab-messages');
+          if (msgsTab && msgsTab.classList.contains('active')) {
+            loadMessages();
+          }
+          // Show admin toast
+          showAdminToast('New message from client');
         }
-      } catch(e) {}
+      } catch(e) { console.error('Admin realtime messages:', e); }
     };
 
-    msgChannel.onerror = function(e) { console.error('Realtime messages error:', e); };
-    realtimeChannels.push(msgChannel);
+    msgChannel.onerror = function(e) { console.error('Admin realtime msg error:', e); };
+    adminRealtimeChannels.push(msgChannel);
 
-    // ── 2. LIVE CLIENT STATUS (contract, payment, pipeline) ───────
-    // Fires when admin updates any field on the client record
+    // ── 2. LIVE NEW CLIENTS from intake form ──────────────────────
+    // Admin sees new leads instantly when someone submits the intake form
     var clientChannel = new WebSocket(
       'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
     );
 
     clientChannel.onopen = function() {
       clientChannel.send(JSON.stringify({
-        topic: 'realtime:public:clients:id=eq.' + currentClient.id,
+        topic: 'realtime:public:clients',
         event: 'phx_join',
         payload: {},
         ref: '2'
@@ -1653,155 +1832,80 @@
     clientChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
+        if (data.event === 'INSERT' && data.payload && data.payload.record) {
+          var newClient = data.payload.record;
+          // Add to local cache
+          allClients.unshift(newClient);
+          updateStats();
+          // If clients tab is active, re-render
+          var clientsTab = document.getElementById('tab-clients');
+          if (clientsTab && clientsTab.classList.contains('active')) {
+            applyFilters();
+          }
+          showAdminToast('New lead: ' + (newClient.full_name || newClient.email || 'Unknown'));
+        }
         if (data.event === 'UPDATE' && data.payload && data.payload.record) {
           var updated = data.payload.record;
-          // Merge into currentClient
-          currentClient = Object.assign({}, currentClient, updated);
-          // Re-render status badges live
-          renderStatusBadges(currentClient);
-          renderTimeline(currentClient.client_stage || 'inquiry_submitted', currentClient.construction_stage);
-          // Update pipeline status card
-          var PIPELINE_LABELS = {
-            'client_inquiry_made': 'New Inquiry', 'client_qualified': 'Qualified',
-            'discovery_call_booked': 'Discovery Call Booked', 'discovery_call_completed': 'Discovery Call Complete',
-            'design_proposal_drafting': 'Proposal Drafting', 'design_proposal_presented': 'Proposal Presented',
-            'design_proposal_accepted': 'Proposal Accepted', 'site_consultation_scheduled': 'Site Consultation Scheduled',
-            'site_consultation_completed': 'Site Consultation Complete', 'design_phase_started': 'Design Phase Started',
-            'base_map_complete': 'Base Map Complete', 'base_map_approved': 'Base Map Approved',
-            '3d_model_completed': '3D Model Complete', '3d_model_approved': '3D Model Approved',
-            'visualizations_completed': 'Visualizations Complete', 'visualizations_approved': 'Visualizations Approved',
-            'construction_document_phase_complete': 'Construction Documents Complete',
-            'permit_plans_submitted': 'Permit Plans Submitted', 'permit_plans_approved': 'Permit Plans Approved',
-            'construction_started': 'Construction Started', 'construction_finished': 'Construction Finished',
-            'project_complete': 'Project Complete'
-          };
-          var statusEl = document.getElementById('ddStatus');
-          if (statusEl) statusEl.textContent = PIPELINE_LABELS[updated.status] || updated.status || 'New Inquiry';
-          // Update project type
-          var ptEl = document.getElementById('ddProjectType');
-          if (ptEl && updated.project_type_category) ptEl.textContent = PROJECT_TYPE_LABELS[updated.project_type_category] || updated.project_type_category;
-          // Show a subtle toast notification
-          showRealtimeToast('Your project has been updated');
+          // Update local cache
+          var idx = allClients.findIndex(function(c) { return c.id === updated.id; });
+          if (idx > -1) allClients[idx] = Object.assign({}, allClients[idx], updated);
         }
-      } catch(e) { console.error('Realtime client update:', e); }
+      } catch(e) { console.error('Admin realtime clients:', e); }
     };
 
-    clientChannel.onerror = function(e) { console.error('Realtime client error:', e); };
-    realtimeChannels.push(clientChannel);
+    clientChannel.onerror = function(e) { console.error('Admin realtime client error:', e); };
+    adminRealtimeChannels.push(clientChannel);
+
+    // ── 3. LIVE NEW PROJECTS from client portal ───────────────────
+    var projChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    projChannel.onopen = function() {
+      projChannel.send(JSON.stringify({
+        topic: 'realtime:public:projects',
+        event: 'phx_join',
+        payload: {},
+        ref: '3'
+      }));
+    };
+
+    projChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        if (data.event === 'INSERT' && data.payload && data.payload.record) {
+          var proj = data.payload.record;
+          // If projects tab is active, reload it
+          var projTab = document.getElementById('tab-projects');
+          if (projTab && projTab.classList.contains('active')) {
+            loadProjects();
+          }
+          showAdminToast('New project created: ' + (proj.project_name || 'Unnamed'));
+        }
+      } catch(e) { console.error('Admin realtime projects:', e); }
+    };
+
+    projChannel.onerror = function(e) { console.error('Admin realtime proj error:', e); };
+    adminRealtimeChannels.push(projChannel);
   }
 
-  function stopRealtime() {
-    realtimeChannels.forEach(function(ch) {
+  function stopAdminRealtime() {
+    adminRealtimeChannels.forEach(function(ch) {
       try { ch.close(); } catch(e) {}
     });
-    realtimeChannels = [];
+    adminRealtimeChannels = [];
   }
 
-  // ── TOAST NOTIFICATION ────────────────────────────────────────
-  function showRealtimeToast(message) {
-    var existing = document.getElementById('ddRealtimeToast');
+  // Admin toast notification
+  function showAdminToast(message) {
+    var existing = document.getElementById('daRealtimeToast');
     if (existing) existing.remove();
     var toast = document.createElement('div');
-    toast.id = 'ddRealtimeToast';
+    toast.id = 'daRealtimeToast';
     toast.textContent = message;
-    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--bg);font-family:Jost,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 20px;z-index:9999;animation:ddFadeUp 0.3s ease both;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--bg);font-family:Jost,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 20px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);animation:daFade 0.3s ease both';
     document.body.appendChild(toast);
-    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3000);
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 4000);
   }
-
-  // ── CREATE PROJECT PANEL ──────────────────────────────────────────
-  window._showCreateProject = function() {
-    var panel = document.getElementById('ddCreateProject');
-    if (panel) panel.classList.add('visible');
-    document.getElementById('ddProjectSelector').classList.remove('visible');
-    document.getElementById('ddDashboard').classList.remove('visible');
-    // Pre-fill client name if we know it
-    var nameInput = document.getElementById('cpClientName');
-    if (nameInput && currentClient && currentClient.full_name && !nameInput.value) {
-      nameInput.value = currentClient.full_name;
-    }
-  };
-
-  window._hideCreateProject = function() {
-    var panel = document.getElementById('ddCreateProject');
-    if (panel) panel.classList.remove('visible');
-    // Reset all unified form fields
-    ['cpAddress','cpClientName','cpName','cpAnything','cpGoals'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.value = '';
-    });
-    ['cpType','cpBudget'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) el.value = '';
-    });
-    var msg  = document.getElementById('cpMsg');       if (msg)  msg.textContent = '';
-    var succ = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'none';
-    var btn  = document.getElementById('cpSubmit');    if (btn) { btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = ''; }
-
-    if (allClientProjects.length > 1 || isContractor) showProjectSelector();
-    else if (currentClient) showDashboard();
-    else showLogin();
-  };
-
-  window._submitCreateProject = async function() {
-    var address    = document.getElementById('cpAddress').value.trim();
-    var clientName = (document.getElementById('cpClientName') || {}).value ? document.getElementById('cpClientName').value.trim() : '';
-    var name       = document.getElementById('cpName').value.trim();
-    var type       = document.getElementById('cpType').value;
-    var anything   = (document.getElementById('cpAnything') || {}).value ? document.getElementById('cpAnything').value.trim() : '';
-    var goals      = document.getElementById('cpGoals').value.trim();
-    var budget     = document.getElementById('cpBudget').value;
-    var msg = document.getElementById('cpMsg');
-    var btn = document.getElementById('cpSubmit');
-
-    // Unified validation — same required fields as admin
-    if (!address)    { msg.textContent = 'Project address is required.';           msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
-    if (!clientName) { msg.textContent = 'Client name is required.';               msg.style.color = 'var(--error)'; document.getElementById('cpClientName').focus(); return; }
-    if (!name)       { msg.textContent = 'Project name is required.';              msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
-    if (!budget)     { msg.textContent = 'Please enter your investment / budget level.';     msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
-
-    if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
-    var clientId = (currentClient || allClientProjects[0]).id;
-    btn.textContent = 'Creating Project...'; btn.disabled = true; msg.textContent = '';
-
-    var description = [goals, anything ? 'Additional notes: ' + anything : ''].filter(Boolean).join('\n\n');
-
-    try {
-      var res = await apiFetch('/rest/v1/projects', {
-        method: 'POST', headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify({
-          client_id: clientId,
-          project_name: name,
-          project_type: type || null,
-          project_address: address || null,
-          description: description || null,
-          status: 'active'
-        })
-      });
-      // Save investment level on client record
-      if (budget) {
-        apiFetch('/rest/v1/clients?id=eq.' + clientId, {
-          method: 'PATCH',
-          headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ investment: budget })
-        }).catch(function(e) { console.error('investment patch:', e); });
-      }
-      if (res.ok) {
-        var projData = await res.json() || [];
-        var newProjectId = projData[0] ? projData[0].id : null;
-        // Files uploaded via Documents tab after project creation
-        var succ = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'block';
-        btn.textContent = 'Project Created!'; btn.style.background = 'var(--success)';
-        setTimeout(function() { window._hideCreateProject(); loadContractorProjects(); }, 2000);
-      } else {
-        var errText = await res.text();
-        console.error('Create project error:', errText);
-        msg.textContent = 'Error creating project. Please try again.'; msg.style.color = 'var(--error)';
-        btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
-      }
-    } catch(e) {
-      console.error('_submitCreateProject:', e);
-      msg.textContent = 'Something went wrong.'; msg.style.color = 'var(--error)';
-      btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
-    }
-  };
 
 })();
