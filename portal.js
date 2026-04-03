@@ -1,4 +1,7 @@
 (function () {
+  // Prevent double initialization if script loads twice
+  if (window.__ddPortalInit) return;
+  window.__ddPortalInit = true;
 
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
@@ -375,29 +378,27 @@
     '      <span class="dd-nav-user" id="ddNavUser"></span>',
     '      <button class="dd-nav-logout" id="ddRefreshBtn" title="Refresh project data" style="border:1px solid var(--border);padding:6px 12px;font-size:9px">&#8635; Refresh</button>',
     '      <button class="dd-nav-back" id="ddNavBack">&#8592; All Projects</button>',
-    '      <button id="ddChangePassBtn" onclick="window._toggleChangePass()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:8px;letter-spacing:0.25em;text-transform:uppercase;padding:6px 14px;cursor:pointer;font-family:Jost,sans-serif;margin-right:8px">Change Password</button>',
     '      <button class="dd-nav-logout" id="ddLogoutBtn">Sign Out</button>',
     '    </div>',
     '  </nav>',
-    '  <div id="ddChangePassPanel" style="display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:24px 32px">',
-    '    <div style="max-width:380px">',
-    '      <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Change Your Password</div>',
-    '      <div style="display:flex;flex-direction:column;gap:10px">',
-    '        <input type="password" id="ddNewPass" placeholder="New password (min 6 characters)" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
-    '        <input type="password" id="ddConfirmPass" placeholder="Confirm new password" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
-    '        <div style="display:flex;gap:8px">',
-    '          <button class="dd-btn" onclick="window._saveNewPassword()" style="padding:10px 24px;font-size:9px">Update Password</button>',
-    '          <button onclick="window._toggleChangePass()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:10px 20px;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-family:Jost,sans-serif">Cancel</button>',
-    '        </div>',
-    '        <div id="ddChangePassMsg" style="font-size:11px;min-height:16px"></div>',
-    '      </div>',
+
+    '  <div class="dd-tabs" id="ddTabBar">',
+    '    <span class="dd-active-tab-label" id="ddActiveTabLabel">Overview</span>',
+    '    <button class="dd-hamburger" id="ddHamburger" onclick="window._toggleMobileMenu()" aria-label="Menu">&#9776;</button>',
+    '    <div class="dd-mobile-menu" id="ddMobileMenu">',
+    '      <button class="dd-tab active" data-tab="overview" onclick="window._selectMobileTab(this)">Overview</button>',
+    '      <button class="dd-tab" data-tab="checklist" onclick="window._selectMobileTab(this)">Checklist</button>',
+    '      <button class="dd-tab" data-tab="uploads" onclick="window._selectMobileTab(this)">Documents</button>',
+    '      <button class="dd-tab" data-tab="messages" onclick="window._selectMobileTab(this)">Messages</button>',
+    '      <button class="dd-tab" data-tab="schedule" onclick="window._selectMobileTab(this)">Schedule</button>',
+    '      <button class="dd-tab" data-tab="drive" onclick="window._selectMobileTab(this)">Project Files</button>',
+    '      <button class="dd-tab" data-tab="settings" onclick="window._selectMobileTab(this)">Settings</button>',
     '    </div>',
-    '  </div>',
-    '  <div class="dd-tabs">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
     '    <button class="dd-tab" data-tab="uploads">Documents</button>',
     '    <button class="dd-tab" data-tab="messages">Messages</button>',
+    '    <button class="dd-tab" data-tab="settings">Settings</button>',
 
     '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
@@ -517,6 +518,27 @@
     '      <div class="dd-section-sub">Access your shared project folders</div>',
     '      <div id="ddDriveList"></div>',
     '    </div>',
+    '    <div class="dd-tab-content" id="tab-settings">',
+    '      <div class="dd-section-title">Account Settings</div>',
+    '      <div class="dd-section-sub">Manage your account and password</div>',
+    '      <div style="max-width:420px;margin-top:24px">',
+    '        <div style="background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:16px">',
+    '          <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Change Password</div>',
+    '          <div style="display:flex;flex-direction:column;gap:10px">',
+    '            <input type="password" id="ddNewPass" placeholder="New password (min 6 characters)" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
+    '            <input type="password" id="ddConfirmPass" placeholder="Confirm new password" style="background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;font-family:Jost,sans-serif;font-size:12px;outline:none;width:100%;box-sizing:border-box" />',
+    '            <button class="dd-btn" onclick="window._saveNewPassword()" style="padding:12px 24px;font-size:9px;align-self:flex-start">Update Password</button>',
+    '            <div id="ddChangePassMsg" style="font-size:11px;min-height:16px"></div>',
+    '          </div>',
+    '        </div>',
+    '        <div style="background:var(--surface);border:1px solid var(--border);padding:24px">',
+    '          <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Account</div>',
+    '          <div style="font-size:13px;color:var(--muted);margin-bottom:20px" id="ddSettingsEmail"></div>',
+    '          <button onclick="doLogout()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;padding:10px 20px;cursor:pointer;font-family:Jost,sans-serif">Sign Out</button>',
+    '        </div>',
+    '      </div>',
+    '    </div>',
+
 
     '  </div>',
     '</div>',
@@ -663,6 +685,10 @@
     if (dashBtn) dashBtn.style.display = isContractor ? 'block' : 'none';
     var navUser = document.getElementById('ddNavUser');
     if (navUser) navUser.textContent = currentClient ? (currentClient.full_name || currentUser.email) : currentUser.email;
+    var settingsEmail = document.getElementById('ddSettingsEmail');
+    if (settingsEmail) settingsEmail.textContent = 'Signed in as: ' + currentUser.email;
+    var settingsEmail = document.getElementById('ddSettingsEmail');
+    if (settingsEmail) settingsEmail.textContent = 'Signed in as: ' + currentUser.email;
     var navProject = document.getElementById('ddNavProjectName');
     if (navProject && isContractor && allClientProjects.length > 1) {
       navProject.textContent = currentClient ? (currentClient.full_name || '') : '';
@@ -901,6 +927,40 @@
 
   document.getElementById('ddNavBack').addEventListener('click', function() {
     stopRealtime(); // Stop subscriptions for this project before switching
+  // ── MOBILE HAMBURGER MENU ─────────────────────────────────────────
+  window._toggleMobileMenu = function() {
+    var menu = document.getElementById('ddMobileMenu');
+    if (menu) menu.classList.toggle('open');
+  };
+
+  window._selectMobileTab = function(btn) {
+    var tab = btn.getAttribute('data-tab');
+    // Close menu
+    var menu = document.getElementById('ddMobileMenu');
+    if (menu) menu.classList.remove('open');
+    // Update active label
+    var label = document.getElementById('ddActiveTabLabel');
+    if (label) label.textContent = btn.textContent;
+    // Trigger normal tab switch
+    var desktopTab = document.querySelector('#dd-portal .dd-tabs > .dd-tab[data-tab="' + tab + '"]');
+    if (desktopTab) desktopTab.click();
+    else {
+      // Direct tab switch
+      document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      var content = document.getElementById('tab-' + tab);
+      if (content) content.classList.add('active');
+    }
+  };
+
+  // Close hamburger menu when clicking outside
+  document.addEventListener('click', function(e) {
+    var menu = document.getElementById('ddMobileMenu');
+    var hamburger = document.getElementById('ddHamburger');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== hamburger) {
+      menu.classList.remove('open');
+    }
+  });
+
     document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
     document.querySelector('[data-tab="overview"]').classList.add('active');
