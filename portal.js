@@ -1133,24 +1133,16 @@
           localStorage.setItem('dd_token', data.access_token);
           sessionStorage.setItem('dd_token', data.access_token);
         } catch(e) {}
-        // Get user info and boot the portal
-        try {
-          var userRes  = await fetch(SUPABASE_URL + '/auth/v1/user', {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + data.access_token }
-          });
-          var userData = await userRes.json();
-          if (userData && userData.email) {
-            currentUser = { access_token: data.access_token, email: userData.email, id: userData.id };
-            document.getElementById('ddLoginWrap').style.display = 'none';
-            await init();
-          } else {
-            showMsg(msg, 'Could not load your account. Please try again.', 'error');
-          }
-        } catch(e) {
-          showMsg(msg, 'Could not load your portal. Please try again.', 'error');
-        }
+        // Use the existing init() flow — it reads the token from storage
+        // and handles showing login vs dashboard correctly
+        await init();
       } else {
-        showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
+        var errMsg = data.error_description || data.msg || '';
+        if (errMsg.toLowerCase().includes('invalid') || errMsg.toLowerCase().includes('credentials')) {
+          showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
+        } else {
+          showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
+        }
       }
     } catch(e) {
       showMsg(msg, 'Connection error. Please try again.', 'error');
