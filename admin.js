@@ -614,12 +614,17 @@
       var mcat = !cCat || c.work_category === cCat;
       // Subtab filter
       var mst = true;
+      var clientStatus = c.client_status || 'lead';
       if (activeSubtab === 'all') {
-        mst = c.client_status !== 'archived';
+        mst = clientStatus !== 'archived';
       } else if (activeSubtab === 'stone_sourcing') {
         mst = c.service_type === 'stone_sourcing';
+      } else if (activeSubtab === 'active_client') {
+        mst = clientStatus === 'active_client';
+      } else if (activeSubtab === 'lead') {
+        mst = clientStatus === 'lead' || clientStatus === null || clientStatus === undefined || clientStatus === '';
       } else {
-        mst = (c.client_status || 'lead') === activeSubtab;
+        mst = clientStatus === activeSubtab;
       }
       return mq && ms && mcat && mst;
     }));
@@ -630,6 +635,7 @@
     allClients.forEach(function(c) {
       var st = c.client_status || 'lead';
       if (counts[st] !== undefined) counts[st]++;
+      else counts['lead']++; // treat unknown statuses as lead
       if (st !== 'archived') counts.all++;
       if (c.service_type === 'stone_sourcing') counts.stone_sourcing++;
     });
