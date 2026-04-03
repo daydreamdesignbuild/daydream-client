@@ -199,7 +199,10 @@
     '#dd-admin .da-stat { background: var(--surface); padding: 16px 24px; flex: 1; }',
     '#dd-admin .da-stat-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }',
     '#dd-admin .da-stat-value { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); font-weight: 400; }',
-    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 32px; overflow-x: auto; }',
+    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 32px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; position: relative; }',
+    '#dd-admin .da-tabs::-webkit-scrollbar { display: none; }',
+    '#dd-admin .da-tabs-wrap { position: relative; }',
+    '#dd-admin .da-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 48px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; z-index: 1; }',
     '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
     '#dd-admin .da-tab:hover { color: var(--text); }',
     '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
@@ -213,7 +216,6 @@
     '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
     '#dd-admin .da-subtab-count { font-size: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }',
     '#dd-admin .da-client-subtab.active .da-subtab-count { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
-    '#dd-admin .da-client-subtabs { display: flex; background: var(--bg); border-bottom: 2px solid var(--border); padding: 0 32px; gap: 0; overflow-x: auto; }',
     '#dd-admin .da-client-subtab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }',
     '#dd-admin .da-client-subtab:hover { color: var(--text); }',
     '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
@@ -357,7 +359,29 @@
     '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
-    '@media (max-width: 700px) { #dd-admin .da-stats { flex-direction: column; } #dd-admin .da-nav { padding: 0 16px; } #dd-admin .da-toolbar { padding: 16px; } #dd-admin .da-cards-wrap { padding: 16px; } #dd-admin .da-details-grid { grid-template-columns: 1fr; } #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 16px; } #dd-admin .da-modal-grid { grid-template-columns: 1fr; } }'
+    '@media (max-width: 700px) {',
+    '  #dd-admin .da-stats { flex-direction: column; }',
+    '  #dd-admin .da-nav { padding: 0 12px; height: 52px; }',
+    '  #dd-admin .da-nav-title { font-size: 12px; }',
+    '  #dd-admin .da-toolbar { padding: 12px; gap: 8px; }',
+    '  #dd-admin .da-toolbar .da-search { width: 100%; }',
+    '  #dd-admin .da-toolbar .da-filter { width: 100%; min-width: unset !important; }',
+    '  #dd-admin .da-cards-wrap { padding: 12px; }',
+    '  #dd-admin .da-card-top { flex-direction: column; align-items: flex-start; gap: 8px; }',
+    '  #dd-admin .da-card-right { width: 100%; justify-content: flex-start; flex-wrap: wrap; }',
+    '  #dd-admin .da-card-name { font-size: 13px; word-break: break-word; }',
+    '  #dd-admin .da-stage-pill { font-size: 9px; }',
+    '  #dd-admin .da-details-grid { grid-template-columns: 1fr; }',
+    '  #dd-admin .da-action-row { flex-direction: column; align-items: flex-start; }',
+    '  #dd-admin .da-action-row .da-select { width: 100%; }',
+    '  #dd-admin .da-action-row .da-update-btn { width: 100%; }',
+    '  #dd-admin .da-messages-wrap, #dd-admin .da-checklist-wrap { padding: 12px; }',
+    '  #dd-admin .da-modal-grid { grid-template-columns: 1fr; }',
+    '  #dd-admin .da-add-client-wrap { padding: 16px; }',
+    '  #dd-admin .da-client-subtabs { padding: 0 12px; }',
+    '  #dd-admin .da-client-subtab { padding: 12px 14px; font-size: 8px; }',
+    '  #dd-admin .da-section-title { font-size: 16px; }',
+    '}'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -393,14 +417,14 @@
     '    <div class="da-stat"><div class="da-stat-label">Completed</div><div class="da-stat-value" id="daStatComplete">—</div></div>',
     '    <div class="da-stat"><div class="da-stat-label">New This Month</div><div class="da-stat-value" id="daStatMonth">—</div></div>',
     '  </div>',
-    '  <div class="da-tabs">',
+    '  <div class="da-tabs-wrap"><div class="da-tabs">',
     '    <button class="da-tab active" data-tab="clients">Clients</button>',
     '    <button class="da-tab da-tab-add" data-tab="add-client">+ Add Client</button>',
     '    <button class="da-tab da-tab-add" data-tab="projects">Projects</button>',
     '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
     '    <button class="da-tab" data-tab="site-photos">Job Site Photos</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
-    '  </div>',
+    '  </div></div>',
 
     // CLIENTS TAB
     '  <div class="da-tab-content active" id="tab-clients">',
@@ -639,7 +663,7 @@
       });
       var data = await res.json();
       if (data.access_token) {
-        try { sessionStorage.setItem('dd_admin_token', data.access_token); } catch(e) {}
+        try { localStorage.setItem('dd_admin_token', data.access_token); sessionStorage.setItem('dd_admin_token', data.access_token); } catch(e) {}
         document.getElementById('daLoginWrap').style.display = 'none';
         document.getElementById('daDashboard').classList.add('visible');
         loadClients();
@@ -653,7 +677,7 @@
   document.getElementById('daPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('daLoginBtn').click(); });
   document.getElementById('daLogoutBtn').addEventListener('click', function() {
     stopAdminRealtime(); // Clean up WebSocket connections
-    try { sessionStorage.removeItem('dd_admin_token'); } catch(e) {}
+    try { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); } catch(e) {}
     document.getElementById('daDashboard').classList.remove('visible');
     document.getElementById('daLoginWrap').style.display = 'flex';
   });
@@ -1179,13 +1203,20 @@
 
   // ── RESEND PORTAL ACCESS ──────────────────────────────────────────
   window._resendPortalAccess = async function(id, email, name, btn) {
-    if (!email) return;
+    // Decode HTML entities from escaped strings (fixes mobile payload issue)
+    email = (email || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
+    name  = (name  || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
+    if (!email) { alert('No email address on file for this client.'); return; }
     if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
     try {
       var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
-        body: JSON.stringify({ email: email, full_name: name })
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'apikey': SUPABASE_KEY
+        },
+        body: JSON.stringify({ email: email.toLowerCase().trim(), full_name: name })
       });
       var data = await res.json();
       if (btn) { btn.textContent = data.success ? 'Link Sent!' : 'Error'; btn.style.color = data.success ? 'var(--success)' : 'var(--error)'; }
