@@ -79,6 +79,9 @@
 
     /* Submit */
     '#dd-form-wrap .dd-submit-wrap { padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; background: var(--surface-2); border-top: 1px solid var(--border); }',
+    '#dd-form-wrap .dd-radio-group { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }',
+    '#dd-form-wrap .dd-radio-label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text); cursor: pointer; }',
+    '#dd-form-wrap .dd-radio-label input { accent-color: var(--gold); width: 16px; height: 16px; }',
     '#dd-form-wrap button[type="submit"] { width: 100%; max-width: 300px; background: transparent; border: 1px solid var(--gold) !important; color: var(--gold); font-family: Jost, sans-serif; font-weight: 300; font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase; padding: 18px 40px; cursor: pointer; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }',
     '#dd-form-wrap button[type="submit"]:hover { background: var(--gold) !important; color: #0d0d0b !important; box-shadow: 0 0 30px rgba(238,178,74,0.15); }',
     '#dd-form-wrap button[type="submit"]:disabled { opacity: 0.35; cursor: not-allowed; }',
@@ -223,6 +226,14 @@
     });
   }
 
+  // Show/hide Professional Role based on service type
+  document.querySelectorAll('input[name="serviceType"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var profRow = document.getElementById('ddProfRoleRow');
+      if (profRow) profRow.style.display = this.value === 'stone_sourcing' ? 'block' : 'none';
+    });
+  });
+
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     errMsg.classList.remove('visible');
@@ -245,6 +256,8 @@
       investment:   document.getElementById('ddInvestment').value.trim(),
       notes:        document.getElementById('ddNotes').value.trim(),
       status:       'client_inquiry_made',
+      service_type:   (document.querySelector('input[name="serviceType"]:checked') || {}).value || 'design_build',
+      professional_role: document.getElementById('ddProfRole') ? document.getElementById('ddProfRole').value || null : null,
       client_stage: 'inquiry_submitted'
     };
 
