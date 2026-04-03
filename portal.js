@@ -1112,9 +1112,10 @@
     if (!email) { showMsg(msg, 'Please enter your email address.', 'error'); return; }
     this.disabled = true; this.textContent = 'Sending...';
     try {
-      var res = await fetch(SUPABASE_URL + '/auth/v1/magiclink?redirect_to=' + encodeURIComponent(PORTAL_URL), {
-        method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email })
+      var res = await fetch(SUPABASE_URL + '/auth/v1/otp', {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, options: { emailRedirectTo: PORTAL_URL } })
       });
       showMsg(msg, res.ok ? 'Login link sent! Check your inbox and click the link to access your portal.' : 'Something went wrong. Please try again.', res.ok ? 'success' : 'error');
     } catch(e) { showMsg(msg, 'Something went wrong. Please try again.', 'error'); }
