@@ -86,12 +86,12 @@
     /* Placeholder */
     '#dd-form-wrap .dd-field input::placeholder, #dd-form-wrap .dd-field textarea::placeholder { color: #c4bdb6; }',
 
-    /* Submit area */
+    /* Submit area — centered column */
     '#dd-form-wrap .dd-submit-wrap { padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; background: var(--surface-2); border-top: 1px solid var(--border); }',
 
-    /* Submit button — bronze outline, fills on hover */
+    /* Submit button — bronze outline, fills on hover, ALWAYS CENTERED */
     '#dd-form-wrap button[type="submit"] {',
-    '  width: 100%; max-width: 320px;',
+    '  display: block; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto;',
     '  background: transparent; border: 1px solid var(--gold) !important;',
     '  color: var(--gold); font-family: Jost, sans-serif; font-weight: 300;',
     '  font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase;',
