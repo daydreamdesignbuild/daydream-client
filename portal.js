@@ -79,13 +79,13 @@
 
   var CONTRACT_LABELS = {
     'not_sent':   { label: 'Not Yet Sent',              color: '#8a8680' },
-    'sent':       { label: 'Sent — Awaiting Signature', color: '#eeb24a' },
+    'sent':       { label: 'Sent — Awaiting Signature', color: '#9e7b50' },
     'signed':     { label: 'Signed ✓',                  color: '#6a9e7a' }
   };
 
   var PAYMENT_LABELS = {
     'not_sent':         { label: 'Invoice Not Yet Sent',           color: '#8a8680' },
-    'invoice_sent':     { label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
+    'invoice_sent':     { label: 'Invoice Sent — Awaiting Payment', color: '#9e7b50' },
     'deposit_paid':     { label: 'Deposit Paid — Balance Due',     color: '#5a8e9e' },
     'partially_paid':   { label: 'Partially Paid',                 color: '#7a9e8a' },
     'payment_complete': { label: 'Payment Complete ✓',             color: '#6a9e7a' }
@@ -118,7 +118,7 @@
   var style = document.createElement('style');
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
-    '#dd-portal { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
+    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #e1d9cd; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
     '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
     '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
@@ -800,7 +800,7 @@
     if (!card || !list) return;
     if (!services || !services.length) { card.style.display = 'none'; return; }
     card.style.display = 'block';
-    var STATUS_COLORS = { 'pending': '#8a8680', 'in_progress': '#eeb24a', 'complete': '#6a9e7a' };
+    var STATUS_COLORS = { 'pending': '#8a8680', 'in_progress': '#9e7b50', 'complete': '#6a9e7a' };
     var STATUS_LABELS = { 'pending': 'Pending', 'in_progress': 'In Progress', 'complete': 'Complete' };
     list.innerHTML = '<div class="dd-services-grid">' + services.map(function(sv) {
       var color = STATUS_COLORS[sv.status] || '#8a8680';
