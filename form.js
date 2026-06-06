@@ -89,16 +89,16 @@
     /* Submit area — centered column */
     '#dd-form-wrap .dd-submit-wrap { padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; background: var(--surface-2); border-top: 1px solid var(--border); }',
 
-    /* Submit button — bronze outline, fills on hover, ALWAYS CENTERED */
+    /* Submit button — clean solid bronze, snug width, centered via the flex wrap */
     '#dd-form-wrap button[type="submit"] {',
-    '  display: block; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto;',
-    '  background: transparent; border: 1px solid var(--gold) !important;',
-    '  color: var(--gold); font-family: Jost, sans-serif; font-weight: 300;',
-    '  font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase;',
-    '  padding: 18px 40px; cursor: pointer;',
-    '  transition: background 0.25s, color 0.25s, box-shadow 0.25s;',
+    '  display: inline-block; width: auto; max-width: none; margin: 0 auto;',
+    '  background: var(--gold); border: 1px solid var(--gold) !important;',
+    '  color: #faf8f5; font-family: Jost, sans-serif; font-weight: 400;',
+    '  font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;',
+    '  padding: 16px 52px; cursor: pointer; border-radius: 0;',
+    '  transition: background 0.3s, border-color 0.3s;',
     '}',
-    '#dd-form-wrap button[type="submit"]:hover { background: var(--gold) !important; color: #faf8f5 !important; box-shadow: 0 4px 20px rgba(158,123,80,0.18); }',
+    '#dd-form-wrap button[type="submit"]:hover { background: var(--gold-hover) !important; border-color: var(--gold-hover) !important; }',
     '#dd-form-wrap button[type="submit"]:disabled { opacity: 0.35; cursor: not-allowed; }',
     '#dd-form-wrap button[type="submit"].loading .btn-text    { display: none; }',
     '#dd-form-wrap button[type="submit"].loading .btn-loading { display: inline; }',
