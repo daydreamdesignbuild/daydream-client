@@ -16,9 +16,9 @@
 
   var PIPELINE_STAGES = [
     { value: 'client_inquiry_made',                  label: 'Client Inquiry Made',                  color: '#8a8680' },
-    { value: 'client_qualified',                      label: 'Client Qualified',                      color: '#eeb24a' },
-    { value: 'discovery_call_booked',                 label: 'Discovery Call Booked',                 color: '#eeb24a' },
-    { value: 'discovery_call_completed',              label: 'Discovery Call Completed',              color: '#eeb24a' },
+    { value: 'client_qualified',                      label: 'Client Qualified',                      color: '#9e7b50' },
+    { value: 'discovery_call_booked',                 label: 'Discovery Call Booked',                 color: '#9e7b50' },
+    { value: 'discovery_call_completed',              label: 'Discovery Call Completed',              color: '#9e7b50' },
     { value: 'design_proposal_drafting',              label: 'Design Proposal Drafting',              color: '#7a9e8a' },
     { value: 'design_proposal_presented',             label: 'Design Proposal Presented',             color: '#7a9e8a' },
     { value: 'design_proposal_accepted',              label: 'Design Proposal Accepted',              color: '#6a9e7a' },
@@ -39,11 +39,11 @@
     { value: 'permit_plans_submitted',                label: 'Permit Plans Submitted',                color: '#9e6a5a' },
     { value: 'permit_plan_revisions',                 label: 'Permit Plan Revisions',                 color: '#c07a6a' },
     { value: 'permit_plans_approved',                 label: 'Permit Plans Approved',                 color: '#6a9e7a' },
-    { value: 'construction_started',                  label: 'Construction Started',                  color: '#eeb24a' },
+    { value: 'construction_started',                  label: 'Construction Started',                  color: '#9e7b50' },
     { value: 'construction_finished',                 label: 'Construction Finished',                 color: '#6a9e7a' },
     { value: 'site_photos_to_be_made',                label: 'Site Photos To Be Made',                color: '#8a8680' },
     { value: 'site_photos_finished',                  label: 'Site Photos Finished',                  color: '#6a9e7a' },
-    { value: 'project_complete',                      label: 'Project Complete',                      color: '#eeb24a' }
+    { value: 'project_complete',                      label: 'Project Complete',                      color: '#9e7b50' }
   ];
 
   // Design & Permit Phase Timeline
@@ -80,8 +80,8 @@
     { value: 'designs_received',      label: 'Designs Received',       color: '#7a9eb8' },
     { value: 'model_started',         label: '3D Model Started',       color: '#6a8ea8' },
     { value: 'model_completed',       label: '3D Model Completed',     color: '#5a7e98' },
-    { value: 'takeoffs_complete',     label: 'Take-offs Complete',     color: '#eeb24a' },
-    { value: 'proposal_sent',         label: 'Proposal Sent',          color: '#d4a043' },
+    { value: 'takeoffs_complete',     label: 'Take-offs Complete',     color: '#9e7b50' },
+    { value: 'proposal_sent',         label: 'Proposal Sent',          color: '#c4a07a' },
     { value: 'proposal_accepted',     label: 'Proposal Accepted',      color: '#6a9e7a' },
     { value: 'payment_sent',          label: 'Payment Sent',           color: '#5a8e6a' },
     { value: 'payment_received',      label: 'Payment Received',       color: '#4a7e5a' },
@@ -94,13 +94,13 @@
 
   var CONTRACT_STAGES = [
     { value: 'not_sent',   label: 'Not Yet Sent',               color: '#8a8680' },
-    { value: 'sent',       label: 'Sent — Awaiting Signature',  color: '#eeb24a' },
+    { value: 'sent',       label: 'Sent — Awaiting Signature',  color: '#9e7b50' },
     { value: 'signed',     label: 'Signed ✓',                   color: '#6a9e7a' }
   ];
 
   var PAYMENT_STAGES = [
     { value: 'not_sent',          label: 'Invoice Not Yet Sent',            color: '#8a8680' },
-    { value: 'invoice_sent',      label: 'Invoice Sent — Awaiting Payment', color: '#eeb24a' },
+    { value: 'invoice_sent',      label: 'Invoice Sent — Awaiting Payment', color: '#9e7b50' },
     { value: 'deposit_paid',      label: 'Deposit Paid — Balance Due',      color: '#5a8e9e' },
     { value: 'partially_paid',    label: 'Partially Paid',                  color: '#7a9e8a' },
     { value: 'payment_complete',  label: 'Payment Complete ✓',              color: '#6a9e7a' }
@@ -133,7 +133,7 @@
   // Client relationship status
   var CLIENT_STATUSES = [
     { value: 'active_client',    label: 'Active Client',        color: '#6a9e7a' },
-    { value: 'lead',             label: 'Lead / Not Converted', color: '#eeb24a' },
+    { value: 'lead',             label: 'Lead / Not Converted', color: '#9e7b50' },
     { value: 'archived',         label: 'Archived',             color: '#8a8680' }
   ];
 
@@ -185,7 +185,7 @@
   var style = document.createElement('style');
   style.textContent = [
     '#dd-admin * { box-sizing: border-box; margin: 0; padding: 0; }',
-    '#dd-admin { --bg: #0d0d0b; --surface: #131310; --surface-2: #181815; --border: #252520; --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a; --gold-dim: rgba(238,178,74,0.08); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
+    '#dd-admin { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #e1d9cd; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
     '#dd-admin .da-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; animation: daFade 0.7s ease both; }',
     '#dd-admin .da-login-card { width: 100%; max-width: 400px; border: 1px solid var(--border); background: var(--surface); }',
     '#dd-admin .da-login-header { background: var(--bg); border-bottom: 3px solid var(--gold); padding: 28px 32px; text-align: center; }',
@@ -837,7 +837,7 @@
       return '<div class="da-client-card" id="card-' + c.id + '">'
         + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
         + '  <div class="da-card-left"><div class="da-card-avatar">' + s(initials(c.full_name)) + '</div>'
-        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>','archived':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
+        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #9e7b50;color:#9e7b50;background:rgba(158,123,80,0.08);margin-left:6px;vertical-align:middle">Lead</span>','archived':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
         + '  <div class="da-card-sub">' + s(c.email || '') + (c.phone ? ' · ' + s(c.phone) : '') + (isContr && g.projects.length > 1 ? ' · ' + g.projects.length + ' projects' : '') + '</div></div></div>'
         + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + s(stage.label) + '</div><div class="da-card-investment">' + s(inv) + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
         + '</div>'
@@ -949,7 +949,7 @@
           var existingBadge = nameDiv.querySelector('.da-status-badge-inline');
           if (existingBadge) existingBadge.remove();
           if (val === 'lead') {
-            nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #eeb24a;color:#eeb24a;background:rgba(238,178,74,0.08);margin-left:6px;vertical-align:middle">Lead</span>');
+            nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #9e7b50;color:#9e7b50;background:rgba(158,123,80,0.08);margin-left:6px;vertical-align:middle">Lead</span>');
           } else if (val === 'archived') {
             nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>');
           }
