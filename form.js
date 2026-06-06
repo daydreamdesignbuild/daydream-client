@@ -11,27 +11,37 @@
   style.textContent = [
     '#dd-form-wrap * { box-sizing: border-box; margin: 0; padding: 0; }',
     '#dd-form-wrap {',
-    '  --surface: #131310; --surface-2: #181815; --border: #252520;',
-    '  --text: #f0ebe0; --muted: #8a8680; --gold: #eeb24a;',
-    '  --gold-dim: rgba(238,178,74,0.07); --error: #c07a6a;',
+    '  --surface:    #faf8f5;',   /* dd off-white */
+    '  --surface-2:  #ede8df;',   /* dd cream */
+    '  --border:     #ddd7ce;',   /* dd rule */
+    '  --text:       #28231e;',   /* dd charcoal */
+    '  --muted:      #8a7d73;',   /* dd stone */
+    '  --gold:       #9e7b50;',   /* dd bronze */
+    '  --gold-hover: #c4a07a;',   /* dd bronze-light */
+    '  --gold-dim:   rgba(158,123,80,0.06);',
+    '  --error:      #a05040;',
     '  font-family: Jost, sans-serif; font-weight: 300;',
-    '  color: var(--text); width: 100%; max-width: 660px; margin: 0 auto; padding: 48px 0; background: #0d0d0b !important;',
+    '  color: var(--text); width: 100%; max-width: 660px; margin: 0 auto; padding: 48px 0; background: var(--surface);',
     '}',
 
     /* Header */
-    '#dd-form-wrap header { text-align: center; margin-bottom: 48px; animation: ddFadeUp 0.9s ease both; background: #0d0d0b; padding: 32px 24px; }',
-    '#dd-form-wrap .dd-logo { font-family: "Cormorant Garamond", serif; font-weight: 400; font-size: clamp(28px,5vw,40px); letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; line-height: 1; margin-bottom: 8px; }',
+    '#dd-form-wrap header { text-align: center; margin-bottom: 48px; animation: ddFadeUp 0.9s ease both; background: var(--surface); padding: 32px 24px; }',
+    '#dd-form-wrap .dd-logo { font-family: "Cormorant Garamond", serif; font-weight: 300; font-size: clamp(28px,5vw,40px); letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; line-height: 1; margin-bottom: 8px; }',
     '#dd-form-wrap .dd-logo-sub { font-size: 9px; letter-spacing: 0.45em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }',
     '#dd-form-wrap .dd-rule { display: flex; align-items: center; gap: 16px; justify-content: center; margin-bottom: 18px; }',
-    '#dd-form-wrap .dd-rule span { display: block; height: 1px; width: 60px; background: linear-gradient(90deg, transparent, #252520); }',
-    '#dd-form-wrap .dd-rule span:last-child { background: linear-gradient(90deg, #252520, transparent); }',
+    '#dd-form-wrap .dd-rule span { display: block; height: 1px; width: 60px; background: linear-gradient(90deg, transparent, var(--border)); }',
+    '#dd-form-wrap .dd-rule span:last-child { background: linear-gradient(90deg, var(--border), transparent); }',
     '#dd-form-wrap .dd-diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }',
     '#dd-form-wrap .dd-subtitle { font-family: "Cormorant Garamond", serif; font-size: clamp(14px,2.5vw,17px); font-style: italic; font-weight: 300; color: var(--muted); letter-spacing: 0.04em; line-height: 1.5; }',
 
-    /* Form */
+    /* Form shell */
     '#dd-form-wrap form { display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--surface); animation: ddFadeUp 0.7s 0.2s ease both; opacity: 0; animation-fill-mode: both; }',
-    '#dd-form-wrap .dd-section { font-size: 8px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); padding: 16px 24px 10px; border-bottom: 1px solid var(--border); background: var(--surface-2); opacity: 0.8; }',
-    '#dd-form-wrap .dd-row { display: grid; grid-template-columns: 1fr 1fr; }',
+
+    /* Section headers */
+    '#dd-form-wrap .dd-section { font-size: 8px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); padding: 16px 24px 10px; border-bottom: 1px solid var(--border); background: var(--surface-2); opacity: 0.9; }',
+
+    /* Grid rows */
+    '#dd-form-wrap .dd-row   { display: grid; grid-template-columns: 1fr 1fr; }',
     '#dd-form-wrap .dd-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; }',
 
     /* Fields */
@@ -42,67 +52,74 @@
     '#dd-form-wrap .dd-field label { display: block; font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 16px 24px 5px; transition: color 0.2s; font-family: Jost, sans-serif; }',
     '#dd-form-wrap .dd-field:focus-within label { color: var(--gold); }',
 
-    /* Inputs - force dark bg on everything including autofill */
+    /* Inputs */
     '#dd-form-wrap .dd-field input,',
     '#dd-form-wrap .dd-field select,',
     '#dd-form-wrap .dd-field textarea {',
-    '  width: 100%; background: #131310 !important; border: none !important; outline: none;',
-    '  color: #f0ebe0 !important; font-family: Jost, sans-serif; font-weight: 300; font-size: 14px;',
+    '  width: 100%; background: transparent !important; border: none !important; outline: none;',
+    '  color: var(--text) !important; font-family: Jost, sans-serif; font-weight: 300; font-size: 14px;',
     '  padding: 2px 24px 16px; letter-spacing: 0.03em; appearance: none; -webkit-appearance: none;',
     '  box-shadow: none !important;',
     '}',
 
-    /* Autofill override */
+    /* Autofill override — light bg version */
     '#dd-form-wrap .dd-field input:-webkit-autofill,',
     '#dd-form-wrap .dd-field input:-webkit-autofill:hover,',
     '#dd-form-wrap .dd-field input:-webkit-autofill:focus,',
     '#dd-form-wrap .dd-field input:-webkit-autofill:active {',
-    '  -webkit-box-shadow: 0 0 0 60px #131310 inset !important;',
-    '  -webkit-text-fill-color: #f0ebe0 !important;',
-    '  caret-color: #f0ebe0;',
+    '  -webkit-box-shadow: 0 0 0 60px #faf8f5 inset !important;',
+    '  -webkit-text-fill-color: #28231e !important;',
+    '  caret-color: #28231e;',
     '  transition: background-color 5000s ease-in-out 0s;',
     '}',
 
-    /* Select specific */
+    /* Select */
     '#dd-form-wrap .dd-field select { cursor: pointer; padding-right: 44px; }',
-    '#dd-form-wrap .dd-field select:focus { background: #131310 !important; color: #f0ebe0 !important; }',
-    '#dd-form-wrap .dd-field select option { background: #131310 !important; color: #f0ebe0 !important; }',
+    '#dd-form-wrap .dd-field select option { background: #faf8f5; color: #28231e; }',
 
-    '#dd-form-wrap .dd-field:focus-within { background: var(--gold-dim) !important; }',
-    '#dd-form-wrap .dd-field:focus-within input,',
-    '#dd-form-wrap .dd-field:focus-within select,',
-    '#dd-form-wrap .dd-field:focus-within textarea { background: transparent !important; }',
-
+    /* Arrow */
     '#dd-form-wrap .dd-arrow { position: absolute; right: 20px; top: 50%; transform: translateY(4px); pointer-events: none; color: var(--muted); font-size: 9px; }',
-    '#dd-form-wrap .dd-field textarea { resize: none; min-height: 120px; line-height: 1.75; }',
-    '#dd-form-wrap .dd-field input::placeholder, #dd-form-wrap .dd-field textarea::placeholder { color: #5a5a54; }',
 
-    /* Submit */
+    /* Textarea */
+    '#dd-form-wrap .dd-field textarea { resize: none; min-height: 120px; line-height: 1.75; }',
+
+    /* Placeholder */
+    '#dd-form-wrap .dd-field input::placeholder, #dd-form-wrap .dd-field textarea::placeholder { color: #c4bdb6; }',
+
+    /* Submit area */
     '#dd-form-wrap .dd-submit-wrap { padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; background: var(--surface-2); border-top: 1px solid var(--border); }',
-    '#dd-form-wrap .dd-radio-group { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }',
-    '#dd-form-wrap .dd-radio-label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text); cursor: pointer; }',
-    '#dd-form-wrap .dd-radio-label input { accent-color: var(--gold); width: 16px; height: 16px; }',
-    '#dd-form-wrap button[type="submit"] { width: 100%; max-width: 300px; background: transparent; border: 1px solid var(--gold) !important; color: var(--gold); font-family: Jost, sans-serif; font-weight: 300; font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase; padding: 18px 40px; cursor: pointer; transition: background 0.3s, color 0.3s, box-shadow 0.3s; }',
-    '#dd-form-wrap button[type="submit"]:hover { background: var(--gold) !important; color: #0d0d0b !important; box-shadow: 0 0 30px rgba(238,178,74,0.15); }',
+
+    /* Submit button — bronze outline, fills on hover */
+    '#dd-form-wrap button[type="submit"] {',
+    '  width: 100%; max-width: 320px;',
+    '  background: transparent; border: 1px solid var(--gold) !important;',
+    '  color: var(--gold); font-family: Jost, sans-serif; font-weight: 300;',
+    '  font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase;',
+    '  padding: 18px 40px; cursor: pointer;',
+    '  transition: background 0.25s, color 0.25s, box-shadow 0.25s;',
+    '}',
+    '#dd-form-wrap button[type="submit"]:hover { background: var(--gold) !important; color: #faf8f5 !important; box-shadow: 0 4px 20px rgba(158,123,80,0.18); }',
     '#dd-form-wrap button[type="submit"]:disabled { opacity: 0.35; cursor: not-allowed; }',
-    '#dd-form-wrap button[type="submit"].loading .btn-text { display: none; }',
+    '#dd-form-wrap button[type="submit"].loading .btn-text    { display: none; }',
     '#dd-form-wrap button[type="submit"].loading .btn-loading { display: inline; }',
-    '#dd-form-wrap input[type="checkbox"] { accent-color: var(--gold); }',
     '#dd-form-wrap .btn-loading { display: none; }',
+
+    /* Privacy note */
     '#dd-form-wrap .dd-privacy { font-size: 9px; letter-spacing: 0.2em; color: var(--muted); text-align: center; text-transform: uppercase; }',
 
     /* Error / Success */
     '#dd-form-wrap .dd-error { font-size: 11px; color: var(--error); text-align: center; letter-spacing: 0.1em; display: none; }',
     '#dd-form-wrap .dd-error.visible { display: block; }',
-    '#dd-form-wrap .dd-success { display: none; text-align: center; padding: 80px 20px; animation: ddFadeUp 0.7s ease both; background: #0d0d0b !important; min-height: 500px; width: 100%; box-sizing: border-box; }',  
+    '#dd-form-wrap .dd-success { display: none; text-align: center; padding: 80px 20px; animation: ddFadeUp 0.7s ease both; background: var(--surface); min-height: 500px; width: 100%; box-sizing: border-box; }',
     '#dd-form-wrap .dd-success.visible { display: block; }',
     '#dd-form-wrap .dd-success-diamond { display: inline-block; width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); margin-bottom: 28px; }',
     '#dd-form-wrap .dd-success h2 { font-family: "Cormorant Garamond", serif; font-size: 30px; font-weight: 300; font-style: italic; color: var(--gold); margin-bottom: 14px; }',
     '#dd-form-wrap .dd-success p { font-size: 13px; color: var(--muted); line-height: 2; letter-spacing: 0.08em; }',
 
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
+
     '@media (max-width: 540px) {',
-    '  #dd-form-wrap .dd-row { grid-template-columns: 1fr; }',
+    '  #dd-form-wrap .dd-row   { grid-template-columns: 1fr; }',
     '  #dd-form-wrap .dd-row-3 { grid-template-columns: 1fr; }',
     '  #dd-form-wrap .dd-field { border-right: none; }',
     '}'
@@ -121,7 +138,7 @@
     '  <div class="dd-subtitle">High-End Outdoor Projects Built on Clarity and Truth</div>',
     '</header>',
 
-    '<div class="dd-success" id="ddSuccess" style="background:#0d0d0b !important">',
+    '<div class="dd-success" id="ddSuccess">',
     '  <div class="dd-success-diamond"></div>',
     '  <h2>Thank you.</h2>',
     '  <p>Your inquiry has been received.<br/>We\u2019ll be in touch shortly<br/>to discuss your project.</p>',
@@ -140,7 +157,7 @@
     '  </div>',
 
     '  <div class="dd-row">',
-    '    <div class="dd-field"><label>Are You a Contractor?</label><div class="dd-select-wrap"><select id="ddIsContractor" onchange="window._onContractorChange(this.value)"><option value="">Select an option</option><option value="no">No — I am the homeowner</option><option value="yes">Yes — I am a contractor</option></select><span class="dd-arrow">&#9662;</span></div></div>',
+    '    <div class="dd-field"><label>Are You a Contractor?</label><div class="dd-select-wrap"><select id="ddIsContractor" onchange="window._onContractorChange(this.value)"><option value="">Select an option</option><option value="no">No \u2014 I am the homeowner</option><option value="yes">Yes \u2014 I am a contractor</option></select><span class="dd-arrow">&#9662;</span></div></div>',
     '    <div class="dd-field"><label>What Service Are You Interested In?</label><div class="dd-select-wrap"><select id="ddServiceType"><option value="">Select a service...</option><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="both">Both (Design, Build &amp; Stone)</option></select><span class="dd-arrow">&#9662;</span></div></div>',
     '  </div>',
     '  <div class="dd-row" id="ddCompanyWrap" style="display:none">',
@@ -179,8 +196,8 @@
     '      <option value="YouTube">YouTube</option>',
     '      <option value="Houzz">Houzz</option>',
     '      <option value="Nextdoor">Nextdoor</option>',
-    '      <option value="Referral — Friend or Family">Referral — Friend or Family</option>',
-    '      <option value="Referral — Past Client">Referral — Past Client</option>',
+    '      <option value="Referral \u2014 Friend or Family">Referral \u2014 Friend or Family</option>',
+    '      <option value="Referral \u2014 Past Client">Referral \u2014 Past Client</option>',
     '      <option value="Yard Sign / Drove By">Yard Sign / Drove By</option>',
     '      <option value="Home Show / Event">Home Show / Event</option>',
     '      <option value="Other">Other</option>',
@@ -202,10 +219,9 @@
     '  <div class="dd-field dd-full"><label>What Level of Investment Are You Preparing for This Project?</label><input type="text" id="ddInvestment" placeholder="e.g. $75,000" /></div>',
     '  <div class="dd-field dd-full"><label>Anything Else We Need to Know?</label><textarea id="ddNotes" placeholder="Tell us about your vision, timeline, or any other details..."></textarea></div>',
 
-
     '  <div class="dd-submit-wrap">',
     '    <div class="dd-error" id="ddError">Something went wrong. Please try again.</div>',
-    '    <button type="submit" id="ddSubmit"><span class="btn-text">Submit Inquiry</span><span class="btn-loading">Sending...</span></button>',
+    '    <button type="submit" id="ddSubmit"><span class="btn-text">Submit Inquiry</span><span class="btn-loading">Sending\u2026</span></button>',
     '    <div class="dd-privacy">Your information is kept private and never shared</div>',
     '  </div>',
 
@@ -216,12 +232,11 @@
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
 
-  var form     = document.getElementById('ddForm');
-  var btn      = document.getElementById('ddSubmit');
-  var errMsg   = document.getElementById('ddError');
-  var success  = document.getElementById('ddSuccess');
+  var form    = document.getElementById('ddForm');
+  var btn     = document.getElementById('ddSubmit');
+  var errMsg  = document.getElementById('ddError');
+  var success = document.getElementById('ddSuccess');
 
-  // Show company field when contractor is checked
   // Global contractor change handler (called via onchange attribute)
   window._onContractorChange = function(val) {
     var wrap = document.getElementById('ddCompanyWrap');
@@ -236,8 +251,6 @@
     });
   }
 
-
-
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     errMsg.classList.remove('visible');
@@ -245,28 +258,28 @@
     btn.disabled = true;
 
     var data = {
-      full_name:    (document.getElementById('ddFirstName').value.trim() + ' ' + document.getElementById('ddLastName').value.trim()).trim(),
-      email:        document.getElementById('ddEmail').value.trim(),
-      phone:        document.getElementById('ddPhone').value.trim(),
-      street:       document.getElementById('ddStreet').value.trim(),
-      city:         document.getElementById('ddCity').value.trim(),
-      state:        document.getElementById('ddState').value.trim(),
-      zip:          document.getElementById('ddZip').value.trim(),
-      country:      document.getElementById('ddCountry').value || '',
-      referral:     document.getElementById('ddReferral').value || '',
+      full_name:     (document.getElementById('ddFirstName').value.trim() + ' ' + document.getElementById('ddLastName').value.trim()).trim(),
+      email:         document.getElementById('ddEmail').value.trim(),
+      phone:         document.getElementById('ddPhone').value.trim(),
+      street:        document.getElementById('ddStreet').value.trim(),
+      city:          document.getElementById('ddCity').value.trim(),
+      state:         document.getElementById('ddState').value.trim(),
+      zip:           document.getElementById('ddZip').value.trim(),
+      country:       document.getElementById('ddCountry').value || '',
+      referral:      document.getElementById('ddReferral').value || '',
       is_contractor: document.getElementById('ddIsContractor') ? document.getElementById('ddIsContractor').value === 'yes' : false,
-      company_name: document.getElementById('ddCompany') ? document.getElementById('ddCompany').value.trim() || null : null,
-      project_type: document.getElementById('ddServices').value,
-      investment:   document.getElementById('ddInvestment').value.trim(),
-      notes:        document.getElementById('ddNotes').value.trim(),
-      status:       'client_inquiry_made',
-      service_type:   (document.getElementById('ddServiceType') || {}).value || 'design_build',
+      company_name:  document.getElementById('ddCompany') ? document.getElementById('ddCompany').value.trim() || null : null,
+      project_type:  document.getElementById('ddServices').value,
+      investment:    document.getElementById('ddInvestment').value.trim(),
+      notes:         document.getElementById('ddNotes').value.trim(),
+      status:        'client_inquiry_made',
+      service_type:  (document.getElementById('ddServiceType') || {}).value || 'design_build',
       professional_role: document.getElementById('ddIsContractor') ? (document.getElementById('ddIsContractor').value === 'yes' ? 'contractor' : 'homeowner') : null,
-      client_stage: 'inquiry_submitted'
+      client_stage:  'inquiry_submitted'
     };
 
     try {
-      // ── STEP 1: Insert client record into database ────────────────
+      // ── STEP 1: Insert client record ──────────────────────────────
       var res = await fetch(SUPABASE_URL + '/rest/v1/clients', {
         method: 'POST',
         headers: {
@@ -284,14 +297,11 @@
         throw new Error('Insert failed');
       }
 
-      // ── STEP 2: Portal email is sent automatically ──────────────
-      // The Supabase database trigger (send-email) fires on INSERT
-      // and sends the branded magic link email automatically.
-      // No manual email call needed here — doing so would cause
-      // duplicate emails. The trigger handles auth user creation
-      // and the portal access link in one step.
+      // ── STEP 2: DB trigger fires automatically ────────────────────
+      // send-email trigger on INSERT handles auth user creation
+      // and the branded portal magic link. No manual call needed.
 
-      // ── STEP 3: Show success screen ───────────────────────────────
+      // ── STEP 3: Show success ──────────────────────────────────────
       form.style.display = 'none';
       success.classList.add('visible');
 
