@@ -134,6 +134,7 @@
   var CLIENT_STATUSES = [
     { value: 'active_client',    label: 'Active Client',        color: '#6a9e7a' },
     { value: 'lead',             label: 'Lead / Not Converted', color: '#9e7b50' },
+    { value: 'no_response',      label: 'No Response / Ghosted',color: '#c07a6a' },
     { value: 'archived',         label: 'Archived',             color: '#8a8680' }
   ];
 
@@ -228,11 +229,6 @@
     '#dd-admin .da-tab-content { display: none; flex: 1; }',
     '#dd-admin .da-tab-content.active { display: block; }',
     '#dd-admin .da-client-subtabs { display: flex; background: var(--bg); border-bottom: 2px solid var(--border); padding: 0 32px; gap: 0; overflow-x: auto; }',
-    '#dd-admin .da-client-subtab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }',
-    '#dd-admin .da-client-subtab:hover { color: var(--text); }',
-    '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
-    '#dd-admin .da-subtab-count { font-size: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }',
-    '#dd-admin .da-client-subtab.active .da-subtab-count { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }',
     '#dd-admin .da-client-subtab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }',
     '#dd-admin .da-client-subtab:hover { color: var(--text); }',
     '#dd-admin .da-client-subtab.active { color: var(--gold); border-bottom-color: var(--gold); }',
@@ -352,6 +348,8 @@
     '#dd-admin .da-check-row:last-child { border-bottom: none; }',
     '#dd-admin .da-check-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; margin-top: 4px; }',
     '#dd-admin .da-check-dot.done { background: var(--success); }',
+    '#dd-admin .da-check-clickable { cursor: pointer; transition: background 0.15s; }',
+    '#dd-admin .da-check-clickable:hover { background: var(--gold-dim); }',
     '#dd-admin .da-check-row-label { font-size: 12px; color: var(--text); margin-bottom: 3px; }',
     '#dd-admin .da-check-row-note { font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; background: var(--surface-2); padding: 8px 12px; border-left: 2px solid var(--gold); }',
     '#dd-admin .da-messages-wrap { padding: 24px 32px; }',
@@ -373,8 +371,6 @@
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
     '#dd-admin .da-mobile-menu .da-tab { text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--border); border-radius: 0; width: 100%; font-size: 9px; letter-spacing: 0.25em; }',
-    '@media (max-width: 700px) {',
-    '}',
     '@media (max-width: 700px) {',
     '  #dd-admin .da-stats { flex-direction: column; }',
     '  #dd-admin .da-nav { padding: 0 12px; height: 52px; }',
@@ -450,6 +446,7 @@
     '      <button class="da-client-subtab active" data-status="all">All <span class="da-subtab-count" id="cnt-all"></span></button>',
     '      <button class="da-client-subtab" data-status="active_client">Active <span class="da-subtab-count" id="cnt-active"></span></button>',
     '      <button class="da-client-subtab" data-status="lead">Leads <span class="da-subtab-count" id="cnt-lead"></span></button>',
+    '      <button class="da-client-subtab" data-status="no_response">No Response <span class="da-subtab-count" id="cnt-noresponse"></span></button>',
     '      <button class="da-client-subtab" data-status="finished">Finished <span class="da-subtab-count" id="cnt-finished"></span></button>',
     '      <button class="da-client-subtab" data-status="archived">Archived <span class="da-subtab-count" id="cnt-archived"></span></button>',
     '      <button class="da-client-subtab" data-status="stone_sourcing" style="border-left:1px solid var(--border);margin-left:8px">Stone Sourcing <span class="da-subtab-count" id="cnt-stone"></span></button>',
@@ -522,7 +519,7 @@
     '    </div>',
     '  </div>',
 
-    // CHECKLIST TAB
+    // JOB SITE PHOTOS TAB
     '  <div class="da-tab-content" id="tab-site-photos">',
     '    <div class="da-add-client-wrap" style="max-width:900px">',
     '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">',
@@ -560,7 +557,7 @@
 
 
     '  <div class="da-tab-content" id="tab-checklist">',
-    '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
+    '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><div style="font-size:11px;color:var(--muted);margin:-12px 0 16px;letter-spacing:0.05em">Click any item to mark it received from the client.</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
     '  </div>',
 
     // MESSAGES TAB
@@ -612,7 +609,8 @@
       var mst = true;
       var clientStatus = c.client_status || 'lead';
       if (activeSubtab === 'all') {
-        mst = clientStatus !== 'archived';
+        // FEATURE 1: archived AND no-response clients are hidden from the working pipeline
+        mst = clientStatus !== 'archived' && clientStatus !== 'no_response';
       } else if (activeSubtab === 'stone_sourcing') {
         mst = c.service_type === 'stone_sourcing';
       } else if (activeSubtab === 'active_client') {
@@ -627,15 +625,15 @@
   }
 
   function updateSubtabCounts() {
-    var counts = { all: 0, active_client: 0, lead: 0, finished: 0, archived: 0, stone_sourcing: 0 };
+    var counts = { all: 0, active_client: 0, lead: 0, no_response: 0, finished: 0, archived: 0, stone_sourcing: 0 };
     allClients.forEach(function(c) {
       var st = c.client_status || 'lead';
       if (counts[st] !== undefined) counts[st]++;
       else counts['lead']++; // treat unknown statuses as lead
-      if (st !== 'archived') counts.all++;
+      if (st !== 'archived' && st !== 'no_response') counts.all++;
       if (c.service_type === 'stone_sourcing') counts.stone_sourcing++;
     });
-    var keyMap = { active_client: 'active', stone_sourcing: 'stone' };
+    var keyMap = { active_client: 'active', stone_sourcing: 'stone', no_response: 'noresponse' };
     Object.keys(counts).forEach(function(key) {
       var el = document.getElementById('cnt-' + (keyMap[key] || key));
       if (el) el.textContent = counts[key] || '';
@@ -668,6 +666,7 @@
       if (target) target.classList.add('active');
       if (tab.dataset.tab === 'projects') loadProjects();
       if (tab.dataset.tab === 'checklist') loadAllChecklists();
+      if (tab.dataset.tab === 'site-photos') { populatePhotoClientFilter(); loadAdminPhotos(''); }
       if (tab.dataset.tab === 'messages') {
         loadMessages();
         apiFetch('/rest/v1/messages?sender=neq.daydream_team&is_read=eq.false', { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_read: true }) }).catch(function() {});
@@ -757,7 +756,7 @@
       allClients = Array.isArray(data) ? data : [];
       updateStats();
       updateSubtabCounts();
-      renderCards(allClients);
+      applyFilters();
       checkUnreadMessages();
     } catch(e) { console.error('loadClients error:', e.message); }
   }
@@ -834,10 +833,10 @@
           + '</div>';
       }
 
-      return '<div class="da-client-card" id="card-' + c.id + '">'
+      return '<div class="da-client-card' + (c.client_status === 'archived' || c.client_status === 'no_response' ? ' archived' : '') + '" id="card-' + c.id + '">'
         + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
         + '  <div class="da-card-left"><div class="da-card-avatar">' + s(initials(c.full_name)) + '</div>'
-        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #9e7b50;color:#9e7b50;background:rgba(158,123,80,0.08);margin-left:6px;vertical-align:middle">Lead</span>','archived':'<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
+        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #9e7b50;color:#9e7b50;background:rgba(158,123,80,0.08);margin-left:6px;vertical-align:middle">Lead</span>','no_response':'<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #c07a6a;color:#c07a6a;background:rgba(192,122,106,0.08);margin-left:6px;vertical-align:middle">No Response</span>','archived':'<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
         + '  <div class="da-card-sub">' + s(c.email || '') + (c.phone ? ' · ' + s(c.phone) : '') + (isContr && g.projects.length > 1 ? ' · ' + g.projects.length + ' projects' : '') + '</div></div></div>'
         + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + s(stage.label) + '</div><div class="da-card-investment">' + s(inv) + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
         + '</div>'
@@ -871,7 +870,7 @@
           ? '    <div class="da-action-row"><select class="da-select" id="stonesel-' + c.id + '">' + STONE_STAGES.map(function(ss) { return '<option value="' + ss.value + '"' + (c.stone_stage === ss.value ? ' selected' : '') + '>' + ss.label + '</option>'; }).join('') + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'stone_stage\', \'stonesel-' + c.id + '\')">Update</button></div>'
           : '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>')
         + '    <div class="da-section-divider">Client Status</div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="finished"' + (c.client_status==='finished'?' selected':'') + '>Finished</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
+        + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="no_response"' + (c.client_status==='no_response'?' selected':'') + '>No Response / Ghosted</option><option value="finished"' + (c.client_status==='finished'?' selected':'') + '>Finished</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Contractor</div><select class="da-select" id="contrsel-' + c.id + '"><option value="false"' + (!c.is_contractor?' selected':'') + '>No — Homeowner / Client</option><option value="true"' + (c.is_contractor?' selected':'') + '>Yes — Contractor</option></select><button class="da-update-btn" onclick="window._updateContractor(\'' + c.id + '\', \'contrsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Category</div><select class="da-select" id="catsel-' + c.id + '"><option value="">— Not Set —</option><option value="design_only"' + (c.work_category==='design_only'?' selected':'') + '>Design Only</option><option value="build"' + (c.work_category==='build'?' selected':'') + '>Build / Construction</option><option value="full_service"' + (c.work_category==='full_service'?' selected':'') + '>Full Service</option><option value="consultation"' + (c.work_category==='consultation'?' selected':'') + '>Consultation</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'work_category\', \'catsel-' + c.id + '\')">Update</button></div>'
         + '    <div class="da-action-row"><div class="da-action-label">Relationship</div><select class="da-select" id="relsel-' + c.id + '"><option value="">— Not Set —</option><option value="owner"' + (c.client_relationship === 'owner' ? ' selected' : '') + '>Owner</option><option value="contractor"' + (c.client_relationship === 'contractor' ? ' selected' : '') + '>Contractor</option><option value="builder"' + (c.client_relationship === 'builder' ? ' selected' : '') + '>Builder</option><option value="designer"' + (c.client_relationship === 'designer' ? ' selected' : '') + '>Designer / Architect</option><option value="property_manager"' + (c.client_relationship === 'property_manager' ? ' selected' : '') + '>Property Manager</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_relationship\', \'relsel-' + c.id + '\')" >Update</button></div>'
@@ -940,9 +939,9 @@
       if (field === 'client_status') {
         // Update subtab counts
         updateSubtabCounts();
-        // Update archived dimming
+        // FEATURE 1: dim card for archived AND no-response
         var card2 = document.getElementById('card-' + id);
-        if (card2) { card2.classList.toggle('archived', val === 'archived'); }
+        if (card2) { card2.classList.toggle('archived', val === 'archived' || val === 'no_response'); }
         // Update badge in card name
         var nameDiv = card2 ? card2.querySelector('.da-card-name') : null;
         if (nameDiv) {
@@ -950,9 +949,20 @@
           if (existingBadge) existingBadge.remove();
           if (val === 'lead') {
             nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #9e7b50;color:#9e7b50;background:rgba(158,123,80,0.08);margin-left:6px;vertical-align:middle">Lead</span>');
+          } else if (val === 'no_response') {
+            nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #c07a6a;color:#c07a6a;background:rgba(192,122,106,0.08);margin-left:6px;vertical-align:middle">No Response</span>');
           } else if (val === 'archived') {
             nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>');
           }
+        }
+        // FEATURE 1: if the client no longer belongs in the current view, fade it out
+        var shouldHide = false;
+        if (activeSubtab === 'all' && (val === 'archived' || val === 'no_response')) shouldHide = true;
+        else if (activeSubtab !== 'all' && activeSubtab !== 'stone_sourcing' && val !== activeSubtab) shouldHide = true;
+        if (shouldHide && card2) {
+          card2.style.transition = 'opacity 0.4s';
+          card2.style.opacity = '0';
+          setTimeout(function() { applyFilters(); }, 450);
         }
       }
       if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2000); }
@@ -983,6 +993,32 @@
       if (btn) { btn.textContent = res.ok ? 'Saved ✓' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update'; btn.style.background='var(--gold)';} }, 2000); }
       if (!res.ok) console.error('_updateProjType error:', await res.text());
     } catch(e) { console.error('_updateProjType exception:', e); }
+  };
+
+  // Contractor select Update button (was previously unwired)
+  window._updateContractor = async function(id, selectId) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    var newState = sel.value === 'true';
+    var row = sel.closest('.da-action-row');
+    var btn = row ? row.querySelector('.da-update-btn') : null;
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    try {
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_contractor: newState }) });
+      if (!res.ok) {
+        console.error('_updateContractor error:', await res.text());
+        if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
+        return;
+      }
+      var c = allClients.find(function(x) { return x.id === id; });
+      if (c) c.is_contractor = newState;
+      var badge = document.querySelector('#card-' + id + ' .da-role-badge');
+      if (badge) { badge.textContent = newState ? 'Contractor' : 'Client'; badge.className = 'da-role-badge ' + (newState ? 'contractor' : 'client'); }
+      if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2000); }
+    } catch(e) {
+      console.error('_updateContractor exception:', e);
+      if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
+    }
   };
 
   function flashSaved(selectId) {
@@ -1138,7 +1174,7 @@
     } catch(e) { log.innerHTML = '<div class="da-notes-log-empty">Could not load notes</div>'; }
   };
 
-  // ── CONTRACTOR TOGGLE ─────────────────────────────────────────────
+  // ── CONTACT INFO ──────────────────────────────────────────────────
   window._saveContactInfo = async function(id) {
     var name       = (document.getElementById('edit-name-' + id) || {}).value || '';
     var phone      = (document.getElementById('edit-phone-' + id) || {}).value || '';
@@ -1202,7 +1238,7 @@
         btn.setAttribute('onclick', "window._quickStatus('" + id + "', '" + newStatus + "')");
       }
       var card = document.getElementById('card-' + id);
-      if (card) card.classList.toggle('archived', newStatus === 'archived');
+      if (card) card.classList.toggle('archived', newStatus === 'archived' || newStatus === 'no_response');
       if (activeSubtab !== 'all' && activeSubtab !== newStatus) {
         if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(function() { applyFilters(); }, 300); }
       }
@@ -1491,12 +1527,12 @@
     } catch(e) { console.error('_deleteProject:', e); }
   };
 
-  // ── CHECKLIST TAB ─────────────────────────────────────────────────
+  // ── CHECKLIST TAB (FEATURE 2: click to toggle documents received) ──
   async function loadAllChecklists() {
     try {
-      var [checkRes, noteRes] = await Promise.all([apiFetch('/rest/v1/checklist_items?select=*'), apiFetch('/rest/v1/client_notes?select=*')]);
-      var checks = await checkRes.json() || [];
-      var notes = await noteRes.json() || [];
+      var results = await Promise.all([apiFetch('/rest/v1/checklist_items?select=*'), apiFetch('/rest/v1/client_notes?select=*')]);
+      var checks = await results[0].json() || [];
+      var notes = await results[1].json() || [];
       allChecklists = {}; allNotes = {};
       checks.forEach(function(c) { if (!allChecklists[c.client_id]) allChecklists[c.client_id] = {}; allChecklists[c.client_id][c.item_key] = c.completed; });
       notes.forEach(function(n) { if (!allNotes[n.client_id]) allNotes[n.client_id] = {}; allNotes[n.client_id][n.note_key] = n.content; });
@@ -1515,11 +1551,51 @@
       var items = KEYS.map(function(key) {
         var isDone = cc[key] === true;
         var note = cn[key] || '';
-        return '<div class="da-check-row"><div class="da-check-dot' + (isDone?' done':'') + '"></div><div style="flex:1"><div class="da-check-row-label">' + s(CHECKLIST_LABELS[key]||key) + (isDone?' <span style="color:var(--success);font-size:10px">✓</span>':'') + '</div>' + (note ? '<div class="da-check-row-note">' + s(note) + '</div>' : '') + '</div></div>';
+        return '<div class="da-check-row da-check-clickable" data-client="' + c.id + '" data-item="' + key + '" onclick="window._adminToggleCheck(this)" title="Click to toggle received">'
+          + '<div class="da-check-dot' + (isDone ? ' done' : '') + '"></div>'
+          + '<div style="flex:1"><div class="da-check-row-label">' + s(CHECKLIST_LABELS[key] || key)
+          + ' <span class="da-check-done-mark" style="color:var(--success);font-size:10px;display:' + (isDone ? 'inline' : 'none') + '">\u2713 Received</span></div>'
+          + (note ? '<div class="da-check-row-note">' + s(note) + '</div>' : '')
+          + '</div></div>';
       }).join('');
-      return '<div class="da-client-checklist"><div class="da-client-checklist-header" onclick="window._toggleClientChecklist(\'' + c.id + '\')"><div class="da-client-checklist-name">' + s(c.full_name||'Unknown') + ' <span style="font-size:10px;color:var(--muted)">' + s(c.email||'') + '</span></div><div class="da-client-checklist-progress"><span>' + done + '</span> / ' + KEYS.length + '</div></div><div class="da-client-checklist-body" id="client-checklist-' + c.id + '">' + items + '</div></div>';
+      return '<div class="da-client-checklist"><div class="da-client-checklist-header" id="client-checklist-head-' + c.id + '" onclick="window._toggleClientChecklist(\'' + c.id + '\')"><div class="da-client-checklist-name">' + s(c.full_name || 'Unknown') + ' <span style="font-size:10px;color:var(--muted)">' + s(c.email || '') + '</span></div><div class="da-client-checklist-progress"><span>' + done + '</span> / ' + KEYS.length + '</div></div><div class="da-client-checklist-body" id="client-checklist-' + c.id + '">' + items + '</div></div>';
     }).join('');
   }
+
+  window._adminToggleCheck = async function(rowEl) {
+    var clientId = rowEl.dataset.client;
+    var itemKey  = rowEl.dataset.item;
+    var cc = allChecklists[clientId] = allChecklists[clientId] || {};
+    var newVal = !cc[itemKey];
+
+    // Optimistic UI
+    var dot  = rowEl.querySelector('.da-check-dot');
+    var mark = rowEl.querySelector('.da-check-done-mark');
+    if (dot)  dot.classList.toggle('done', newVal);
+    if (mark) mark.style.display = newVal ? 'inline' : 'none';
+
+    try {
+      // UPSERT on (client_id, item_key) — requires the unique constraint from the patch SQL
+      var res = await apiFetch('/rest/v1/checklist_items?on_conflict=client_id,item_key', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify({ client_id: clientId, item_key: itemKey, completed: newVal })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      cc[itemKey] = newVal;
+      var KEYS = ['goals','inspo','photos','survey','bylaws','houseplans'];
+      var doneCount = KEYS.filter(function(k) { return cc[k]; }).length;
+      var prog = document.querySelector('#client-checklist-head-' + clientId + ' .da-client-checklist-progress span');
+      if (prog) prog.textContent = doneCount;
+      showAdminToast(newVal ? 'Marked received \u2713' : 'Marked not received');
+    } catch(e) {
+      console.error('_adminToggleCheck:', e);
+      // Roll back optimistic UI so it never lies about what saved
+      if (dot)  dot.classList.toggle('done', !newVal);
+      if (mark) mark.style.display = !newVal ? 'inline' : 'none';
+      showAdminToast('Error saving — see console');
+    }
+  };
 
   window._toggleClientChecklist = function(id) { var b = document.getElementById('client-checklist-' + id); if (b) b.classList.toggle('visible'); };
 
@@ -1594,9 +1670,6 @@
   window._showAdminPhotoUpload = function() {
     var form = document.getElementById('daAdminPhotoUploadForm');
     if (form) form.style.display = 'block';
-    // Default visit date to today
-    var dateInput = document.getElementById('daPhotoVisitDate');
-    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
     // Populate client selector
     var uploadClient = document.getElementById('daPhotoUploadClient');
     if (uploadClient && allClients.length && uploadClient.options.length <= 1) {
@@ -1644,9 +1717,9 @@
         if (file.size > SIX_MB) {
           ok = await adminUploadResumable(file, path);
         } else {
-          var res = await fetch('https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/client-documents/' + path, {
+          var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
             method: 'POST',
-            headers: { 'apikey': 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Authorization': 'Bearer ' + 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU', 'Content-Type': file.type },
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': file.type },
             body: file
           });
           ok = res.ok;
@@ -1679,26 +1752,24 @@
     } else {
       msg.textContent = 'Upload failed. Please try again.'; msg.className = 'da-modal-msg error';
     }
-    btn.disabled = false; btn.textContent = 'Upload & Save';
+    btn.disabled = false; btn.textContent = 'Upload to Drive & Save';
   };
 
   async function adminUploadResumable(file, path) {
     var CHUNK = 6 * 1024 * 1024;
-    var SKEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
-    var SURL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
     try {
-      var createRes = await fetch(SURL + '/storage/v1/upload/resumable', {
+      var createRes = await fetch(SUPABASE_URL + '/storage/v1/upload/resumable', {
         method: 'POST',
-        headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/offset+octet-stream', 'Upload-Length': file.size, 'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'), 'Tus-Resumable': '1.0.0' }
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': 'application/offset+octet-stream', 'Upload-Length': file.size, 'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'), 'Tus-Resumable': '1.0.0' }
       });
       if (!createRes.ok && createRes.status !== 201) return false;
       var uploadUrl = createRes.headers.get('Location');
       if (!uploadUrl) return false;
-      if (uploadUrl.startsWith('/')) uploadUrl = SURL + uploadUrl;
+      if (uploadUrl.startsWith('/')) uploadUrl = SUPABASE_URL + uploadUrl;
       var offset = 0;
       while (offset < file.size) {
         var chunk = file.slice(offset, offset + CHUNK);
-        var patchRes = await fetch(uploadUrl, { method: 'PATCH', headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY, 'Content-Type': 'application/offset+octet-stream', 'Upload-Offset': offset, 'Tus-Resumable': '1.0.0' }, body: chunk });
+        var patchRes = await fetch(uploadUrl, { method: 'PATCH', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': 'application/offset+octet-stream', 'Upload-Offset': offset, 'Tus-Resumable': '1.0.0' }, body: chunk });
         if (!patchRes.ok) return false;
         offset += CHUNK;
       }
@@ -1739,7 +1810,7 @@
           + (notes ? '<div style="padding:12px 20px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);border-left:3px solid var(--gold)">' + s(notes) + '</div>' : '')
           + '<div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">'
           + datePhotos.map(function(p) {
-              var signedUrl = 'https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/public/client-documents/' + p.file_url;
+              var signedUrl = SUPABASE_URL + '/storage/v1/object/public/client-documents/' + p.file_url;
               return '<div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface-2);border:1px solid var(--border)">'
                 + '<img src="' + signedUrl + '" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="window.open(\'' + signedUrl + '\', \'_blank\')" onerror="this.parentNode.innerHTML=\'<div style=\\"display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--muted);\\">No preview</div>\'" />'
                 + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);padding:4px 6px;font-size:9px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + s(p.file_name) + '</div>'
@@ -1760,7 +1831,7 @@
     // ── 1. LIVE NEW MESSAGES from clients ─────────────────────────
     // Admin sees gold dot and unread count update the moment a client sends a message
     var msgChannel = new WebSocket(
-      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0'
     );
 
     msgChannel.onopen = function() {
@@ -1805,7 +1876,7 @@
     // ── 2. LIVE NEW CLIENTS from intake form ──────────────────────
     // Admin sees new leads instantly when someone submits the intake form
     var clientChannel = new WebSocket(
-      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0'
     );
 
     clientChannel.onopen = function() {
@@ -1825,6 +1896,7 @@
           // Add to local cache
           allClients.unshift(newClient);
           updateStats();
+          updateSubtabCounts();
           // If clients tab is active, re-render
           var clientsTab = document.getElementById('tab-clients');
           if (clientsTab && clientsTab.classList.contains('active')) {
@@ -1846,7 +1918,7 @@
 
     // ── 3. LIVE NEW PROJECTS from client portal ───────────────────
     var projChannel = new WebSocket(
-      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0'
     );
 
     projChannel.onopen = function() {
@@ -1891,7 +1963,7 @@
     var toast = document.createElement('div');
     toast.id = 'daRealtimeToast';
     toast.textContent = message;
-    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--bg);font-family:Jost,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 20px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);animation:daFade 0.3s ease both';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#9e7b50;color:#ede8df;font-family:Jost,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 20px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.4);animation:daFade 0.3s ease both';
     document.body.appendChild(toast);
     setTimeout(function() { if (toast.parentNode) toast.remove(); }, 4000);
   }
