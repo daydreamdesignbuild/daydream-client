@@ -305,6 +305,19 @@
       form.style.display = 'none';
       success.classList.add('visible');
 
+      // ── STEP 4: Notify GTM of successful lead ─────────────────────
+      // Fires ONLY after Supabase confirms the insert, so this counts
+      // genuine, completed inquiries — never failed/abandoned attempts.
+      // Extra fields let GA4 break leads down by source, service, and type.
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        'event': 'lead_form_submit',
+        'form_name': 'intake_form',
+        'service_type': data.service_type,
+        'referral_source': data.referral,
+        'is_contractor': data.is_contractor
+      });
+
     } catch(err) {
       console.error('Form error:', err);
       errMsg.classList.add('visible');
