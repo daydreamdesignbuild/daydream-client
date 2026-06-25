@@ -9,7 +9,7 @@
   var CONSULT_URL  = 'https://calendar.app.google/scy4m5dPpbPDgTEB8';
   var REVISION_URL = 'https://calendar.app.google/UtmC71cqbK1D2W74A';
 
-  // ── FIX 4: XSS sanitization ──────────────────────────────────────
+  // ── XSS sanitization ──────────────────────────────────────────────
   function s(str) {
     return (str || '')
       .replace(/&/g, '&amp;')
@@ -19,7 +19,7 @@
       .replace(/'/g, '&#039;');
   }
 
-  // ── FIX 3: File validation ────────────────────────────────────────
+  // ── File validation ───────────────────────────────────────────────
   var ALLOWED_EXTS = ['jpg','jpeg','png','webp','heic','gif','pdf','mp4','mov','avi','mkv','dwg','dxf','txt','doc','docx'];
   var MAX_FILE_MB  = 5120; // 5GB — covers drone video and large site plans
   function validateFile(file) {
@@ -31,7 +31,6 @@
   function safeName(name) { return name.replace(/[^a-zA-Z0-9._\-]/g, '_'); }
 
   // Design & Permit Phase Timeline
-  // Design & Permit Phase Timeline — per spec
   var TIMELINE = [
     { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
     { value: 'discovery_call',               label: 'Discovery Call' },
@@ -46,7 +45,6 @@
     { value: 'final_deliverables',           label: 'Final Deliverables' }
   ];
 
-  // Construction Phase Timeline
   // Stone Sourcing linear state machine
   var STONE_TIMELINE = [
     { value: 'discovery_call',       label: 'Discovery Call' },
@@ -65,6 +63,7 @@
     { value: 'delivered_to_job_site',label: 'Delivered to Job Site' }
   ];
 
+  // Construction Phase Timeline
   var CONSTRUCTION_TIMELINE = [
     { value: 'not_started',            label: 'Not Started' },
     { value: 'pre_site_visit',         label: 'Pre Site Visit' },
@@ -78,16 +77,16 @@
   ];
 
   var CONTRACT_LABELS = {
-    'not_sent':   { label: 'Not Yet Sent',              color: '#8a8680' },
-    'sent':       { label: 'Sent — Awaiting Signature', color: '#9e7b50' },
-    'signed':     { label: 'Signed ✓',                  color: '#6a9e7a' }
+    'not_sent':   { label: 'Not Yet Sent',               color: '#8a7d73' },
+    'sent':       { label: 'Sent · Awaiting Signature',  color: '#9e7b50' },
+    'signed':     { label: 'Signed ✓',                   color: '#6a9e7a' }
   };
 
   var PAYMENT_LABELS = {
-    'not_sent':         { label: 'Invoice Not Yet Sent',           color: '#8a8680' },
-    'invoice_sent':     { label: 'Invoice Sent — Awaiting Payment', color: '#9e7b50' },
-    'deposit_paid':     { label: 'Deposit Paid — Balance Due',     color: '#5a8e9e' },
-    'partially_paid':   { label: 'Partially Paid',                 color: '#7a9e8a' },
+    'not_sent':         { label: 'Invoice Not Yet Sent',            color: '#8a7d73' },
+    'invoice_sent':     { label: 'Invoice Sent · Awaiting Payment', color: '#9e7b50' },
+    'deposit_paid':     { label: 'Deposit Paid · Balance Due',      color: '#c4a07a' },
+    'partially_paid':   { label: 'Partially Paid',                  color: '#c4a07a' },
     'payment_complete': { label: 'Payment Complete ✓',             color: '#6a9e7a' }
   };
 
@@ -118,7 +117,7 @@
   var style = document.createElement('style');
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
-    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #e1d9cd; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
+    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #ddd7ce; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
     '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
     '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
@@ -263,18 +262,12 @@
     '#dd-portal .dd-message.theirs { align-self: flex-start; }',
     '#dd-portal .dd-message-bubble { padding: 12px 16px; font-size: 13px; line-height: 1.7; }',
     '#dd-portal .dd-message.mine .dd-message-bubble { background: var(--gold-dim); border: 1px solid var(--gold); color: var(--text); }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; }',
-    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
     '#dd-portal .dd-message.theirs .dd-message-bubble { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); }',
     '#dd-portal .dd-message-meta { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; }',
     '#dd-portal .dd-message.mine .dd-message-meta { text-align: right; }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 11px; padding: 0 4px; opacity: 0; transition: opacity 0.2s, color 0.2s; vertical-align: middle; }',
+    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; vertical-align: middle; opacity: 0.6; transition: color 0.2s, opacity 0.2s; }',
     '#dd-portal .dd-message:hover .dd-msg-del-btn { opacity: 1; }',
-    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; opacity: 0.6; }',
     '#dd-portal .dd-msg-del-btn:hover { color: var(--error); opacity: 1; }',
-    '#dd-portal .dd-msg-del-btn { background: none; border: none; color: var(--muted); font-size: 10px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; vertical-align: middle; }',
-    '#dd-portal .dd-msg-del-btn:hover { color: var(--error); }',
     '#dd-portal .dd-messages-input { border-top: 1px solid var(--border); display: flex; }',
     '#dd-portal .dd-messages-input textarea { flex: 1; background: var(--surface-2); border: none; outline: none; color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 16px 20px; resize: none; height: 56px; }',
     '#dd-portal .dd-messages-input textarea::placeholder { color: var(--muted); }',
@@ -336,7 +329,7 @@
     // LOGIN
     '<div id="ddLoginWrap" class="dd-login-wrap">',
     '  <div class="dd-login-card">',
-    '    <div class="dd-login-header"><div class="dd-login-logo">Daydream</div><div class="dd-login-sub">Design + Build &mdash; Atlanta, Georgia</div></div>',
+    '    <div class="dd-login-header"><div class="dd-login-logo">Daydream</div><div class="dd-login-sub">Design + Build &nbsp;&middot;&nbsp; Atlanta, Georgia</div></div>',
     '    <div class="dd-login-body">',
     '      <div class="dd-login-title">Welcome Back</div>',
     '      <div class="dd-login-desc">Sign in to access your client portal.</div>',
@@ -389,11 +382,11 @@
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
     '    <button class="dd-tab" data-tab="uploads">Documents</button>',
+    '    <button class="dd-tab" data-tab="site-photos">Site Photos</button>',
     '    <button class="dd-tab" data-tab="messages">Messages</button>',
-    '    <button class="dd-tab" data-tab="settings">Settings</button>',
-
     '    <button class="dd-tab" data-tab="schedule">Schedule</button>',
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
+    '    <button class="dd-tab" data-tab="settings">Settings</button>',
     '  </div>',
     '  <div class="dd-content">',
 
@@ -425,8 +418,8 @@
     '        </div>',
     '      </div>',
     '      <div class="dd-status-grid">',
-    '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Not Yet Sent</span></div></div>',
-    '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a8680;border-color:#8a8680;background:#8a868018">Invoice Not Yet Sent</span></div></div>',
+    '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddContractStatus"><span class="dd-status-badge" style="color:#8a7d73;border-color:#8a7d73;background:#8a7d7318">Not Yet Sent</span></div></div>',
+    '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddPaymentStatus"><span class="dd-status-badge" style="color:#8a7d73;border-color:#8a7d73;background:#8a7d7318">Invoice Not Yet Sent</span></div></div>',
     '      </div>',
     '      <div id="ddProjectGoals" style="display:none;margin-bottom:32px">',
     '        <div style="border:1px solid var(--border);">',
@@ -443,6 +436,10 @@
     '      <div class="dd-timeline" id="ddDesignTimeline">',
     '        <div class="dd-timeline-header">Design &amp; Permit Phase</div>',
     '        <div id="ddTimeline"></div>',
+    '      </div>',
+    '      <div class="dd-timeline" id="ddStoneTimeline" style="display:none">',
+    '        <div class="dd-timeline-header">Stone Sourcing Phase</div>',
+    '        <div id="ddStoneTimelineItems"></div>',
     '      </div>',
     '      <div id="ddConstructionTimeline" style="margin-top:24px;display:none">',
     '        <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--success);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--success)">Construction Phase</div>',
@@ -469,7 +466,7 @@
     '      <div class="dd-section-sub">Upload your project documents below. Videos up to 5GB supported.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary lines, trees, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-survey"></div></div></div>',
-    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Upload here — view in Job Site Photos tab</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" id="clientSitePhotoInput" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Photos</div><div class="dd-upload-card-desc">Upload here — view in Site Photos tab</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" data-category="photos" class="dd-file-input" id="clientSitePhotoInput" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-photos"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Videos</div><div class="dd-upload-card-desc">Walkthrough or drone footage</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".mp4,.mov,.avi,.mkv" data-category="videos" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-videos"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Inspiration</div><div class="dd-upload-card-desc">Pinterest boards, AI images, reference photos</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.webp" data-category="inspo" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-inspo"></div></div></div>',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">House Plans & HOA Bylaws</div><div class="dd-upload-card-desc">Architectural plans, drawings, HOA rules</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.png" data-category="houseplans" class="dd-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="status-houseplans"></div></div></div>',
@@ -477,13 +474,14 @@
     '      </div>',
     '    </div>',
 
-    // MESSAGES
+    // SITE PHOTOS
     '    <div class="dd-tab-content" id="tab-site-photos">',
     '      <div class="dd-section-title">Job Site Photos</div>',
     '      <div class="dd-section-sub">Photos from your project site, grouped by visit date.</div>',
     '      <div id="ddSitePhotosList"><div class="dd-empty">Loading photos...</div></div>',
     '    </div>',
 
+    // MESSAGES
     '    <div class="dd-tab-content" id="tab-messages">',
     '      <div class="dd-section-title">Messages</div>',
     '      <div class="dd-section-sub">Communicate directly with the Daydream team</div>',
@@ -509,6 +507,8 @@
     '      <div class="dd-section-title">Project Files</div>',
     '      <div class="dd-section-sub">Your project files and shared folders will appear here once your project is active. Your project manager will share access with you directly.</div>',
     '    </div>',
+
+    // SETTINGS
     '    <div class="dd-tab-content" id="tab-settings">',
     '      <div class="dd-section-title">Account Settings</div>',
     '      <div class="dd-section-sub">Manage your account and password</div>',
@@ -529,7 +529,6 @@
     '        </div>',
     '      </div>',
     '    </div>',
-
 
     '  </div>',
     '</div>',
@@ -596,7 +595,7 @@
     '    </div>',
 
     '    <div class="dd-create-section">',
-    '      <div class="dd-create-section-title">File Uploads <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none;font-weight:300">— Optional</span></div>',
+    '      <div class="dd-create-section-title">File Uploads <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none;font-weight:300">(Optional)</span></div>',
     '      <div class="dd-create-section-sub">You can upload more files after the project is created. Videos up to 5GB supported.</div>',
     '      <div class="dd-upload-grid">',
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Site Survey</div><div class="dd-upload-card-desc">Boundary, topography, setbacks</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple data-category="survey" class="dd-cp-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click</div></div><div class="dd-upload-status" id="cp-status-survey"></div></div></div>',
@@ -620,25 +619,6 @@
   // ── STATE ─────────────────────────────────────────────────────────
   var currentUser    = null;
   var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing'
-
-  window._setPortalType = function(type) {
-    portalType = type;
-    var dBtn = document.getElementById('ddPortalTypeDesign');
-    var sBtn = document.getElementById('ddPortalTypeStone');
-    if (dBtn && sBtn) {
-      if (type === 'design_build') {
-        dBtn.style.background = 'var(--gold)'; dBtn.style.color = 'var(--bg)';
-        sBtn.style.background = 'var(--surface-2)'; sBtn.style.color = 'var(--muted)';
-      } else {
-        sBtn.style.background = 'var(--gold)'; sBtn.style.color = 'var(--bg)';
-        dBtn.style.background = 'var(--surface-2)'; dBtn.style.color = 'var(--muted)';
-      }
-    }
-  };
-
-  var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing'
-
-
   var currentClient  = null;
   var allClientProjects = [];
   var currentProject = null;
@@ -678,8 +658,6 @@
     if (navUser) navUser.textContent = currentClient ? (currentClient.full_name || currentUser.email) : currentUser.email;
     var settingsEmail = document.getElementById('ddSettingsEmail');
     if (settingsEmail) settingsEmail.textContent = 'Signed in as: ' + currentUser.email;
-    var settingsEmail = document.getElementById('ddSettingsEmail');
-    if (settingsEmail) settingsEmail.textContent = 'Signed in as: ' + currentUser.email;
     var navProject = document.getElementById('ddNavProjectName');
     if (navProject && isContractor && allClientProjects.length > 1) {
       navProject.textContent = currentClient ? (currentClient.full_name || '') : '';
@@ -702,9 +680,40 @@
 
   // ── RENDER ────────────────────────────────────────────────────────
   function renderTimeline(clientStage, constructionStage) {
-    // Design & Permit timeline
+    var isStone     = currentClient && currentClient.service_type === 'stone_sourcing';
+    var designWrap  = document.getElementById('ddDesignTimeline');
+    var stoneWrap   = document.getElementById('ddStoneTimeline');
+    var stoneItems  = document.getElementById('ddStoneTimelineItems');
+    var conTimeline = document.getElementById('ddConstructionTimeline');
+    var conItems    = document.getElementById('ddConstructionTimelineItems');
+
+    // ── Stone Sourcing clients: show only the stone timeline ──
+    if (isStone) {
+      if (designWrap)  designWrap.style.display  = 'none';
+      if (conTimeline) conTimeline.style.display = 'none';
+      if (stoneWrap && stoneItems) {
+        stoneWrap.style.display = 'block';
+        var stoneStage = currentClient.stone_stage || 'discovery_call';
+        var stoneIdx = STONE_TIMELINE.findIndex(function(t) { return t.value === stoneStage; });
+        if (stoneIdx === -1) stoneIdx = 0;
+        stoneItems.innerHTML = STONE_TIMELINE.map(function(stage, idx) {
+          var isDone = idx < stoneIdx, isActive = idx === stoneIdx;
+          var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
+          var badge = isActive ? '<div class="dd-timeline-badge">In Progress</div>'
+                    : (isDone  ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
+          return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + dotClass + '"></div><div class="dd-timeline-label ' + (isDone || isActive ? '' : 'muted') + '">' + s(stage.label) + '</div>' + badge + '</div>';
+        }).join('');
+      }
+      return;
+    }
+
+    // ── Design & Build clients: hide stone, show design + (optional) construction ──
+    if (stoneWrap)  stoneWrap.style.display  = 'none';
+    if (designWrap) designWrap.style.display = 'block';
+
     var currentIdx = getStageIndex(clientStage || 'inquiry_submitted');
-    document.getElementById('ddTimeline').innerHTML = TIMELINE.map(function(stage, idx) {
+    var dt = document.getElementById('ddTimeline');
+    if (dt) dt.innerHTML = TIMELINE.map(function(stage, idx) {
       var isDone = idx < currentIdx, isActive = idx === currentIdx;
       var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
       var labelClass = (isDone || isActive) ? '' : 'muted';
@@ -713,56 +722,13 @@
     }).join('');
 
     // Construction timeline — only show if construction has started
-    var conTimeline = document.getElementById('ddConstructionTimeline');
-    var conItems = document.getElementById('ddConstructionTimelineItems');
     if (!conTimeline || !conItems) return;
-    // Stone sourcing timeline
-    var stoneTimeline = document.getElementById('ddStoneTimeline');
-    var stoneItems    = document.getElementById('ddStoneTimelineItems');
-    if (stoneTimeline && stoneItems && currentClient && currentClient.service_type === 'stone_sourcing') {
-      stoneTimeline.style.display = 'block';
-      if (conTimeline) conTimeline.style.display = 'none'; // hide construction for stone clients
-      var stoneStage = currentClient.stone_stage || 'discovery_call';
-      var stoneIdx   = STONE_TIMELINE.findIndex(function(t) { return t.value === stoneStage; });
-      if (stoneIdx === -1) stoneIdx = 0;
-      stoneItems.innerHTML = STONE_TIMELINE.map(function(stage, idx) {
-        var isDone = idx < stoneIdx, isActive = idx === stoneIdx;
-        var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
-        var badge = isActive ? '<div class="dd-timeline-badge" style="border-color:var(--gold);color:var(--gold)">In Progress</div>'
-                  : (isDone  ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
-        return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + dotClass + '" style="' + (isDone || isActive ? 'background:var(--gold)' : '') + '"></div><div class="dd-timeline-label ' + (isDone || isActive ? '' : 'muted') + '">' + stage.label + '</div>' + badge + '</div>';
-      }).join('');
-    } else if (stoneTimeline) {
-      stoneTimeline.style.display = 'none';
-    }
-
-    // Stone sourcing timeline
-    var stoneTimeline = document.getElementById('ddStoneTimeline');
-    var stoneItems    = document.getElementById('ddStoneTimelineItems');
-    if (stoneTimeline && stoneItems && currentClient && currentClient.service_type === 'stone_sourcing') {
-      stoneTimeline.style.display = 'block';
-      if (conTimeline) conTimeline.style.display = 'none';
-      var stoneStage = currentClient.stone_stage || 'discovery_call';
-      var stoneIdx   = STONE_TIMELINE.findIndex(function(t) { return t.value === stoneStage; });
-      if (stoneIdx === -1) stoneIdx = 0;
-      stoneItems.innerHTML = STONE_TIMELINE.map(function(stage, idx) {
-        var isDone = idx < stoneIdx, isActive = idx === stoneIdx;
-        var dotStyle = (isDone || isActive) ? 'background:var(--gold)' : '';
-        var badge = isActive ? '<div class="dd-timeline-badge" style="border-color:var(--gold);color:var(--gold)">In Progress</div>'
-                  : (isDone  ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
-        return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + (isDone?'done':isActive?'active':'') + '" style="' + dotStyle + '"></div><div class="dd-timeline-label ' + (isDone||isActive?'':'muted') + '">' + stage.label + '</div>' + badge + '</div>';
-      }).join('');
-    } else if (stoneTimeline) {
-      stoneTimeline.style.display = 'none';
-    }
-
     if (constructionStage && constructionStage !== 'not_started') {
       conTimeline.style.display = 'block';
       var conIdx = CONSTRUCTION_TIMELINE.findIndex(function(t) { return t.value === constructionStage; });
       if (conIdx === -1) conIdx = 0;
       conItems.innerHTML = CONSTRUCTION_TIMELINE.map(function(stage, idx) {
         var isDone = idx < conIdx, isActive = idx === conIdx;
-        var dotClass = isDone ? 'done' : (isActive ? 'active' : '');
         var labelClass = (isDone || isActive) ? '' : 'muted';
         var badge = isActive ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
         return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + (isDone ? 'done' : (isActive ? 'active' : '')) + '" style="' + (isDone || isActive ? 'background:var(--success)' : '') + '"></div><div class="dd-timeline-label ' + labelClass + '">' + s(stage.label) + '</div>' + badge + '</div>';
@@ -783,6 +749,7 @@
 
   function renderDriveLinks(client) {
     var container = document.getElementById('ddDriveList');
+    if (!container) return;
     var links = [
       { key: 'drive_design_link',       label: 'Design Folder',       sub: 'Base maps, 3D models, renders and design deliverables' },
       { key: 'drive_permit_link',        label: 'Permit Folder',        sub: 'Permit plans, structural documents and approvals' },
@@ -800,10 +767,10 @@
     if (!card || !list) return;
     if (!services || !services.length) { card.style.display = 'none'; return; }
     card.style.display = 'block';
-    var STATUS_COLORS = { 'pending': '#8a8680', 'in_progress': '#9e7b50', 'complete': '#6a9e7a' };
+    var STATUS_COLORS = { 'pending': '#8a7d73', 'in_progress': '#9e7b50', 'complete': '#6a9e7a' };
     var STATUS_LABELS = { 'pending': 'Pending', 'in_progress': 'In Progress', 'complete': 'Complete' };
     list.innerHTML = '<div class="dd-services-grid">' + services.map(function(sv) {
-      var color = STATUS_COLORS[sv.status] || '#8a8680';
+      var color = STATUS_COLORS[sv.status] || '#8a7d73';
       return '<div class="dd-service-tile"><div class="dd-service-tile-name">' + s(sv.service_name) + '</div><div class="dd-service-tile-status"><div class="dd-service-tile-dot" style="background:' + color + '"></div><div class="dd-service-tile-label" style="color:' + color + '">' + s(STATUS_LABELS[sv.status] || sv.status) + '</div></div></div>';
     }).join('') + '</div>';
   }
@@ -834,7 +801,7 @@
   // ── PROJECT SELECTOR ──────────────────────────────────────────────
   async function loadContractorProjects() {
     try {
-      // FIX: case-insensitive email lookup
+      // case-insensitive email lookup
       var res = await apiFetch('/rest/v1/clients?email=ilike.' + encodeURIComponent(currentUser.email.toLowerCase()) + '&order=created_at.desc');
       var clients = await res.json() || [];
       allClientProjects = clients;
@@ -998,7 +965,7 @@
       renderTimeline(client.client_stage || 'inquiry_submitted', client.construction_stage);
       renderStatusBadges(client);
       // Load discussion link if set
-      if (client.discussion_link) {
+      if (client.discussion_link && typeof showDiscussionLink === 'function') {
         showDiscussionLink(client.discussion_link);
         var urlInput = document.getElementById('ddDiscussionUrl');
         if (urlInput) urlInput.value = client.discussion_link;
@@ -1031,12 +998,12 @@
   async function loadChecklistData() {
     if (!currentClient) return;
     try {
-      var [checkRes, noteRes] = await Promise.all([
+      var results = await Promise.all([
         apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id),
         apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id)
       ]);
-      var checks = await checkRes.json() || [];
-      var notes  = await noteRes.json() || [];
+      var checks = await results[0].json() || [];
+      var notes  = await results[1].json() || [];
       checklistState = {}; notesState = {};
       checks.forEach(function(c) { checklistState[c.item_key] = c.completed; });
       notes.forEach(function(n)  { notesState[n.note_key] = n.content; });
@@ -1071,7 +1038,6 @@
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
   async function tryTokenFromUrl() {
     // Check both hash fragment (#access_token=) and query params (?access_token=)
-    // Supabase delivers the token in the hash after verifying the magic link
     var hash   = window.location.hash   || '';
     var search = window.location.search || '';
     var hashParams  = new URLSearchParams(hash.replace('#', ''));
@@ -1143,7 +1109,6 @@
   }
   init();
 
-  // ── LOGIN ─────────────────────────────────────────────────────────
   // ── EMAIL + PASSWORD LOGIN ──────────────────────────────────────
   document.getElementById('ddLoginBtn').addEventListener('click', async function() {
     var email    = (document.getElementById('ddLoginEmail').value    || '').trim().toLowerCase();
@@ -1165,15 +1130,9 @@
           sessionStorage.setItem('dd_token', data.access_token);
         } catch(e) {}
         // Use the existing init() flow — it reads the token from storage
-        // and handles showing login vs dashboard correctly
         await init();
       } else {
-        var errMsg = data.error_description || data.msg || '';
-        if (errMsg.toLowerCase().includes('invalid') || errMsg.toLowerCase().includes('credentials')) {
-          showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
-        } else {
-          showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
-        }
+        showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
       }
     } catch(e) {
       showMsg(msg, 'Connection error. Please try again.', 'error');
@@ -1214,11 +1173,9 @@
     } catch(e) {
       showMsg(msg, 'Connection error. Please try again.', 'error');
     }
-    this.disabled = false; this.textContent = 'Send Reset Link';
+    this.disabled = false; this.textContent = 'Send New Password';
   });
-  document.getElementById('ddLoginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
 
-  // ── LOGOUT ────────────────────────────────────────────────────────
   // ── CLIENT SITE PHOTOS — Load and display grouped by date ─────────
   async function loadClientSitePhotos() {
     var container = document.getElementById('ddSitePhotosList');
@@ -1269,6 +1226,7 @@
     }
   }
 
+  // ── LOGOUT ────────────────────────────────────────────────────────
   function doLogout() {
     stopRealtime(); // Clean up WebSocket connections
     try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
@@ -1278,6 +1236,8 @@
     document.getElementById('ddCreateProject').classList.remove('visible');
     showLogin();
   }
+  window.doLogout = doLogout;
+
   // ── CHANGE PASSWORD ──────────────────────────────────────────────
   window._toggleChangePass = function() {
     var panel = document.getElementById('ddChangePassPanel');
@@ -1296,9 +1256,9 @@
     var newPass     = (document.getElementById('ddNewPass').value     || '').trim();
     var confirmPass = (document.getElementById('ddConfirmPass').value || '').trim();
     var msg         = document.getElementById('ddChangePassMsg');
-    if (!newPass)                { msg.textContent = 'Please enter a new password.';        msg.style.color = 'var(--error)';   return; }
+    if (!newPass)                { msg.textContent = 'Please enter a new password.';            msg.style.color = 'var(--error)';   return; }
     if (newPass.length < 6)      { msg.textContent = 'Password must be at least 6 characters.'; msg.style.color = 'var(--error)';   return; }
-    if (newPass !== confirmPass)  { msg.textContent = 'Passwords do not match.';             msg.style.color = 'var(--error)';   return; }
+    if (newPass !== confirmPass)  { msg.textContent = 'Passwords do not match.';                msg.style.color = 'var(--error)';   return; }
     msg.textContent = 'Updating...'; msg.style.color = 'var(--muted)';
     try {
       var token = null;
@@ -1318,7 +1278,6 @@
         msg.style.color = 'var(--success)';
         document.getElementById('ddNewPass').value     = '';
         document.getElementById('ddConfirmPass').value = '';
-        setTimeout(function() { window._toggleChangePass(); }, 2000);
       } else {
         msg.textContent = data.msg || data.message || 'Could not update password. Please try again.';
         msg.style.color = 'var(--error)';
@@ -1329,7 +1288,6 @@
     }
   };
 
-  // ── CHANGE PASSWORD ──────────────────────────────────────────────
   document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
   document.getElementById('ddRefreshBtn').addEventListener('click', async function() {
     if (!currentClient) return;
@@ -1349,6 +1307,8 @@
       var target = document.getElementById('tab-' + tab.dataset.tab);
       if (target) target.classList.add('active');
 
+      if (tab.dataset.tab === 'site-photos') loadClientSitePhotos();
+
       if (tab.dataset.tab === 'messages') {
         try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
         var dot = tab.querySelector('.dd-msg-dot'); if (dot) dot.remove();
@@ -1356,7 +1316,6 @@
     });
   });
 
-  // ── CHECKLIST ─────────────────────────────────────────────────────
   // ── RESUMABLE UPLOAD (TUS) for files > 6MB ───────────────────────
   // Uses Supabase's TUS endpoint — survives network interruptions
   async function uploadResumable(file, path, token) {
@@ -1403,6 +1362,7 @@
     return true;
   }
 
+  // ── CHECKLIST ─────────────────────────────────────────────────────
   window._toggleCheckItem = async function(key) {
     var item = CHECKLIST_ITEMS.find(function(i) { return i.key === key; });
     if (!item || !currentClient) return;
@@ -1443,7 +1403,7 @@
     } catch(e) { console.error('_saveNote:', e); }
   };
 
-  // ── FILE UPLOADS — FIX 3: Validation + FIX 7: Parallel uploads ───
+  // ── FILE UPLOADS — Validation + Parallel uploads ─────────────────
   document.querySelectorAll('#dd-portal .dd-file-input').forEach(function(input) {
     input.addEventListener('change', async function() {
       var files = Array.from(this.files);
@@ -1515,17 +1475,6 @@
     } catch(e) { console.error('_deleteMessage:', e); }
   };
 
-  window._deleteMessage = async function(id) {
-    if (!confirm('Delete this message?')) return;
-    try {
-      var res = await apiFetch('/rest/v1/messages?id=eq.' + id, { method: 'DELETE' });
-      if (res.ok) {
-        var el = document.getElementById('msg-' + id);
-        if (el) el.remove();
-      } else { console.error('Delete message error:', await res.text()); }
-    } catch(e) { console.error('_deleteMessage:', e); }
-  };
-
   document.getElementById('ddSendBtn').addEventListener('click', async function() {
     var input = document.getElementById('ddMessageInput');
     var content = input.value.trim();
@@ -1547,7 +1496,6 @@
     if (!currentClient) return;
 
     // ── 1. LIVE MESSAGES ─────────────────────────────────────────
-    // Fires instantly when admin sends a reply
     var msgChannel = new WebSocket(
       'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
     );
@@ -1584,7 +1532,6 @@
     realtimeChannels.push(msgChannel);
 
     // ── 2. LIVE CLIENT STATUS (contract, payment, pipeline) ───────
-    // Fires when admin updates any field on the client record
     var clientChannel = new WebSocket(
       'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
     );
@@ -1701,10 +1648,10 @@
     var btn = document.getElementById('cpSubmit');
 
     // Unified validation — same required fields as admin
-    if (!address)    { msg.textContent = 'Project address is required.';           msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
-    if (!clientName) { msg.textContent = 'Client name is required.';               msg.style.color = 'var(--error)'; document.getElementById('cpClientName').focus(); return; }
-    if (!name)       { msg.textContent = 'Project name is required.';              msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
-    if (!budget)     { msg.textContent = 'Please enter your investment / budget level.';     msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
+    if (!address)    { msg.textContent = 'Project address is required.';                  msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
+    if (!clientName) { msg.textContent = 'Client name is required.';                      msg.style.color = 'var(--error)'; document.getElementById('cpClientName').focus(); return; }
+    if (!name)       { msg.textContent = 'Project name is required.';                     msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
+    if (!budget)     { msg.textContent = 'Please enter your investment / budget level.';  msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
 
     if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
     var clientId = (currentClient || allClientProjects[0]).id;
