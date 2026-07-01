@@ -158,7 +158,7 @@
 
     '  <div class="dd-row">',
     '    <div class="dd-field"><label>Are You a Contractor?</label><div class="dd-select-wrap"><select id="ddIsContractor" onchange="window._onContractorChange(this.value)"><option value="">Select an option</option><option value="no">No \u2014 I am the homeowner</option><option value="yes">Yes \u2014 I am a contractor</option></select><span class="dd-arrow">&#9662;</span></div></div>',
-    '    <div class="dd-field"><label>What Service Are You Interested In?</label><div class="dd-select-wrap"><select id="ddServiceType"><option value="">Select a service...</option><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="both">Both (Design, Build &amp; Stone)</option></select><span class="dd-arrow">&#9662;</span></div></div>',
+    '    <div class="dd-field"><label>What Service Are You Interested In?</label><div class="dd-select-wrap"><select id="ddServiceType"><option value="">Select a service...</option><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="outdoor_showers">Custom Outdoor Showers</option><option value="both">Both (Design, Build &amp; Stone)</option></select><span class="dd-arrow">&#9662;</span></div></div>',
     '  </div>',
     '  <div class="dd-row" id="ddCompanyWrap" style="display:none">',
     '    <div class="dd-field dd-full"><label>Company Name</label><input type="text" id="ddCompany" placeholder="e.g. Smith Contracting LLC" /></div>',
