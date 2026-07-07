@@ -1,36 +1,3 @@
-/**
- * ============================================================
- * DAYDREAM  ·  [daydream_portfolio] shortcode (renderer)
- * ============================================================
- * Pairs with your existing "Projects" registration snippet
- * (dd_project + dd_project_cat + Location/Scope). KEEP that one
- * active. This snippet only renders the grid.
- *
- * WPCode: PHP Snippet · Auto Insert · Run Everywhere · Active.
- * Already WPCode-ready: no opening <?php tag.
- * If you have another snippet that defines [daydream_portfolio],
- * deactivate it so there is only one.
- *
- * ATTRIBUTES
- * limit     number of projects to show. Default -1 (all).
- * filter    "yes" (default) shows the category toggles, "no" hides them.
- * lightbox  "yes" opens the full image in an overlay on click.
- * link      a URL or anchor (e.g. "#service-inquiry"); cards link there
- * instead of opening the lightbox.
- * cat       optional category slug(s) to limit to (e.g. "pools-spas").
- * When set, the toggles are hidden automatically.
- * columns   grid columns on desktop. Default 3.
- *
- * USAGE
- * Portfolio page (all, with toggles):  [daydream_portfolio lightbox="yes"]
- * Service page (9, teaser):            [daydream_portfolio lightbox="yes" limit="9"]
- * Service page (9, no toggles):        [daydream_portfolio lightbox="yes" limit="9" filter="no"]
- * Only pool projects:                  [daydream_portfolio lightbox="yes" limit="9" cat="pools-spas"]
- * ============================================================
- */
-
-if ( ! defined( 'ABSPATH' ) ) { exit; }
-
 (function () {
   // Prevent double initialization if script loads twice
   if (window.__ddPortalInit) return;
@@ -65,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
   // Design & Permit Phase Timeline
   var TIMELINE = [
-    { value: 'inquiry_submitted',           label: 'Inquiry Submitted' },
+    { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
     { value: 'discovery_call',               label: 'Discovery Call' },
     { value: 'design_proposal',              label: 'Design Proposal' },
     { value: 'contract_signed',              label: 'Contract Signed' },
@@ -98,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
   // Construction Phase Timeline
   var CONSTRUCTION_TIMELINE = [
-    { value: 'not_started',             label: 'Not Started' },
+    { value: 'not_started',            label: 'Not Started' },
     { value: 'pre_site_visit',         label: 'Pre Site Visit' },
     { value: 'erosion_control',        label: 'Erosion Control / BMP Installed' },
     { value: 'construction_scheduled', label: 'Construction Start Date Scheduled' },
@@ -110,9 +77,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
   ];
 
   var CONTRACT_LABELS = {
-    'not_sent':   { label: 'Not Yet Sent',                color: '#8a7d73' },
+    'not_sent':   { label: 'Not Yet Sent',               color: '#8a7d73' },
     'sent':       { label: 'Sent · Awaiting Signature',  color: '#9e7b50' },
-    'signed':     { label: 'Signed ✓',                    color: '#6a9e7a' }
+    'signed':     { label: 'Signed ✓',                   color: '#6a9e7a' }
   };
 
   var PAYMENT_LABELS = {
@@ -133,9 +100,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     { key: 'goals',       label: 'Project Goals & Must-Have Features',        desc: 'Tell us the main purpose of the space and any non-negotiable features.', type: 'note', noteKey: 'goals' },
     { key: 'inspo',       label: 'Inspiration Photos or Boards',              desc: 'Upload your Pinterest boards, AI images, Google saves or any reference images.', type: 'upload', category: 'inspo' },
     { key: 'photos',      label: 'Detailed Site Photos & Walkthrough Video',  desc: 'Show the entire project area with straight-on shots of the house.', type: 'upload', category: 'photos' },
-    { key: 'survey',      label: 'Property Survey / Site Plat',                desc: 'Crucial for accuracy. Should show topography, property lines and trees.', type: 'upload', category: 'survey' },
+    { key: 'survey',      label: 'Property Survey / Site Plat',               desc: 'Crucial for accuracy. Should show topography, property lines and trees.', type: 'upload', category: 'survey' },
     { key: 'bylaws',      label: 'HOA Bylaws & Neighborhood Covenants',       desc: 'All construction rules and regulations.', type: 'upload', category: 'houseplans' },
-    { key: 'houseplans',  label: 'Existing House Architectural Plans',         desc: 'If available.', type: 'upload', category: 'houseplans' }
+    { key: 'houseplans',  label: 'Existing House Architectural Plans',        desc: 'If available.', type: 'upload', category: 'houseplans' }
   ];
 
   function getStageIndex(value) { var i = TIMELINE.findIndex(function(t) { return t.value === value; }); return i === -1 ? 0 : i; }
@@ -150,10 +117,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
   var style = document.createElement('style');
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
-    /* FIX: Grounded layout framework container explicitly centered with no float leakage */
-    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #ddd7ce; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }',
+    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #ddd7ce; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
     '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
-    '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; width: 100%; }',
+    '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
     '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
     '#dd-portal .dd-login-header { background: var(--text); border-bottom: 2px solid var(--gold); padding: 42px 40px 34px; text-align: center; }',
@@ -175,11 +141,11 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-msg.visible { display: block; }',
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
-    '#dd-portal .dd-project-selector { display: none; min-height: 100vh; flex-direction: column; width: 100%; }',
+    '#dd-portal .dd-project-selector { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-project-selector.visible { display: flex; }',
-    '#dd-portal .dd-selector-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; width: 100%; }',
+    '#dd-portal .dd-selector-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; }',
     '#dd-portal .dd-selector-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
-    '#dd-portal .dd-selector-content { flex: 1; padding: 48px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-selector-content { flex: 1; padding: 48px 32px; max-width: 800px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-selector-title { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
     '#dd-portal .dd-selector-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 40px; }',
     '#dd-portal .dd-project-cards { display: flex; flex-direction: column; gap: 12px; }',
@@ -192,9 +158,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-project-card-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; }',
     '#dd-portal .dd-project-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; }',
     '#dd-portal .dd-project-card:hover .dd-project-card-arrow { opacity: 1; }',
-    '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; width: 100%; align-items: center; }',
+    '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
-    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; width: 100%; }',
+    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
     '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
     '#dd-portal .dd-nav-project-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 4px 12px; border: 1px solid var(--border); display: none; }',
@@ -206,22 +172,16 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-nav-back.visible { display: block; }',
     '#dd-portal .dd-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
     '#dd-portal .dd-nav-logout:hover { color: var(--gold); }',
-    
-    /* FIX: Tab menu structure reset to full-width horizontal balance across desktop viewports */
-    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; scrollbar-width: none; -webkit-overflow-scrolling: touch; box-shadow: 0 2px 10px rgba(40,35,30,0.03); width: 100%; justify-content: center; }',
+    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; overflow-y: visible; padding: 0 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: flex-start; width: 100%; }',
     '#dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
-    '#dd-portal .dd-tabs-wrap { position: relative; width: 100%; }',
-    '#dd-portal .dd-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 48px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; }',
-    
-    '#dd-portal .dd-tab { font-size: 10px; font-weight: 400; letter-spacing: 0.26em; text-transform: uppercase; color: var(--muted); padding: 22px 24px; cursor: pointer; border-bottom: 3px solid transparent; transition: color 0.25s ease, border-color 0.25s ease; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; line-height: 1; margin-bottom: -1px; }',
-    '#dd-portal .dd-tab:hover { color: var(--text); border-bottom-color: var(--border); }',
-    '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 500; }',
-    
+    '#dd-portal .dd-tabs-wrap { position: relative; width: 100%; overflow: hidden; }',
+    '#dd-portal .dd-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 32px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; z-index: 1; }',
+    '#dd-portal .dd-tab { font-size: 9px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 18px 14px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; line-height: 1; flex-shrink: 0; }',
+    '#dd-portal .dd-tab:hover { color: var(--text); }',
+    '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
     '#dd-portal .dd-tab-badge { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
     '#dd-portal .dd-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
-    
-    /* FIX: Centered the workspace, eliminating the right-push bug */
-    '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 960px; width: 100%; margin: 0 auto; display: block; }',
+    '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
     '#dd-portal .dd-section-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 32px; }',
     '#dd-portal .dd-welcome-card { border: 1px solid var(--gold); background: var(--gold-dim); padding: 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }',
@@ -321,10 +281,10 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-drive-link { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 10px 20px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-portal .dd-drive-link:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-drive-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; border: 1px solid var(--border); background: var(--surface); }',
-    '#dd-portal .dd-tab-content { display: none; width: 100%; }',
+    '#dd-portal .dd-tab-content { display: none; }',
     '#dd-portal .dd-tab-content.active { display: block; }',
     '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
-    '#dd-portal .dd-create-project { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); width: 100%; }',
+    '#dd-portal .dd-create-project { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); }',
     '#dd-portal .dd-create-project.visible { display: flex; }',
     '#dd-portal .dd-create-project-body { flex: 1; padding: 40px 32px; max-width: 860px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-create-section { margin-bottom: 32px; }',
@@ -346,7 +306,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '  #dd-portal .dd-nav-user { display: none; }',
     '  #dd-portal #ddRefreshBtn { display: none; }',
     '  #dd-portal .dd-nav-project-name { display: none !important; }',
-    '  #dd-portal .dd-tabs { padding: 0 8px; justify-content: flex-start; }',
+    '  #dd-portal .dd-tabs { padding: 0 4px; }',
+    '  #dd-portal .dd-tab { padding: 16px 10px; font-size: 8px; letter-spacing: 0.14em; }',
     '  #dd-portal .dd-content { padding: 24px 16px; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
@@ -658,13 +619,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
   // ── STATE ─────────────────────────────────────────────────────────
   var currentUser    = null;
-  var portalType      = 'design_build'; // 'design_build' | 'stone_sourcing'
+  var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing'
   var currentClient  = null;
   var allClientProjects = [];
   var currentProject = null;
-  var isContractor    = false;
+  var isContractor   = false;
   var checklistState = {};
-  var notesState      = {};
+  var notesState     = {};
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
@@ -1077,15 +1038,18 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
   async function tryTokenFromUrl() {
+    // Check both hash fragment (#access_token=) and query params (?access_token=)
     var hash   = window.location.hash   || '';
     var search = window.location.search || '';
     var hashParams  = new URLSearchParams(hash.replace('#', ''));
     var queryParams = new URLSearchParams(search.replace('?', ''));
     var accessToken = hashParams.get('access_token') || queryParams.get('access_token');
 
+    // Also handle Supabase PKCE flow — token_hash in query params
     var tokenHash = queryParams.get('token_hash') || queryParams.get('token');
     var tokenType = queryParams.get('type');
 
+    // If we have a token_hash (confirmation flow), exchange it for a session
     if (tokenHash && tokenType) {
       try {
         var verifyRes = await fetch(SUPABASE_URL + '/auth/v1/verify', {
@@ -1109,6 +1073,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
         if (user && user.email) {
           currentUser = { access_token: accessToken, email: user.email, id: user.id };
           try { localStorage.setItem('dd_token', accessToken); sessionStorage.setItem('dd_token', accessToken); } catch(e) {}
+          // Clean URL — remove token params
           history.replaceState(null, '', window.location.pathname);
           return true;
         }
@@ -1138,6 +1103,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     var clients = await res.json() || [];
     allClientProjects = clients;
     if (!allClientProjects.length) { showLogin(); return; }
+    // Only treat as contractor if explicitly flagged — don't assume multiple records = contractor
     isContractor = allClientProjects.some(function(c) { return c.is_contractor; });
     if (isContractor || allClientProjects.length > 1) await loadContractorProjects();
     else await loadProjectDashboard(allClientProjects[0]);
@@ -1164,6 +1130,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
           localStorage.setItem('dd_token', data.access_token);
           sessionStorage.setItem('dd_token', data.access_token);
         } catch(e) {}
+        // Use the existing init() flow — it reads the token from storage
         await init();
       } else {
         showMsg(msg, 'Incorrect email or password. Please try again.', 'error');
@@ -1173,4 +1140,564 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     }
     this.disabled = false; this.textContent = 'Sign In';
   });
+
+  document.getElementById('ddLoginEmail').addEventListener('keydown',    function(e) { if (e.key === 'Enter') document.getElementById('ddLoginPassword').focus(); });
+  document.getElementById('ddLoginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ddLoginBtn').click(); });
+
+  // ── FORGOT PASSWORD ──────────────────────────────────────────────
+  document.getElementById('ddForgotBtn').addEventListener('click', function() {
+    var wrap = document.getElementById('ddResetWrap');
+    var email = document.getElementById('ddLoginEmail').value.trim();
+    if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+    var resetInput = document.getElementById('ddResetEmail');
+    if (resetInput && email) resetInput.value = email;
+  });
+
+  document.getElementById('ddResetBtn').addEventListener('click', async function() {
+    var email = (document.getElementById('ddResetEmail').value || '').trim().toLowerCase();
+    var msg   = document.getElementById('ddResetMsg');
+    if (!email) { showMsg(msg, 'Please enter your email.', 'error'); return; }
+    this.disabled = true; this.textContent = 'Sending...';
+    try {
+      // Use invite-client to send a fresh password — more reliable than Supabase's built-in recovery
+      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email: email, full_name: '' })
+      });
+      var data = await res.json().catch(function() { return {}; });
+      if (res.ok) {
+        showMsg(msg, 'New login credentials sent — check your inbox.', 'success');
+      } else {
+        showMsg(msg, 'Could not send reset. Please contact us at start@daydreamdesignandbuild.com', 'error');
+      }
+    } catch(e) {
+      showMsg(msg, 'Connection error. Please try again.', 'error');
+    }
+    this.disabled = false; this.textContent = 'Send New Password';
+  });
+
+  // ── CLIENT SITE PHOTOS — Load and display grouped by date ─────────
+  async function loadClientSitePhotos() {
+    var container = document.getElementById('ddSitePhotosList');
+    if (!container || !currentClient) return;
+    container.innerHTML = '<div class="dd-empty">Loading photos...</div>';
+    try {
+      // Load ALL photos for this client (uploaded by client AND admin)
+      var res = await apiFetch('/rest/v1/documents?client_id=eq.' + currentClient.id + '&photo_category=eq.site_photos&order=visit_date.desc,created_at.desc');
+      var photos = await res.json() || [];
+
+      if (!photos.length) {
+        container.innerHTML = '<div class="dd-empty" style="padding:48px 0">No site photos yet.<br><span style="font-size:10px;color:var(--muted)">Upload photos in the Documents tab or ask your Daydream team.</span></div>';
+        return;
+      }
+
+      // Group by visit date
+      var groups = {};
+      photos.forEach(function(p) {
+        var d = p.visit_date || p.created_at.split('T')[0];
+        if (!groups[d]) groups[d] = [];
+        groups[d].push(p);
+      });
+
+      container.innerHTML = Object.keys(groups).sort(function(a,b) { return b.localeCompare(a); }).map(function(date) {
+        var datePhotos = groups[date];
+        var d = new Date(date + 'T12:00:00');
+        var dateStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        var notes = datePhotos[0].photo_notes || '';
+        var uploadedBy = datePhotos[0].uploaded_by === 'daydream_team' ? 'Daydream Team' : 'You';
+        return '<div style="margin-bottom:24px">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:2px solid var(--gold);margin-bottom:12px">'
+          + '  <div><div style="font-family:Cormorant Garamond,serif;font-size:18px;color:var(--gold)">' + dateStr + '</div>'
+          + '  <div style="font-size:10px;color:var(--muted);margin-top:2px">' + datePhotos.length + ' photo(s) · Uploaded by ' + s(uploadedBy) + '</div></div>'
+          + '</div>'
+          + (notes ? '<div style="font-size:12px;color:var(--muted);padding:10px 14px;background:var(--surface);border-left:2px solid var(--gold);margin-bottom:12px;line-height:1.7">' + s(notes) + '</div>' : '')
+          + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">'
+          + datePhotos.map(function(p) {
+              var url = 'https://wboqkfqibztjmdwrwsch.supabase.co/storage/v1/object/public/client-documents/' + p.file_url;
+              return '<div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface-2);border:1px solid var(--border);cursor:pointer" onclick="window.open(\'' + url + '\',\'_blank\')">'
+                + '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML=\'<div style=\\"display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:var(--muted)\\">No preview</div>\'" />'
+                + '</div>';
+            }).join('')
+          + '</div></div>';
+      }).join('');
+    } catch(e) {
+      container.innerHTML = '<div class="dd-empty">Error loading photos. Please refresh.</div>';
+      console.error('loadClientSitePhotos:', e);
+    }
+  }
+
+  // ── LOGOUT ────────────────────────────────────────────────────────
+  function doLogout() {
+    stopRealtime(); // Clean up WebSocket connections
+    try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
+    currentUser = null; currentClient = null; currentProject = null; isContractor = false;
+    document.getElementById('ddDashboard').classList.remove('visible');
+    document.getElementById('ddProjectSelector').classList.remove('visible');
+    document.getElementById('ddCreateProject').classList.remove('visible');
+    showLogin();
+  }
+  window.doLogout = doLogout;
+
+  // ── CHANGE PASSWORD ──────────────────────────────────────────────
+  window._toggleChangePass = function() {
+    var panel = document.getElementById('ddChangePassPanel');
+    if (!panel) return;
+    var isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) {
+      document.getElementById('ddNewPass').value = '';
+      document.getElementById('ddConfirmPass').value = '';
+      document.getElementById('ddChangePassMsg').textContent = '';
+      document.getElementById('ddNewPass').focus();
+    }
+  };
+
+  window._saveNewPassword = async function() {
+    var newPass     = (document.getElementById('ddNewPass').value     || '').trim();
+    var confirmPass = (document.getElementById('ddConfirmPass').value || '').trim();
+    var msg         = document.getElementById('ddChangePassMsg');
+    if (!newPass)                { msg.textContent = 'Please enter a new password.';            msg.style.color = 'var(--error)';   return; }
+    if (newPass.length < 6)      { msg.textContent = 'Password must be at least 6 characters.'; msg.style.color = 'var(--error)';   return; }
+    if (newPass !== confirmPass)  { msg.textContent = 'Passwords do not match.';                msg.style.color = 'var(--error)';   return; }
+    msg.textContent = 'Updating...'; msg.style.color = 'var(--muted)';
+    try {
+      var token = null;
+      try { token = localStorage.getItem('dd_token') || sessionStorage.getItem('dd_token'); } catch(e) {}
+      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+        method: 'PUT',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: newPass })
+      });
+      var data = await res.json().catch(function() { return {}; });
+      if (res.ok) {
+        msg.textContent = 'Password updated successfully!';
+        msg.style.color = 'var(--success)';
+        document.getElementById('ddNewPass').value     = '';
+        document.getElementById('ddConfirmPass').value = '';
+      } else {
+        msg.textContent = data.msg || data.message || 'Could not update password. Please try again.';
+        msg.style.color = 'var(--error)';
+      }
+    } catch(e) {
+      msg.textContent = 'Connection error. Please try again.';
+      msg.style.color = 'var(--error)';
+    }
+  };
+
+  document.getElementById('ddLogoutBtn').addEventListener('click', doLogout);
+  document.getElementById('ddRefreshBtn').addEventListener('click', async function() {
+    if (!currentClient) return;
+    var btn = this;
+    btn.textContent = '⟳ Refreshing...'; btn.disabled = true;
+    await loadProjectDashboard(currentClient);
+    btn.textContent = '⟳ Refresh'; btn.disabled = false;
+  });
+  document.getElementById('ddSelectorLogout').addEventListener('click', doLogout);
+
+  // ── TABS ──────────────────────────────────────────────────────────
+  document.querySelectorAll('#dd-portal .dd-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = document.getElementById('tab-' + tab.dataset.tab);
+      if (target) target.classList.add('active');
+
+      if (tab.dataset.tab === 'site-photos') loadClientSitePhotos();
+
+      if (tab.dataset.tab === 'messages') {
+        try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
+        var dot = tab.querySelector('.dd-msg-dot'); if (dot) dot.remove();
+      }
+    });
+  });
+
+  // ── RESUMABLE UPLOAD (TUS) for files > 6MB ───────────────────────
+  // Uses Supabase's TUS endpoint — survives network interruptions
+  async function uploadResumable(file, path, token) {
+    var CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunks
+    var endpoint = SUPABASE_URL + '/storage/v1/upload/resumable';
+    // Step 1: Create upload session
+    var createRes = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/offset+octet-stream',
+        'Upload-Length': file.size,
+        'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'),
+        'Tus-Resumable': '1.0.0'
+      }
+    });
+    if (!createRes.ok && createRes.status !== 201) {
+      console.error('TUS create failed:', createRes.status, await createRes.text());
+      return false;
+    }
+    var uploadUrl = createRes.headers.get('Location');
+    if (!uploadUrl) { console.error('No TUS upload URL returned'); return false; }
+    // Make absolute if relative
+    if (uploadUrl.startsWith('/')) uploadUrl = SUPABASE_URL + uploadUrl;
+    // Step 2: Upload in chunks
+    var offset = 0;
+    while (offset < file.size) {
+      var chunk = file.slice(offset, offset + CHUNK_SIZE);
+      var patchRes = await fetch(uploadUrl, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/offset+octet-stream',
+          'Upload-Offset': offset,
+          'Tus-Resumable': '1.0.0'
+        },
+        body: chunk
+      });
+      if (!patchRes.ok) { console.error('TUS chunk failed at offset', offset, patchRes.status); return false; }
+      offset += CHUNK_SIZE;
+    }
+    return true;
+  }
+
+  // ── CHECKLIST ─────────────────────────────────────────────────────
+  window._toggleCheckItem = async function(key) {
+    var item = CHECKLIST_ITEMS.find(function(i) { return i.key === key; });
+    if (!item || !currentClient) return;
+    if (item.type === 'note') { var area = document.getElementById('note-area-' + key); if (area) { area.classList.toggle('visible'); return; } }
+    var newState = !checklistState[key];
+    checklistState[key] = newState;
+    try {
+      var existing = await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key);
+      var data = await existing.json() || [];
+      if (data.length > 0) {
+        await apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
+      } else {
+        await apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: key, completed: newState, completed_at: newState ? new Date().toISOString() : null }) });
+      }
+    } catch(e) { console.error('_toggleCheckItem:', e); }
+    renderChecklist();
+  };
+
+  window._saveNote = async function(key) {
+    if (!currentClient) return;
+    var textarea = document.getElementById('note-' + key);
+    var content = textarea ? textarea.value.trim() : '';
+    notesState[key] = content;
+    if (content && !checklistState[key]) checklistState[key] = true;
+    try {
+      var existing = await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key);
+      var data = await existing.json() || [];
+      if (data.length > 0) {
+        await apiFetch('/rest/v1/client_notes?client_id=eq.' + currentClient.id + '&note_key=eq.' + key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ content: content, updated_at: new Date().toISOString() }) });
+      } else {
+        await apiFetch('/rest/v1/client_notes', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, note_key: key, content: content }) });
+      }
+      var saveBtn = document.querySelector('#note-area-' + key + ' .dd-note-save');
+      if (saveBtn) { saveBtn.textContent = 'Saved!'; saveBtn.style.background = 'var(--success)'; setTimeout(function() { if(saveBtn){saveBtn.textContent='Save'; saveBtn.style.background='var(--gold)';} }, 2000); }
+      renderChecklist();
+      var ta = document.getElementById('note-' + key); if (ta) ta.value = content;
+      var area = document.getElementById('note-area-' + key); if (area) area.classList.add('visible');
+    } catch(e) { console.error('_saveNote:', e); }
+  };
+
+  // ── FILE UPLOADS — Validation + Parallel uploads ─────────────────
+  document.querySelectorAll('#dd-portal .dd-file-input').forEach(function(input) {
+    input.addEventListener('change', async function() {
+      var files = Array.from(this.files);
+      var category = this.dataset.category;
+      var statusEl = document.getElementById('status-' + category);
+      if (!files.length || !currentUser) return;
+      // Validate all files first
+      for (var vi = 0; vi < files.length; vi++) {
+        var err = validateFile(files[vi]);
+        if (err) { statusEl.textContent = err; statusEl.style.color = 'var(--error)'; return; }
+      }
+      statusEl.textContent = 'Uploading ' + files.length + ' file(s)...';
+      statusEl.style.color = 'var(--muted)';
+      var clientName = (currentClient && currentClient.full_name) ? currentClient.full_name : currentUser.email;
+
+      // Parallel uploads — resumable TUS for large files, standard for small
+      var SIX_MB = 6 * 1024 * 1024;
+      var uploaded = 0;
+      var total = files.length;
+
+      var uploadResults = await Promise.all(files.map(async function(file) {
+        var path = clientName + '/' + category + '/' + Date.now() + '_' + safeName(file.name);
+        var token = currentUser.access_token || SUPABASE_KEY;
+        try {
+          var ok = false;
+          if (file.size > SIX_MB) {
+            // ── Resumable TUS upload for videos and large files ──
+            ok = await uploadResumable(file, path, token);
+          } else {
+            // ── Standard upload for small files ──
+            var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
+              method: 'POST',
+              headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': file.type },
+              body: file
+            });
+            ok = res.ok;
+          }
+          if (ok) {
+            await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, file_name: file.name, file_url: path, uploaded_by: currentUser.email, photo_category: category === 'photos' ? 'site_photos' : null, visit_date: category === 'photos' ? new Date().toISOString().split('T')[0] : null }) });
+            // Auto-complete checklist item
+            var checkItem = CHECKLIST_ITEMS.find(function(ci) { return ci.category === category; });
+            if (checkItem && currentClient && !checklistState[checkItem.key]) {
+              checklistState[checkItem.key] = true;
+              apiFetch('/rest/v1/checklist_items', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, item_key: checkItem.key, completed: true, completed_at: new Date().toISOString() }) }).catch(function() {
+                return apiFetch('/rest/v1/checklist_items?client_id=eq.' + currentClient.id + '&item_key=eq.' + checkItem.key, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ completed: true, completed_at: new Date().toISOString() }) });
+              });
+              renderChecklist();
+            }
+          }
+          return ok;
+        } catch(e) { console.error('Upload error:', file.name, e); return false; }
+      }));
+
+      uploaded = uploadResults.filter(Boolean).length;
+      statusEl.textContent = uploaded === total ? uploaded + ' file(s) uploaded successfully' : uploaded + ' of ' + total + ' uploaded';
+      statusEl.style.color = uploaded === total ? 'var(--success)' : 'var(--error)';
+    });
+  });
+
+  // ── MESSAGES ──────────────────────────────────────────────────────
+  window._deleteMessage = async function(id) {
+    if (!confirm('Delete this message?')) return;
+    try {
+      var res = await apiFetch('/rest/v1/messages?id=eq.' + id, { method: 'DELETE' });
+      if (res.ok) {
+        var el = document.getElementById('msg-' + id);
+        if (el) { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(function() { if(el.parentNode) el.remove(); }, 300); }
+      } else { console.error('Delete message error:', await res.text()); }
+    } catch(e) { console.error('_deleteMessage:', e); }
+  };
+
+  document.getElementById('ddSendBtn').addEventListener('click', async function() {
+    var input = document.getElementById('ddMessageInput');
+    var content = input.value.trim();
+    if (!content || !currentUser) return;
+    input.value = '';
+    try {
+      await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: currentProject ? currentProject.id : null, client_id: currentClient ? currentClient.id : null, sender: currentUser.email, content: content, is_read: false }) });
+      await loadMessages();
+    } catch(e) { console.error('Send message:', e); }
+  });
+  document.getElementById('ddMessageInput').addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('ddSendBtn').click(); } });
+
+  // ── SUPABASE REALTIME — Live updates without refresh ─────────────
+  var realtimeChannels = [];
+
+  function startRealtime() {
+    // Clean up any existing subscriptions first
+    stopRealtime();
+    if (!currentClient) return;
+
+    // ── 1. LIVE MESSAGES ─────────────────────────────────────────
+    var msgChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    msgChannel.onopen = function() {
+      // Join the messages channel filtered to this client
+      msgChannel.send(JSON.stringify({
+        topic: 'realtime:public:messages:client_id=eq.' + currentClient.id,
+        event: 'phx_join',
+        payload: {},
+        ref: '1'
+      }));
+    };
+
+    msgChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        // New message inserted
+        if (data.event === 'INSERT' || data.payload && data.payload.data) {
+          loadMessages();
+          // Flash the messages tab if not active
+          var msgTab = document.querySelector('[data-tab="messages"]');
+          var activeTab = document.querySelector('#dd-portal .dd-tab.active');
+          if (msgTab && activeTab && activeTab.dataset.tab !== 'messages') {
+            var dot = msgTab.querySelector('.dd-msg-dot');
+            if (!dot) { dot = document.createElement('span'); dot.className = 'dd-msg-dot'; msgTab.appendChild(dot); }
+            dot.textContent = '●';
+          }
+        }
+      } catch(e) {}
+    };
+
+    msgChannel.onerror = function(e) { console.error('Realtime messages error:', e); };
+    realtimeChannels.push(msgChannel);
+
+    // ── 2. LIVE CLIENT STATUS (contract, payment, pipeline) ───────
+    var clientChannel = new WebSocket(
+      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU&vsn=1.0.0'
+    );
+
+    clientChannel.onopen = function() {
+      clientChannel.send(JSON.stringify({
+        topic: 'realtime:public:clients:id=eq.' + currentClient.id,
+        event: 'phx_join',
+        payload: {},
+        ref: '2'
+      }));
+    };
+
+    clientChannel.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        if (data.event === 'UPDATE' && data.payload && data.payload.record) {
+          var updated = data.payload.record;
+          // Merge into currentClient
+          currentClient = Object.assign({}, currentClient, updated);
+          // Re-render status badges live
+          renderStatusBadges(currentClient);
+          renderTimeline(currentClient.client_stage || 'inquiry_submitted', currentClient.construction_stage);
+          // Update pipeline status card
+          var PIPELINE_LABELS = {
+            'client_inquiry_made': 'New Inquiry', 'client_qualified': 'Qualified',
+            'discovery_call_booked': 'Discovery Call Booked', 'discovery_call_completed': 'Discovery Call Complete',
+            'design_proposal_drafting': 'Proposal Drafting', 'design_proposal_presented': 'Proposal Presented',
+            'design_proposal_accepted': 'Proposal Accepted', 'site_consultation_scheduled': 'Site Consultation Scheduled',
+            'site_consultation_completed': 'Site Consultation Complete', 'design_phase_started': 'Design Phase Started',
+            'base_map_complete': 'Base Map Complete', 'base_map_approved': 'Base Map Approved',
+            '3d_model_completed': '3D Model Complete', '3d_model_approved': '3D Model Approved',
+            'visualizations_completed': 'Visualizations Complete', 'visualizations_approved': 'Visualizations Approved',
+            'construction_document_phase_complete': 'Construction Documents Complete',
+            'permit_plans_submitted': 'Permit Plans Submitted', 'permit_plans_approved': 'Permit Plans Approved',
+            'construction_started': 'Construction Started', 'construction_finished': 'Construction Finished',
+            'project_complete': 'Project Complete'
+          };
+          var statusEl = document.getElementById('ddStatus');
+          if (statusEl) statusEl.textContent = PIPELINE_LABELS[updated.status] || updated.status || 'New Inquiry';
+          // Update project type
+          var ptEl = document.getElementById('ddProjectType');
+          if (ptEl && updated.project_type_category) ptEl.textContent = PROJECT_TYPE_LABELS[updated.project_type_category] || updated.project_type_category;
+          // Show a subtle toast notification
+          showRealtimeToast('Your project has been updated');
+        }
+      } catch(e) { console.error('Realtime client update:', e); }
+    };
+
+    clientChannel.onerror = function(e) { console.error('Realtime client error:', e); };
+    realtimeChannels.push(clientChannel);
+  }
+
+  function stopRealtime() {
+    realtimeChannels.forEach(function(ch) {
+      try { ch.close(); } catch(e) {}
+    });
+    realtimeChannels = [];
+  }
+
+  // ── TOAST NOTIFICATION ────────────────────────────────────────
+  function showRealtimeToast(message) {
+    var existing = document.getElementById('ddRealtimeToast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = 'ddRealtimeToast';
+    toast.textContent = message;
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--bg);font-family:Jost,sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 20px;z-index:9999;animation:ddFadeUp 0.3s ease both;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
+    document.body.appendChild(toast);
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3000);
+  }
+
+  // ── CREATE PROJECT PANEL ──────────────────────────────────────────
+  window._showCreateProject = function() {
+    var panel = document.getElementById('ddCreateProject');
+    if (panel) panel.classList.add('visible');
+    document.getElementById('ddProjectSelector').classList.remove('visible');
+    document.getElementById('ddDashboard').classList.remove('visible');
+    // Pre-fill client name if we know it
+    var nameInput = document.getElementById('cpClientName');
+    if (nameInput && currentClient && currentClient.full_name && !nameInput.value) {
+      nameInput.value = currentClient.full_name;
+    }
+  };
+
+  window._hideCreateProject = function() {
+    var panel = document.getElementById('ddCreateProject');
+    if (panel) panel.classList.remove('visible');
+    // Reset all unified form fields
+    ['cpAddress','cpClientName','cpName','cpAnything','cpGoals'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['cpType','cpBudget'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var msg  = document.getElementById('cpMsg');       if (msg)  msg.textContent = '';
+    var succ = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'none';
+    var btn  = document.getElementById('cpSubmit');    if (btn) { btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = ''; }
+
+    if (allClientProjects.length > 1 || isContractor) showProjectSelector();
+    else if (currentClient) showDashboard();
+    else showLogin();
+  };
+
+  window._submitCreateProject = async function() {
+    var address    = document.getElementById('cpAddress').value.trim();
+    var clientName = (document.getElementById('cpClientName') || {}).value ? document.getElementById('cpClientName').value.trim() : '';
+    var name       = document.getElementById('cpName').value.trim();
+    var type       = document.getElementById('cpType').value;
+    var anything   = (document.getElementById('cpAnything') || {}).value ? document.getElementById('cpAnything').value.trim() : '';
+    var goals      = document.getElementById('cpGoals').value.trim();
+    var budget     = document.getElementById('cpBudget').value;
+    var msg = document.getElementById('cpMsg');
+    var btn = document.getElementById('cpSubmit');
+
+    // Unified validation — same required fields as admin
+    if (!address)    { msg.textContent = 'Project address is required.';                  msg.style.color = 'var(--error)'; document.getElementById('cpAddress').focus(); return; }
+    if (!clientName) { msg.textContent = 'Client name is required.';                      msg.style.color = 'var(--error)'; document.getElementById('cpClientName').focus(); return; }
+    if (!name)       { msg.textContent = 'Project name is required.';                     msg.style.color = 'var(--error)'; document.getElementById('cpName').focus(); return; }
+    if (!budget)     { msg.textContent = 'Please enter your investment / budget level.';  msg.style.color = 'var(--error)'; document.getElementById('cpBudget').focus(); return; }
+
+    if (!currentClient && !allClientProjects.length) { msg.textContent = 'No client account found.'; msg.style.color = 'var(--error)'; return; }
+    var clientId = (currentClient || allClientProjects[0]).id;
+    btn.textContent = 'Creating Project...'; btn.disabled = true; msg.textContent = '';
+
+    var description = [goals, anything ? 'Additional notes: ' + anything : ''].filter(Boolean).join('\n\n');
+
+    try {
+      var res = await apiFetch('/rest/v1/projects', {
+        method: 'POST', headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          client_id: clientId,
+          project_name: name,
+          project_type: type || null,
+          project_address: address || null,
+          description: description || null,
+          status: 'active'
+        })
+      });
+      // Save investment level on client record
+      if (budget) {
+        apiFetch('/rest/v1/clients?id=eq.' + clientId, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ investment: budget })
+        }).catch(function(e) { console.error('investment patch:', e); });
+      }
+      if (res.ok) {
+        var projData = await res.json() || [];
+        var newProjectId = projData[0] ? projData[0].id : null;
+        // Files uploaded via Documents tab after project creation
+        var succ = document.getElementById('cpSuccessMsg'); if (succ) succ.style.display = 'block';
+        btn.textContent = 'Project Created!'; btn.style.background = 'var(--success)';
+        setTimeout(function() { window._hideCreateProject(); loadContractorProjects(); }, 2000);
+      } else {
+        var errText = await res.text();
+        console.error('Create project error:', errText);
+        msg.textContent = 'Error creating project. Please try again.'; msg.style.color = 'var(--error)';
+        btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
+      }
+    } catch(e) {
+      console.error('_submitCreateProject:', e);
+      msg.textContent = 'Something went wrong.'; msg.style.color = 'var(--error)';
+      btn.textContent = 'Create Project'; btn.disabled = false; btn.style.background = '';
+    }
+  };
+
 })();
