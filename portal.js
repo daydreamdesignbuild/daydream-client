@@ -45,22 +45,24 @@
     { value: 'final_deliverables',           label: 'Final Deliverables' }
   ];
 
-  // Stone Sourcing linear state machine
+  // Stone Sourcing / Shower Order Timeline (16 stages)
   var STONE_TIMELINE = [
-    { value: 'discovery_call',       label: 'Discovery Call' },
-    { value: 'designs_received',     label: 'Designs Received' },
-    { value: 'model_started',        label: '3D Model Started' },
-    { value: 'model_completed',      label: '3D Model Completed' },
-    { value: 'takeoffs_complete',    label: 'Take-offs Complete' },
-    { value: 'proposal_sent',        label: 'Proposal Sent' },
-    { value: 'proposal_accepted',    label: 'Proposal Accepted' },
-    { value: 'payment_sent',         label: 'Payment Sent' },
-    { value: 'payment_received',     label: 'Payment Received' },
-    { value: 'stone_purchased',      label: 'Stone Purchased' },
-    { value: 'stone_ordered',        label: 'Stone Ordered' },
-    { value: 'in_transit',           label: 'In Transit' },
-    { value: 'arrived_at_port',      label: 'Arrived at Port' },
-    { value: 'delivered_to_job_site',label: 'Delivered to Job Site' }
+    { value: 'inquiry_submitted',     label: 'Inquiry Submitted' },
+    { value: 'discussion_call',       label: 'Project Discussion Call' },
+    { value: 'designs_received',      label: 'Designs Received' },
+    { value: 'model_started',         label: '3D Model Started' },
+    { value: 'model_completed',       label: '3D Model Completed' },
+    { value: 'takeoffs_complete',     label: 'Take-offs Complete' },
+    { value: 'proposal_sent',         label: 'Proposal Sent' },
+    { value: 'proposal_accepted',     label: 'Proposal Accepted' },
+    { value: 'contract_signed',       label: 'Contract Signed' },
+    { value: 'payment_sent',          label: 'Payment Sent' },
+    { value: 'payment_received',      label: 'Payment Received' },
+    { value: 'stone_purchased',       label: 'Stone Purchased' },
+    { value: 'stone_ordered',         label: 'Stone Ordered' },
+    { value: 'in_transit',            label: 'In Transit' },
+    { value: 'arrived_at_port',       label: 'Arrived at Port' },
+    { value: 'delivered_to_job_site', label: 'Delivered to Job Site' }
   ];
 
   // Construction Phase Timeline
@@ -299,6 +301,52 @@
     '#dd-portal .dd-create-input::placeholder { color: var(--muted); }',
     '#dd-portal .dd-create-textarea { resize: vertical; min-height: 120px; line-height: 1.7; }',
     '#dd-portal .dd-create-msg { font-size: 12px; min-height: 20px; margin-bottom: 12px; }',
+
+    /* STONE ORDERS HOME */
+    '#dd-portal .dd-orders-home { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); width: 100%; align-items: center; }',
+    '#dd-portal .dd-orders-home.visible { display: flex; }',
+    '#dd-portal .dd-orders-content { flex: 1; padding: 40px 32px; max-width: 860px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-orders-title { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
+    '#dd-portal .dd-orders-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 36px; }',
+    '#dd-portal .dd-order-card { background: var(--surface); border: 1px solid var(--border); padding: 22px 26px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 20px; }',
+    '#dd-portal .dd-order-card:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-order-card-left { flex: 1; min-width: 0; }',
+    '#dd-portal .dd-order-card-name { font-family: "Cormorant Garamond", serif; font-size: 20px; font-weight: 400; color: var(--gold); margin-bottom: 4px; }',
+    '#dd-portal .dd-order-card-meta { font-size: 11px; color: var(--muted); margin-bottom: 8px; }',
+    '#dd-portal .dd-order-card-tags { display: flex; gap: 8px; flex-wrap: wrap; }',
+    '#dd-portal .dd-order-tag { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; }',
+    '#dd-portal .dd-order-tag.gold { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-order-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; flex-shrink: 0; }',
+    '#dd-portal .dd-order-card:hover .dd-order-card-arrow { opacity: 1; }',
+    '#dd-portal .dd-new-order-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--gold); color: var(--ow); border: none; font-family: Jost, sans-serif; font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; padding: 14px 28px; cursor: pointer; transition: opacity 0.2s; margin-bottom: 32px; }',
+    '#dd-portal .dd-new-order-btn:hover { opacity: 0.85; }',
+    '#dd-portal .dd-orders-empty { text-align: center; padding: 56px 24px; border: 1px dashed var(--border); background: var(--surface); margin-bottom: 24px; }',
+    '#dd-portal .dd-orders-empty-icon { font-size: 28px; color: var(--gold); margin-bottom: 12px; }',
+    '#dd-portal .dd-orders-empty-text { font-size: 13px; color: var(--muted); line-height: 1.9; }',
+
+    /* STONE ORDER DASHBOARD */
+    '#dd-portal .dd-order-dashboard { display: none; min-height: 100vh; flex-direction: column; width: 100%; align-items: center; }',
+    '#dd-portal .dd-order-dashboard.visible { display: flex; }',
+
+    /* NEW ORDER FORM */
+    '#dd-portal .dd-new-order-panel { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); width: 100%; }',
+    '#dd-portal .dd-new-order-panel.visible { display: flex; }',
+    '#dd-portal .dd-new-order-body { flex: 1; padding: 40px 32px; max-width: 760px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-new-order-section { margin-bottom: 28px; }',
+    '#dd-portal .dd-new-order-section-title { font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }',
+    '#dd-portal .dd-no-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }',
+    '#dd-portal .dd-no-full { grid-column: 1 / -1; }',
+    '#dd-portal .dd-no-field { display: flex; flex-direction: column; gap: 6px; }',
+    '#dd-portal .dd-no-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
+    '#dd-portal .dd-no-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: Jost, sans-serif; font-size: 13px; font-weight: 300; padding: 11px 14px; outline: none; width: 100%; transition: border-color 0.2s; appearance: none; }',
+    '#dd-portal .dd-no-input:focus { border-color: var(--gold); }',
+    '#dd-portal .dd-no-input::placeholder { color: var(--muted); }',
+    '#dd-portal .dd-no-textarea { resize: vertical; min-height: 100px; line-height: 1.7; }',
+    '#dd-portal .dd-no-msg { font-size: 12px; min-height: 18px; margin-bottom: 10px; }',
+    '#dd-portal .dd-no-msg.success { color: var(--success); }',
+    '#dd-portal .dd-no-msg.error { color: var(--error); }',
+    '@media (max-width: 600px) { #dd-portal .dd-no-grid { grid-template-columns: 1fr; } #dd-portal .dd-orders-content { padding: 24px 16px; } #dd-portal .dd-new-order-body { padding: 24px 16px; } #dd-portal .dd-order-card { flex-direction: column; align-items: flex-start; } }',
+
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 600px) {',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
@@ -614,15 +662,172 @@
     '    <button class="dd-btn" id="cpSubmit" onclick="window._submitCreateProject()">Create Project</button>',
     '    <div style="height:60px"></div>',
     '  </div>',
+    '</div>',
+
+    // STONE ORDERS HOME
+    '<div id="ddOrdersHome" class="dd-orders-home">',
+    '  <nav class="dd-nav">',
+    '    <div class="dd-nav-left"><div class="dd-nav-logo">Daydream</div></div>',
+    '    <div class="dd-nav-right">',
+    '      <span class="dd-nav-user" id="ddOrdersNavUser"></span>',
+    '      <button class="dd-nav-logout" id="ddOrdersLogoutBtn">Sign Out</button>',
+    '    </div>',
+    '  </nav>',
+    '  <div class="dd-orders-content">',
+    '    <div class="dd-orders-title" id="ddOrdersTitle">Your Orders</div>',
+    '    <div class="dd-orders-sub">Each order tracks its own stone selection, timeline, and documents.</div>',
+    '    <button class="dd-new-order-btn" onclick="window._showNewOrderPanel()">+ Start a New Order</button>',
+    '    <div id="ddOrdersList"></div>',
+    '    <div style="margin-top:32px;padding:20px 24px;background:var(--surface);border:1px solid var(--border)">',
+    '      <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Book a Project Discussion Call</div>',
+    '      <p style="font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:14px">Want to walk through your project before submitting an order? Book a call with our Stone Atelier team.</p>',
+    '      <a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn" style="font-size:9px;padding:12px 22px">Book a Call</a>',
+    '    </div>',
+    '  </div>',
+    '</div>',
+
+    // NEW ORDER PANEL
+    '<div id="ddNewOrderPanel" class="dd-new-order-panel">',
+    '  <nav class="dd-nav">',
+    '    <div class="dd-nav-left"><div class="dd-nav-logo">Daydream</div></div>',
+    '    <div class="dd-nav-right"><button class="dd-nav-logout" onclick="window._hideNewOrderPanel()">&#8592; Back to Orders</button></div>',
+    '  </nav>',
+    '  <div class="dd-new-order-body">',
+    '    <div class="dd-orders-title">Start a New Order</div>',
+    '    <div class="dd-orders-sub" style="margin-bottom:28px">None of the fields are required. Fill in what you know and we will follow up on the rest.</div>',
+
+    '    <div class="dd-new-order-section">',
+    '      <div class="dd-new-order-section-title">Project Details</div>',
+    '      <div class="dd-no-grid">',
+    '        <div class="dd-no-field dd-no-full"><div class="dd-no-label">Order / Project Name</div><input class="dd-no-input" id="noName" type="text" placeholder="e.g. Smith Residence Pool Coping" /></div>',
+    '        <div class="dd-no-field dd-no-full"><div class="dd-no-label">Delivery Address</div><input class="dd-no-input" id="noAddress" type="text" placeholder="123 Main St, Atlanta GA" /></div>',
+    '        <div class="dd-no-field dd-no-full"><div class="dd-no-label">What Are You Building?</div><input class="dd-no-input" id="noUse" type="text" placeholder="e.g. Pool coping, outdoor shower surround, flooring, wall cladding..." /></div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div class="dd-new-order-section">',
+    '      <div class="dd-new-order-section-title">Stone Selection</div>',
+    '      <div class="dd-no-grid">',
+    '        <div class="dd-no-field">',
+    '          <div class="dd-no-label">Stone Type</div>',
+    '          <select class="dd-no-input" id="noStoneType">',
+    '            <option value="">Select a type...</option>',
+    '            <option value="Limestone">Limestone</option>',
+    '            <option value="Sandstone">Sandstone</option>',
+    '            <option value="Travertine">Travertine</option>',
+    '            <option value="Granite">Granite</option>',
+    '            <option value="Marble">Marble</option>',
+    '            <option value="Porcelain">Porcelain</option>',
+    '            <option value="Undecided">Not Sure Yet</option>',
+    '          </select>',
+    '        </div>',
+    '        <div class="dd-no-field"><div class="dd-no-label">Finish Preference</div><input class="dd-no-input" id="noFinish" type="text" placeholder="e.g. Sandblasted, Flamed Brushed, Honed..." /></div>',
+    '        <div class="dd-no-field dd-no-full"><div class="dd-no-label">Quantity Estimate</div><input class="dd-no-input" id="noQty" type="text" placeholder="e.g. 400 sq ft, approx 2 pallets, not sure yet..." /></div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div class="dd-new-order-section">',
+    '      <div class="dd-new-order-section-title">Additional Information</div>',
+    '      <div class="dd-no-grid">',
+    '        <div class="dd-no-field dd-no-full"><div class="dd-no-label">Notes / Anything Else We Should Know</div><textarea class="dd-no-input dd-no-textarea" id="noNotes" placeholder="Timeline, special requirements, existing materials to match, questions..."></textarea></div>',
+    '        <div class="dd-no-field dd-no-full">',
+    '          <div class="dd-no-label">CAD Files, Drawings, or References</div>',
+    '          <div class="dd-drop-zone" style="border:1px dashed var(--border);padding:28px;text-align:center;cursor:pointer;position:relative;background:var(--surface-2)">',
+    '            <input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.jpeg,.png,.webp" id="noFileInput" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" />',
+    '            <div class="dd-drop-icon">&#8679;</div>',
+    '            <div class="dd-drop-text">Drop files or click to upload</div>',
+    '          </div>',
+    '          <div class="dd-upload-status" id="noFileStatus"></div>',
+    '        </div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div style="background:var(--surface);border:1px solid var(--border);padding:20px 24px;margin-bottom:24px">',
+    '      <div style="font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Want to Talk It Through First?</div>',
+    '      <p style="font-size:12px;color:var(--muted);line-height:1.85;margin-bottom:12px">Book a project discussion call and we can walk through your requirements together before you submit.</p>',
+    '      <a href="' + CONSULT_URL + '" target="_blank" class="dd-cal-btn outline" style="font-size:9px;padding:10px 20px">Book a Discussion Call</a>',
+    '    </div>',
+
+    '    <div class="dd-no-msg" id="noMsg"></div>',
+    '    <button class="dd-btn" id="noSubmit" onclick="window._submitNewOrder()" style="background:var(--gold);color:var(--ow);border-color:var(--gold)">Submit Order</button>',
+    '    <div style="height:60px"></div>',
+    '  </div>',
+    '</div>',
+
+    // ORDER DASHBOARD
+    '<div id="ddOrderDashboard" class="dd-order-dashboard">',
+    '  <nav class="dd-nav">',
+    '    <div class="dd-nav-left">',
+    '      <div class="dd-nav-logo">Daydream</div>',
+    '      <div class="dd-nav-project-name visible" id="ddOrderDashName"></div>',
+    '    </div>',
+    '    <div class="dd-nav-right">',
+    '      <button class="dd-nav-back visible" id="ddOrderBackBtn" onclick="window._showOrdersHome()">&#8592; All Orders</button>',
+    '      <button class="dd-nav-logout" id="ddOrderLogoutBtn">Sign Out</button>',
+    '    </div>',
+    '  </nav>',
+    '  <div class="dd-tabs" id="ddOrderTabBar">',
+    '    <button class="dd-tab active" data-order-tab="overview">Overview</button>',
+    '    <button class="dd-tab" data-order-tab="discussion">Discussion</button>',
+    '    <button class="dd-tab" data-order-tab="documents">Documents</button>',
+    '  </div>',
+    '  <div class="dd-content">',
+
+    '    <div class="dd-tab-content active" id="order-tab-overview">',
+    '      <div class="dd-section-title" id="ddOrderTitle">Order</div>',
+    '      <div class="dd-section-sub" id="ddOrderMeta"></div>',
+    '      <div class="dd-status-grid" style="margin-bottom:24px">',
+    '        <div class="dd-status-card"><div class="dd-status-label">Contract Status</div><div id="ddOrderContractStatus"></div></div>',
+    '        <div class="dd-status-card"><div class="dd-status-label">Payment Status</div><div id="ddOrderPaymentStatus"></div></div>',
+    '      </div>',
+    '      <div class="dd-timeline" id="ddOrderTimeline">',
+    '        <div class="dd-timeline-header">Order Progress</div>',
+    '        <div id="ddOrderTimelineItems"></div>',
+    '      </div>',
+    '      <div id="ddOrderDetails" style="margin-top:24px;border:1px solid var(--border);background:var(--surface)">',
+    '        <div style="padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold)">Order Details</div>',
+    '        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)">',
+    '          <div style="background:var(--surface);padding:14px 20px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Stone Type</div><div style="font-size:13px;color:var(--text)" id="ddOrderStoneType">—</div></div>',
+    '          <div style="background:var(--surface);padding:14px 20px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Finish</div><div style="font-size:13px;color:var(--text)" id="ddOrderFinish">—</div></div>',
+    '          <div style="background:var(--surface);padding:14px 20px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Quantity</div><div style="font-size:13px;color:var(--text)" id="ddOrderQty">—</div></div>',
+    '          <div style="background:var(--surface);padding:14px 20px"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Delivery Address</div><div style="font-size:13px;color:var(--text)" id="ddOrderAddress">—</div></div>',
+    '          <div style="background:var(--surface);padding:14px 20px;grid-column:1/-1"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Intended Use</div><div style="font-size:13px;color:var(--text)" id="ddOrderUse">—</div></div>',
+    '          <div style="background:var(--surface);padding:14px 20px;grid-column:1/-1"><div style="font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Notes</div><div style="font-size:13px;color:var(--text);white-space:pre-wrap" id="ddOrderNotes">—</div></div>',
+    '        </div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div class="dd-tab-content" id="order-tab-discussion">',
+    '      <div class="dd-section-title">Discussion</div>',
+    '      <div class="dd-section-sub">Messages with the Daydream Stone Atelier team about this order.</div>',
+    '      <div class="dd-messages-wrap">',
+    '        <div class="dd-messages-header">Order Messages</div>',
+    '        <div class="dd-messages-list" id="ddOrderMessagesList"><div class="dd-empty">No messages yet.</div></div>',
+    '        <div class="dd-messages-input"><textarea id="ddOrderMessageInput" placeholder="Type your message..."></textarea><button class="dd-send-btn" id="ddOrderSendBtn">Send</button></div>',
+    '      </div>',
+    '    </div>',
+
+    '    <div class="dd-tab-content" id="order-tab-documents">',
+    '      <div class="dd-section-title">Documents</div>',
+    '      <div class="dd-section-sub">CAD files, drawings, references, and documents for this order.</div>',
+    '      <div class="dd-upload-grid" style="margin-bottom:24px">',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">CAD Files &amp; Drawings</div><div class="dd-upload-card-desc">DWG, DXF, PDF plans and layouts</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".pdf,.dwg,.dxf,.jpg,.jpeg,.png" data-order-category="cad" class="dd-order-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="order-status-cad"></div></div></div>',
+    '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Reference Photos</div><div class="dd-upload-card-desc">Inspiration, existing materials to match</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.webp,.pdf" data-order-category="reference" class="dd-order-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="order-status-reference"></div></div></div>',
+    '      </div>',
+    '      <div id="ddOrderDocsList"><div class="dd-empty">Loading documents...</div></div>',
+    '    </div>',
+
+    '  </div>',
     '</div>'
   ].join('\n');
 
   // ── STATE ─────────────────────────────────────────────────────────
   var currentUser    = null;
-  var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing'
+  var portalType     = 'design_build'; // 'design_build' | 'stone_sourcing' | 'outdoor_showers'
   var currentClient  = null;
   var allClientProjects = [];
   var currentProject = null;
+  var currentOrder   = null;
   var isContractor   = false;
   var checklistState = {};
   var notesState     = {};
@@ -669,6 +874,267 @@
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
   function formatDate(str) { if (!str) return '—'; return new Date(str).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); }
   function serviceLabel(key) { return key || '—'; }
+
+  // ── STONE CLIENT SCREENS ──────────────────────────────────────────
+  function hideAllScreens() {
+    ['ddLoading','ddLoginWrap','ddDashboard','ddProjectSelector','ddCreateProject','ddOrdersHome','ddNewOrderPanel','ddOrderDashboard'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.style.display = ''; el.classList.remove('visible'); }
+    });
+    var loading = document.getElementById('ddLoading');
+    if (loading) loading.style.display = 'none';
+  }
+
+  function isStoneClient() {
+    return currentClient && (currentClient.service_type === 'stone_sourcing' || currentClient.service_type === 'outdoor_showers');
+  }
+
+  function showOrdersHome() {
+    hideAllScreens();
+    var home = document.getElementById('ddOrdersHome');
+    if (home) home.classList.add('visible');
+    var navUser = document.getElementById('ddOrdersNavUser');
+    if (navUser) navUser.textContent = currentClient ? (currentClient.full_name || currentUser.email) : currentUser.email;
+    var title = document.getElementById('ddOrdersTitle');
+    if (title) title.textContent = currentClient ? (currentClient.full_name + '\'s Orders') : 'Your Orders';
+    loadOrders();
+    // logout
+    var logoutBtn = document.getElementById('ddOrdersLogoutBtn');
+    if (logoutBtn) logoutBtn.onclick = function() { doLogout(); };
+  }
+  window._showOrdersHome = showOrdersHome;
+
+  function showNewOrderPanel() {
+    hideAllScreens();
+    var panel = document.getElementById('ddNewOrderPanel');
+    if (panel) panel.classList.add('visible');
+  }
+  window._showNewOrderPanel = showNewOrderPanel;
+
+  function hideNewOrderPanel() {
+    showOrdersHome();
+  }
+  window._hideNewOrderPanel = hideNewOrderPanel;
+
+  function showOrderDashboard(order) {
+    currentOrder = order;
+    hideAllScreens();
+    var dash = document.getElementById('ddOrderDashboard');
+    if (dash) dash.classList.add('visible');
+    // set nav name
+    var nameEl = document.getElementById('ddOrderDashName');
+    if (nameEl) nameEl.textContent = order.order_name || 'Order';
+    // wire logout
+    var logoutBtn = document.getElementById('ddOrderLogoutBtn');
+    if (logoutBtn) logoutBtn.onclick = function() { doLogout(); };
+    // render overview
+    renderOrderOverview(order);
+    loadOrderMessages(order.id);
+    loadOrderDocs(order.id);
+    // wire order tabs
+    document.querySelectorAll('[data-order-tab]').forEach(function(tab) {
+      tab.onclick = function() {
+        document.querySelectorAll('[data-order-tab]').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('#dd-portal [id^="order-tab-"]').forEach(function(c) { c.classList.remove('active'); });
+        tab.classList.add('active');
+        var target = document.getElementById('order-tab-' + tab.dataset.orderTab);
+        if (target) target.classList.add('active');
+      };
+    });
+    // wire order file uploads
+    document.querySelectorAll('.dd-order-file-input').forEach(function(input) {
+      input.onchange = function() { handleOrderUpload(input, order.id); };
+    });
+    // wire send message
+    var sendBtn = document.getElementById('ddOrderSendBtn');
+    var msgInput = document.getElementById('ddOrderMessageInput');
+    if (sendBtn && msgInput) {
+      sendBtn.onclick = async function() {
+        var content = msgInput.value.trim();
+        if (!content) return;
+        sendBtn.disabled = true;
+        try {
+          await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, order_id: order.id, sender: currentUser.email, content: content, is_read: false }) });
+          msgInput.value = '';
+          loadOrderMessages(order.id);
+        } catch(e) { console.error('send order msg:', e); }
+        sendBtn.disabled = false;
+      };
+      msgInput.onkeydown = function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } };
+    }
+  }
+
+  function renderOrderOverview(order) {
+    var t = document.getElementById('ddOrderTitle');
+    var m = document.getElementById('ddOrderMeta');
+    if (t) t.textContent = order.order_name || 'Order';
+    if (m) {
+      var parts = [];
+      if (order.stone_type) parts.push(order.stone_type);
+      if (order.intended_use) parts.push(order.intended_use);
+      m.textContent = parts.join(' · ') || 'Stone order';
+    }
+    // contract / payment badges
+    var CONTRACT_LABELS = { 'not_sent': { label: 'Not Yet Sent', color: '#8a7d73' }, 'sent': { label: 'Sent · Awaiting Signature', color: '#9e7b50' }, 'signed': { label: 'Signed', color: '#6a9e7a' } };
+    var PAYMENT_LABELS  = { 'not_sent': { label: 'Invoice Not Yet Sent', color: '#8a7d73' }, 'invoice_sent': { label: 'Invoice Sent · Awaiting Payment', color: '#9e7b50' }, 'deposit_paid': { label: 'Deposit Paid · Balance Due', color: '#c4a07a' }, 'partially_paid': { label: 'Partially Paid', color: '#c4a07a' }, 'payment_complete': { label: 'Payment Complete', color: '#6a9e7a' } };
+    var ck = order.contract_status || 'not_sent';
+    var pk = order.payment_status  || 'not_sent';
+    var contract = CONTRACT_LABELS[ck] || CONTRACT_LABELS['not_sent'];
+    var payment  = PAYMENT_LABELS[pk]  || PAYMENT_LABELS['not_sent'];
+    var cs = document.getElementById('ddOrderContractStatus');
+    var ps = document.getElementById('ddOrderPaymentStatus');
+    if (cs) cs.innerHTML = '<span class="dd-status-badge" style="color:' + contract.color + ';border-color:' + contract.color + ';background:' + contract.color + '18">' + s(contract.label) + '</span>';
+    if (ps) ps.innerHTML = '<span class="dd-status-badge" style="color:' + payment.color + ';border-color:' + payment.color + ';background:' + payment.color + '18">' + s(payment.label) + '</span>';
+    // timeline
+    var stage = order.stage || 'inquiry_submitted';
+    var stageIdx = STONE_TIMELINE.findIndex(function(t) { return t.value === stage; });
+    if (stageIdx === -1) stageIdx = 0;
+    var items = document.getElementById('ddOrderTimelineItems');
+    if (items) {
+      items.innerHTML = STONE_TIMELINE.map(function(st, idx) {
+        var isDone = idx < stageIdx, isActive = idx === stageIdx;
+        var badge = isActive ? '<div class="dd-timeline-badge">In Progress</div>' : (isDone ? '<div class="dd-timeline-badge" style="border-color:var(--success);color:var(--success)">Complete</div>' : '');
+        return '<div class="dd-timeline-item"><div class="dd-timeline-dot ' + (isDone ? 'done' : isActive ? 'active' : '') + '"></div><div class="dd-timeline-label ' + (isDone || isActive ? '' : 'muted') + '">' + s(st.label) + '</div>' + badge + '</div>';
+      }).join('');
+    }
+    // details
+    var fields = { ddOrderStoneType: order.stone_type, ddOrderFinish: order.finish, ddOrderQty: order.quantity_estimate, ddOrderAddress: order.delivery_address, ddOrderUse: order.intended_use, ddOrderNotes: order.notes };
+    Object.keys(fields).forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = fields[id] || '—'; });
+  }
+
+  async function loadOrders() {
+    var list = document.getElementById('ddOrdersList');
+    if (!list || !currentClient) return;
+    list.innerHTML = '<div class="dd-empty">Loading orders...</div>';
+    try {
+      var res = await apiFetch('/rest/v1/stone_orders?client_id=eq.' + currentClient.id + '&order=created_at.desc');
+      var orders = await res.json() || [];
+      if (!orders.length) {
+        list.innerHTML = '<div class="dd-orders-empty"><div class="dd-orders-empty-icon">&#9671;</div><div class="dd-orders-empty-text">No orders yet.<br>Click <strong>Start a New Order</strong> above to begin.</div></div>';
+        return;
+      }
+      var CONTRACT_LABELS = { 'not_sent': 'Not Yet Sent', 'sent': 'Awaiting Signature', 'signed': 'Signed' };
+      list.innerHTML = orders.map(function(order) {
+        var stage = STONE_TIMELINE.find(function(t) { return t.value === order.stage; });
+        var stageLabel = stage ? stage.label : (order.stage || 'Inquiry Submitted');
+        var tags = [];
+        if (order.stone_type) tags.push('<div class="dd-order-tag">' + s(order.stone_type) + '</div>');
+        if (order.intended_use) tags.push('<div class="dd-order-tag">' + s(order.intended_use) + '</div>');
+        tags.push('<div class="dd-order-tag gold">' + s(stageLabel) + '</div>');
+        return '<div class="dd-order-card" onclick="window._openOrder(\'' + order.id + '\')">'
+          + '<div class="dd-order-card-left">'
+          + '<div class="dd-order-card-name">' + s(order.order_name || 'Untitled Order') + '</div>'
+          + (order.delivery_address ? '<div class="dd-order-card-meta">' + s(order.delivery_address) + '</div>' : '')
+          + '<div class="dd-order-card-tags">' + tags.join('') + '</div>'
+          + '</div>'
+          + '<div class="dd-order-card-arrow">&#8594;</div>'
+          + '</div>';
+      }).join('');
+    } catch(e) { list.innerHTML = '<div class="dd-empty">Could not load orders.</div>'; }
+  }
+
+  window._openOrder = async function(orderId) {
+    try {
+      var res = await apiFetch('/rest/v1/stone_orders?id=eq.' + orderId);
+      var data = await res.json() || [];
+      if (data[0]) showOrderDashboard(data[0]);
+    } catch(e) { console.error('_openOrder:', e); }
+  };
+
+  window._submitNewOrder = async function() {
+    var btn = document.getElementById('noSubmit');
+    var msg = document.getElementById('noMsg');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+    var name    = (document.getElementById('noName')      || {}).value || '';
+    var address = (document.getElementById('noAddress')   || {}).value || '';
+    var use     = (document.getElementById('noUse')       || {}).value || '';
+    var stone   = (document.getElementById('noStoneType') || {}).value || '';
+    var finish  = (document.getElementById('noFinish')    || {}).value || '';
+    var qty     = (document.getElementById('noQty')       || {}).value || '';
+    var notes   = (document.getElementById('noNotes')     || {}).value || '';
+    try {
+      var res = await apiFetch('/rest/v1/stone_orders', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({ client_id: currentClient.id, order_name: name.trim()||'New Order', delivery_address: address.trim()||null, intended_use: use.trim()||null, stone_type: stone||null, finish: finish.trim()||null, quantity_estimate: qty.trim()||null, notes: notes.trim()||null, stage: 'inquiry_submitted', contract_status: 'not_sent', payment_status: 'not_sent' })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      var newOrders = await res.json() || [];
+      var newOrder = newOrders[0];
+      // handle file uploads if any
+      var fileInput = document.getElementById('noFileInput');
+      if (fileInput && fileInput.files.length && newOrder) {
+        var statusEl = document.getElementById('noFileStatus');
+        for (var i = 0; i < fileInput.files.length; i++) {
+          var file = fileInput.files[i];
+          var path = currentClient.id + '/orders/' + newOrder.id + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._\-]/g,'_');
+          try {
+            await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type }, body: file });
+            await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, order_id: newOrder.id, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
+          } catch(e) { console.error('order file upload:', e); }
+          if (statusEl) statusEl.textContent = (i + 1) + ' of ' + fileInput.files.length + ' uploaded';
+        }
+      }
+      if (msg) { msg.textContent = 'Order submitted. We will be in touch shortly.'; msg.className = 'dd-no-msg success'; }
+      // clear fields
+      ['noName','noAddress','noUse','noStoneType','noFinish','noQty','noNotes'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+      setTimeout(function() { showOrdersHome(); }, 1800);
+    } catch(e) {
+      console.error('_submitNewOrder:', e);
+      if (msg) { msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'dd-no-msg error'; }
+    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Order'; }
+  };
+
+  async function loadOrderMessages(orderId) {
+    var list = document.getElementById('ddOrderMessagesList');
+    if (!list) return;
+    try {
+      var res = await apiFetch('/rest/v1/messages?order_id=eq.' + orderId + '&order=created_at.asc');
+      var msgs = await res.json() || [];
+      if (!msgs.length) { list.innerHTML = '<div class="dd-empty">No messages yet. Send a message below.</div>'; return; }
+      list.innerHTML = msgs.map(function(m) {
+        var isMe = m.sender !== 'daydream_team';
+        return '<div class="dd-message ' + (isMe ? 'mine' : 'theirs') + '">'
+          + '<div class="dd-message-bubble">' + s(m.content) + '</div>'
+          + '<div class="dd-message-meta">' + (isMe ? 'You' : 'Daydream Team') + ' &middot; ' + formatDate(m.created_at) + '</div>'
+          + '</div>';
+      }).join('');
+      list.scrollTop = list.scrollHeight;
+    } catch(e) { console.error('loadOrderMessages:', e); }
+  }
+
+  async function loadOrderDocs(orderId) {
+    var container = document.getElementById('ddOrderDocsList');
+    if (!container) return;
+    try {
+      var res = await apiFetch('/rest/v1/documents?order_id=eq.' + orderId + '&order=created_at.desc');
+      var docs = await res.json() || [];
+      if (!docs.length) { container.innerHTML = '<div class="dd-empty">No documents uploaded yet.</div>'; return; }
+      container.innerHTML = '<div class="dd-drive-list">' + docs.map(function(d) {
+        var url = SUPABASE_URL + '/storage/v1/object/public/client-documents/' + d.file_url;
+        return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + s(d.file_name) + '</div><div class="dd-drive-item-sub">Uploaded ' + formatDate(d.created_at) + '</div></div><a href="' + url + '" target="_blank" class="dd-drive-link">Open</a></div>';
+      }).join('') + '</div>';
+    } catch(e) { container.innerHTML = '<div class="dd-empty">Could not load documents.</div>'; }
+  }
+
+  async function handleOrderUpload(input, orderId) {
+    var cat = input.dataset.orderCategory || 'file';
+    var statusEl = document.getElementById('order-status-' + cat);
+    var files = Array.from(input.files);
+    if (!files.length) return;
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var path = currentClient.id + '/orders/' + orderId + '/' + cat + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._\-]/g,'_');
+      if (statusEl) statusEl.textContent = 'Uploading ' + (i+1) + ' of ' + files.length + '...';
+      try {
+        await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type }, body: file });
+        await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: currentClient.id, order_id: orderId, file_name: file.name, file_url: path, uploaded_by: currentUser.email }) });
+      } catch(e) { console.error('order doc upload:', e); }
+    }
+    if (statusEl) statusEl.textContent = files.length + ' file(s) uploaded';
+    loadOrderDocs(orderId);
+  }
 
   function apiFetch(path, options) {
     var opts = options || {};
@@ -1103,10 +1569,17 @@
     var clients = await res.json() || [];
     allClientProjects = clients;
     if (!allClientProjects.length) { showLogin(); return; }
-    // Only treat as contractor if explicitly flagged — don't assume multiple records = contractor
     isContractor = allClientProjects.some(function(c) { return c.is_contractor; });
-    if (isContractor || allClientProjects.length > 1) await loadContractorProjects();
-    else await loadProjectDashboard(allClientProjects[0]);
+    // Route stone/shower clients to the multi-order home
+    var firstClient = allClientProjects[0];
+    if (firstClient.service_type === 'stone_sourcing' || firstClient.service_type === 'outdoor_showers') {
+      currentClient = firstClient;
+      showOrdersHome();
+    } else if (isContractor || allClientProjects.length > 1) {
+      await loadContractorProjects();
+    } else {
+      await loadProjectDashboard(firstClient);
+    }
   }
   init();
 
@@ -1229,12 +1702,13 @@
 
   // ── LOGOUT ────────────────────────────────────────────────────────
   function doLogout() {
-    stopRealtime(); // Clean up WebSocket connections
+    stopRealtime();
     try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
-    currentUser = null; currentClient = null; currentProject = null; isContractor = false;
-    document.getElementById('ddDashboard').classList.remove('visible');
-    document.getElementById('ddProjectSelector').classList.remove('visible');
-    document.getElementById('ddCreateProject').classList.remove('visible');
+    currentUser = null; currentClient = null; currentProject = null; currentOrder = null; isContractor = false;
+    ['ddDashboard','ddProjectSelector','ddCreateProject','ddOrdersHome','ddNewOrderPanel','ddOrderDashboard'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.classList.remove('visible'); el.style.display = ''; }
+    });
     showLogin();
   }
   window.doLogout = doLogout;
