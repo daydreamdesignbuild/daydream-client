@@ -11,20 +11,18 @@
   style.textContent = [
     '#dd-form-wrap * { box-sizing: border-box; margin: 0; padding: 0; }',
     '#dd-form-wrap {',
-    '  --surface:    #faf8f5;',   /* dd off-white */
-    '  --surface-2:  #ede8df;',   /* dd cream */
-    '  --border:     #ddd7ce;',   /* dd rule */
-    '  --text:       #28231e;',   /* dd charcoal */
-    '  --muted:      #8a7d73;',   /* dd stone */
-    '  --gold:       #9e7b50;',   /* dd bronze */
-    '  --gold-hover: #c4a07a;',   /* dd bronze-light */
+    '  --surface:    #faf8f5;',
+    '  --surface-2:  #ede8df;',
+    '  --border:     #ddd7ce;',
+    '  --text:       #28231e;',
+    '  --muted:      #8a7d73;',
+    '  --gold:       #9e7b50;',
+    '  --gold-hover: #c4a07a;',
     '  --gold-dim:   rgba(158,123,80,0.06);',
     '  --error:      #a05040;',
     '  font-family: Jost, sans-serif; font-weight: 300;',
     '  color: var(--text); width: 100%; max-width: 660px; margin: 0 auto; padding: 48px 0; background: var(--surface);',
     '}',
-
-    /* Header */
     '#dd-form-wrap header { text-align: center; margin-bottom: 48px; animation: ddFadeUp 0.9s ease both; background: var(--surface); padding: 32px 24px; }',
     '#dd-form-wrap .dd-logo { font-family: "Cormorant Garamond", serif; font-weight: 300; font-size: clamp(28px,5vw,40px); letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; line-height: 1; margin-bottom: 8px; }',
     '#dd-form-wrap .dd-logo-sub { font-size: 9px; letter-spacing: 0.45em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }',
@@ -33,26 +31,16 @@
     '#dd-form-wrap .dd-rule span:last-child { background: linear-gradient(90deg, var(--border), transparent); }',
     '#dd-form-wrap .dd-diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }',
     '#dd-form-wrap .dd-subtitle { font-family: "Cormorant Garamond", serif; font-size: clamp(14px,2.5vw,17px); font-style: italic; font-weight: 300; color: var(--muted); letter-spacing: 0.04em; line-height: 1.5; }',
-
-    /* Form shell */
     '#dd-form-wrap form { display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--surface); animation: ddFadeUp 0.7s 0.2s ease both; opacity: 0; animation-fill-mode: both; }',
-
-    /* Section headers */
     '#dd-form-wrap .dd-section { font-size: 8px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); padding: 16px 24px 10px; border-bottom: 1px solid var(--border); background: var(--surface-2); opacity: 0.9; }',
-
-    /* Grid rows */
     '#dd-form-wrap .dd-row   { display: grid; grid-template-columns: 1fr 1fr; }',
     '#dd-form-wrap .dd-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; }',
-
-    /* Fields */
     '#dd-form-wrap .dd-field { position: relative; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); transition: background 0.25s; }',
     '#dd-form-wrap .dd-row .dd-field:last-child, #dd-form-wrap .dd-row-3 .dd-field:last-child, #dd-form-wrap .dd-field.dd-full { border-right: none; }',
     '#dd-form-wrap .dd-field:focus-within { background: var(--gold-dim); z-index: 2; }',
     '#dd-form-wrap .dd-field:focus-within::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gold); }',
     '#dd-form-wrap .dd-field label { display: block; font-size: 8px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--muted); padding: 16px 24px 5px; transition: color 0.2s; font-family: Jost, sans-serif; }',
     '#dd-form-wrap .dd-field:focus-within label { color: var(--gold); }',
-
-    /* Inputs */
     '#dd-form-wrap .dd-field input,',
     '#dd-form-wrap .dd-field select,',
     '#dd-form-wrap .dd-field textarea {',
@@ -61,8 +49,6 @@
     '  padding: 2px 24px 16px; letter-spacing: 0.03em; appearance: none; -webkit-appearance: none;',
     '  box-shadow: none !important;',
     '}',
-
-    /* Autofill override — light bg version */
     '#dd-form-wrap .dd-field input:-webkit-autofill,',
     '#dd-form-wrap .dd-field input:-webkit-autofill:hover,',
     '#dd-form-wrap .dd-field input:-webkit-autofill:focus,',
@@ -72,24 +58,12 @@
     '  caret-color: #28231e;',
     '  transition: background-color 5000s ease-in-out 0s;',
     '}',
-
-    /* Select */
     '#dd-form-wrap .dd-field select { cursor: pointer; padding-right: 44px; }',
     '#dd-form-wrap .dd-field select option { background: #faf8f5; color: #28231e; }',
-
-    /* Arrow */
     '#dd-form-wrap .dd-arrow { position: absolute; right: 20px; top: 50%; transform: translateY(4px); pointer-events: none; color: var(--muted); font-size: 9px; }',
-
-    /* Textarea */
     '#dd-form-wrap .dd-field textarea { resize: none; min-height: 120px; line-height: 1.75; }',
-
-    /* Placeholder */
     '#dd-form-wrap .dd-field input::placeholder, #dd-form-wrap .dd-field textarea::placeholder { color: #c4bdb6; }',
-
-    /* Submit area — centered column */
     '#dd-form-wrap .dd-submit-wrap { padding: 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; background: var(--surface-2); border-top: 1px solid var(--border); }',
-
-    /* Submit button — clean solid bronze, snug width, centered via the flex wrap */
     '#dd-form-wrap button[type="submit"] {',
     '  display: inline-block; width: auto; max-width: none; margin: 0 auto;',
     '  background: var(--gold); border: 1px solid var(--gold) !important;',
@@ -103,11 +77,7 @@
     '#dd-form-wrap button[type="submit"].loading .btn-text    { display: none; }',
     '#dd-form-wrap button[type="submit"].loading .btn-loading { display: inline; }',
     '#dd-form-wrap .btn-loading { display: none; }',
-
-    /* Privacy note */
     '#dd-form-wrap .dd-privacy { font-size: 9px; letter-spacing: 0.2em; color: var(--muted); text-align: center; text-transform: uppercase; }',
-
-    /* Error / Success */
     '#dd-form-wrap .dd-error { font-size: 11px; color: var(--error); text-align: center; letter-spacing: 0.1em; display: none; }',
     '#dd-form-wrap .dd-error.visible { display: block; }',
     '#dd-form-wrap .dd-success { display: none; text-align: center; padding: 80px 20px; animation: ddFadeUp 0.7s ease both; background: var(--surface); min-height: 500px; width: 100%; box-sizing: border-box; }',
@@ -115,9 +85,7 @@
     '#dd-form-wrap .dd-success-diamond { display: inline-block; width: 10px; height: 10px; background: var(--gold); transform: rotate(45deg); margin-bottom: 28px; }',
     '#dd-form-wrap .dd-success h2 { font-family: "Cormorant Garamond", serif; font-size: 30px; font-weight: 300; font-style: italic; color: var(--gold); margin-bottom: 14px; }',
     '#dd-form-wrap .dd-success p { font-size: 13px; color: var(--muted); line-height: 2; letter-spacing: 0.08em; }',
-
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
-
     '@media (max-width: 540px) {',
     '  #dd-form-wrap .dd-row   { grid-template-columns: 1fr; }',
     '  #dd-form-wrap .dd-row-3 { grid-template-columns: 1fr; }',
@@ -157,11 +125,11 @@
     '  </div>',
 
     '  <div class="dd-row">',
-    '    <div class="dd-field"><label>Are You a Contractor?</label><div class="dd-select-wrap"><select id="ddIsContractor" onchange="window._onContractorChange(this.value)"><option value="">Select an option</option><option value="no">No \u2014 I am the homeowner</option><option value="yes">Yes \u2014 I am a contractor</option></select><span class="dd-arrow">&#9662;</span></div></div>',
+    '    <div class="dd-field"><label>Who Are You?</label><div class="dd-select-wrap"><select id="ddIsContractor" onchange="window._onContractorChange(this.value)"><option value="">Select an option</option><option value="homeowner">Homeowner</option><option value="general_contractor">General Contractor</option><option value="custom_home_builder">Custom Home Builder</option><option value="designer">Designer</option><option value="architect">Architect</option><option value="engineer">Engineer</option><option value="other_trade">Other Trade / Professional</option></select><span class="dd-arrow">&#9662;</span></div></div>',
     '    <div class="dd-field"><label>What Service Are You Interested In?</label><div class="dd-select-wrap"><select id="ddServiceType"><option value="">Select a service...</option><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="outdoor_showers">Custom Outdoor Showers</option><option value="both">Both (Design, Build &amp; Stone)</option></select><span class="dd-arrow">&#9662;</span></div></div>',
     '  </div>',
     '  <div class="dd-row" id="ddCompanyWrap" style="display:none">',
-    '    <div class="dd-field dd-full"><label>Company Name</label><input type="text" id="ddCompany" placeholder="e.g. Smith Contracting LLC" /></div>',
+    '    <div class="dd-field dd-full"><label>Company Name</label><input type="text" id="ddCompany" placeholder="e.g. Smith Architecture LLC" /></div>',
     '  </div>',
 
     '  <div class="dd-section">Project Address</div>',
@@ -237,17 +205,17 @@
   var errMsg  = document.getElementById('ddError');
   var success = document.getElementById('ddSuccess');
 
-  // Global contractor change handler (called via onchange attribute)
+  // Global contractor change handler — show company field for any non-homeowner
   window._onContractorChange = function(val) {
     var wrap = document.getElementById('ddCompanyWrap');
-    if (wrap) wrap.style.display = val === 'yes' ? 'block' : 'none';
+    if (wrap) wrap.style.display = (val && val !== 'homeowner') ? 'block' : 'none';
   };
 
   var contractorSelect = document.getElementById('ddIsContractor');
   var companyWrap = document.getElementById('ddCompanyWrap');
   if (contractorSelect && companyWrap) {
     contractorSelect.addEventListener('change', function() {
-      companyWrap.style.display = this.value === 'yes' ? 'block' : 'none';
+      companyWrap.style.display = (this.value && this.value !== 'homeowner') ? 'block' : 'none';
     });
   }
 
@@ -257,29 +225,30 @@
     btn.classList.add('loading');
     btn.disabled = true;
 
+    var roleVal = document.getElementById('ddIsContractor') ? document.getElementById('ddIsContractor').value : '';
+
     var data = {
-      full_name:     (document.getElementById('ddFirstName').value.trim() + ' ' + document.getElementById('ddLastName').value.trim()).trim(),
-      email:         document.getElementById('ddEmail').value.trim(),
-      phone:         document.getElementById('ddPhone').value.trim(),
-      street:        document.getElementById('ddStreet').value.trim(),
-      city:          document.getElementById('ddCity').value.trim(),
-      state:         document.getElementById('ddState').value.trim(),
-      zip:           document.getElementById('ddZip').value.trim(),
-      country:       document.getElementById('ddCountry').value || '',
-      referral:      document.getElementById('ddReferral').value || '',
-      is_contractor: document.getElementById('ddIsContractor') ? document.getElementById('ddIsContractor').value === 'yes' : false,
-      company_name:  document.getElementById('ddCompany') ? document.getElementById('ddCompany').value.trim() || null : null,
-      project_type:  document.getElementById('ddServices').value,
-      investment:    document.getElementById('ddInvestment').value.trim(),
-      notes:         document.getElementById('ddNotes').value.trim(),
-      status:        'client_inquiry_made',
-      service_type:  (document.getElementById('ddServiceType') || {}).value || 'design_build',
-      professional_role: document.getElementById('ddIsContractor') ? (document.getElementById('ddIsContractor').value === 'yes' ? 'contractor' : 'homeowner') : null,
-      client_stage:  'inquiry_submitted'
+      full_name:         (document.getElementById('ddFirstName').value.trim() + ' ' + document.getElementById('ddLastName').value.trim()).trim(),
+      email:             document.getElementById('ddEmail').value.trim(),
+      phone:             document.getElementById('ddPhone').value.trim(),
+      street:            document.getElementById('ddStreet').value.trim(),
+      city:              document.getElementById('ddCity').value.trim(),
+      state:             document.getElementById('ddState').value.trim(),
+      zip:               document.getElementById('ddZip').value.trim(),
+      country:           document.getElementById('ddCountry').value || '',
+      referral:          document.getElementById('ddReferral').value || '',
+      is_contractor:     roleVal !== '' && roleVal !== 'homeowner',
+      company_name:      document.getElementById('ddCompany') ? document.getElementById('ddCompany').value.trim() || null : null,
+      project_type:      document.getElementById('ddServices').value,
+      investment:        document.getElementById('ddInvestment').value.trim(),
+      notes:             document.getElementById('ddNotes').value.trim(),
+      status:            'client_inquiry_made',
+      service_type:      (document.getElementById('ddServiceType') || {}).value || 'design_build',
+      professional_role: roleVal || null,
+      client_stage:      'inquiry_submitted'
     };
 
     try {
-      // ── STEP 1: Insert client record ──────────────────────────────
       var res = await fetch(SUPABASE_URL + '/rest/v1/clients', {
         method: 'POST',
         headers: {
@@ -297,18 +266,9 @@
         throw new Error('Insert failed');
       }
 
-      // ── STEP 2: DB trigger fires automatically ────────────────────
-      // send-email trigger on INSERT handles auth user creation
-      // and the branded portal magic link. No manual call needed.
-
-      // ── STEP 3: Show success ──────────────────────────────────────
       form.style.display = 'none';
       success.classList.add('visible');
 
-      // ── STEP 4: Notify GTM of successful lead ─────────────────────
-      // Fires ONLY after Supabase confirms the insert, so this counts
-      // genuine, completed inquiries — never failed/abandoned attempts.
-      // Extra fields let GA4 break leads down by source, service, and type.
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         'event': 'lead_form_submit',
