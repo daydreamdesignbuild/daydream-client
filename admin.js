@@ -870,6 +870,27 @@
           + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
           + '    <div class="da-section-divider">Services</div>'
           + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
+          + '    <div class="da-section-divider">Stone Orders' + (isStone ? '' : ' <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none">(stone / shower service type)</span>') + '</div>'
+          + '    <div id="admin-orders-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Click to load orders...</div></div>'
+          + '    <button class="da-update-btn" style="margin-top:6px" onclick="window._loadAdminOrders(\'' + c.id + '\')">Load Orders</button>'
+          + '    <button class="da-update-btn" style="margin-top:6px;margin-left:8px;background:var(--surface);color:var(--gold);border:1px solid var(--gold)" onclick="window._showAdminNewOrder(\'' + c.id + '\')">+ New Order</button>'
+          + '    <div id="admin-new-order-form-' + c.id + '" style="display:none;margin-top:12px;background:var(--surface-2);border:1px solid var(--border);padding:16px">'
+          + '      <div style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Create Order for Client</div>'
+          + '      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'
+          + '        <div><div class="da-field-label" style="margin-bottom:4px">Order Name</div><input class="da-text-input" id="ano-name-' + c.id + '" placeholder="e.g. Smith Residence Pool Coping" style="width:100%" /></div>'
+          + '        <div><div class="da-field-label" style="margin-bottom:4px">Stone Type</div><select class="da-select" id="ano-stone-' + c.id + '"><option value="">Select...</option><option>Limestone</option><option>Sandstone</option><option>Travertine</option><option>Granite</option><option>Marble</option><option>Porcelain</option></select></div>'
+          + '        <div><div class="da-field-label" style="margin-bottom:4px">Finish</div><input class="da-text-input" id="ano-finish-' + c.id + '" placeholder="e.g. Sandblasted Brushed" style="width:100%" /></div>'
+          + '        <div><div class="da-field-label" style="margin-bottom:4px">Quantity Estimate</div><input class="da-text-input" id="ano-qty-' + c.id + '" placeholder="e.g. 400 sq ft" style="width:100%" /></div>'
+          + '        <div style="grid-column:1/-1"><div class="da-field-label" style="margin-bottom:4px">Delivery Address</div><input class="da-text-input" id="ano-addr-' + c.id + '" placeholder="123 Main St, Atlanta GA" style="width:100%" /></div>'
+          + '        <div style="grid-column:1/-1"><div class="da-field-label" style="margin-bottom:4px">Intended Use</div><input class="da-text-input" id="ano-use-' + c.id + '" placeholder="Pool coping, shower surround, flooring..." style="width:100%" /></div>'
+          + '        <div style="grid-column:1/-1"><div class="da-field-label" style="margin-bottom:4px">Notes</div><textarea class="da-note-textarea" id="ano-notes-' + c.id + '" style="min-height:60px;border-top:1px solid var(--border)" placeholder="Any additional details..."></textarea></div>'
+          + '      </div>'
+          + '      <div style="display:flex;gap:8px">'
+          + '        <button class="da-update-btn" onclick="window._submitAdminNewOrder(\'' + c.id + '\')">Create Order</button>'
+          + '        <button class="da-update-btn" style="background:var(--surface);color:var(--muted);border:1px solid var(--border)" onclick="document.getElementById(\'admin-new-order-form-' + c.id + '\').style.display=\'none\'">Cancel</button>'
+          + '      </div>'
+          + '      <div id="ano-msg-' + c.id + '" style="font-size:11px;margin-top:8px;min-height:16px"></div>'
+          + '    </div>'
           + '    <div class="da-section-divider">Admin Notes</div>'
           + '    <div class="da-notes-log" id="notes-log-' + c.id + '"><div class="da-notes-log-empty">No notes yet</div></div>'
           + '    <div class="da-notes-new"><textarea class="da-note-textarea" id="note-new-' + c.id + '" placeholder="Write a note..."></textarea><button class="da-update-btn" style="margin-top:8px;width:100%" id="note-add-btn-' + c.id + '" onclick="window._saveNewNote(\'' + c.id + '\')">Add Note</button></div>'
@@ -1110,6 +1131,134 @@
         return '<div class="da-note-entry"><div class="da-note-entry-meta">' + dateStr + '</div><div class="da-note-entry-text">' + s(n.note) + '</div></div>';
       }).join('');
     } catch(e) { log.innerHTML = '<div class="da-notes-log-empty">Could not load notes</div>'; }
+  };
+
+  // ── STONE ORDERS (ADMIN) ──────────────────────────────────────────
+  var STONE_TIMELINE_ADMIN = [
+    { value: 'inquiry_submitted',     label: 'Inquiry Submitted' },
+    { value: 'discussion_call',       label: 'Project Discussion Call' },
+    { value: 'designs_received',      label: 'Designs Received' },
+    { value: 'model_started',         label: '3D Model Started' },
+    { value: 'model_completed',       label: '3D Model Completed' },
+    { value: 'takeoffs_complete',     label: 'Take-offs Complete' },
+    { value: 'proposal_sent',         label: 'Proposal Sent' },
+    { value: 'proposal_accepted',     label: 'Proposal Accepted' },
+    { value: 'contract_signed',       label: 'Contract Signed' },
+    { value: 'payment_sent',          label: 'Payment Sent' },
+    { value: 'payment_received',      label: 'Payment Received' },
+    { value: 'stone_purchased',       label: 'Stone Purchased' },
+    { value: 'stone_ordered',         label: 'Stone Ordered' },
+    { value: 'in_transit',            label: 'In Transit' },
+    { value: 'arrived_at_port',       label: 'Arrived at Port' },
+    { value: 'delivered_to_job_site', label: 'Delivered to Job Site' }
+  ];
+  var CONTRACT_STAGES_ADMIN = [
+    { value: 'not_sent',         label: 'Not Yet Sent' },
+    { value: 'sent',             label: 'Sent — Awaiting Signature' },
+    { value: 'signed',           label: 'Signed' }
+  ];
+  var PAYMENT_STAGES_ADMIN = [
+    { value: 'not_sent',          label: 'Invoice Not Yet Sent' },
+    { value: 'invoice_sent',      label: 'Invoice Sent — Awaiting Payment' },
+    { value: 'deposit_paid',      label: 'Deposit Paid — Balance Due' },
+    { value: 'partially_paid',    label: 'Partially Paid' },
+    { value: 'payment_complete',  label: 'Payment Complete' }
+  ];
+
+  window._loadAdminOrders = async function(clientId) {
+    var container = document.getElementById('admin-orders-' + clientId);
+    if (!container) return;
+    container.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">Loading...</div>';
+    try {
+      var res = await apiFetch('/rest/v1/stone_orders?client_id=eq.' + clientId + '&order=created_at.desc');
+      var orders = await res.json() || [];
+      if (!orders.length) { container.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0">No orders yet. Click + New Order to create one.</div>'; return; }
+      container.innerHTML = orders.map(function(order) {
+        var stageOpts = STONE_TIMELINE_ADMIN.map(function(st) { return '<option value="' + st.value + '"' + (order.stage === st.value ? ' selected' : '') + '>' + st.label + '</option>'; }).join('');
+        var contractOpts = CONTRACT_STAGES_ADMIN.map(function(cs) { return '<option value="' + cs.value + '"' + (order.contract_status === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+        var paymentOpts  = PAYMENT_STAGES_ADMIN.map(function(ps) { return '<option value="' + ps.value + '"' + (order.payment_status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
+        return '<div style="border:1px solid var(--border);background:var(--surface);margin-bottom:10px">'
+          + '<div style="padding:12px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="window._toggleAdminOrder(\'' + order.id + '\')">'
+          + '  <div><div style="font-size:13px;font-weight:400;color:var(--text)">' + s(order.order_name || 'Untitled Order') + '</div>'
+          + '  <div style="font-size:10px;color:var(--muted);margin-top:2px">' + s(order.stone_type || '') + (order.stone_type && order.intended_use ? ' · ' : '') + s(order.intended_use || '') + '</div></div>'
+          + '  <div style="font-size:8px;letter-spacing:0.18em;text-transform:uppercase;padding:3px 10px;border:1px solid var(--gold);color:var(--gold)">' + s((STONE_TIMELINE_ADMIN.find(function(t){return t.value===order.stage;})||{label:order.stage||'—'}).label) + '</div>'
+          + '</div>'
+          + '<div id="admin-order-det-' + order.id + '" style="display:none;padding:14px 16px">'
+          + '  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
+          + '    <div style="font-size:10px;color:var(--muted)"><span style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--gold)">Finish</span>' + s(order.finish||'—') + '</div>'
+          + '    <div style="font-size:10px;color:var(--muted)"><span style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--gold)">Quantity</span>' + s(order.quantity_estimate||'—') + '</div>'
+          + '    <div style="font-size:10px;color:var(--muted)"><span style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--gold)">Delivery Address</span>' + s(order.delivery_address||'—') + '</div>'
+          + '    <div style="font-size:10px;color:var(--muted)"><span style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--gold)">Intended Use</span>' + s(order.intended_use||'—') + '</div>'
+          + '    <div style="font-size:10px;color:var(--muted);grid-column:1/-1"><span style="font-size:8px;letter-spacing:0.25em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--gold)">Notes</span>' + s(order.notes||'—') + '</div>'
+          + '  </div>'
+          + '  <div style="display:flex;flex-direction:column;gap:8px">'
+          + '    <div class="da-action-row"><div class="da-action-label">Stage</div><select class="da-select" id="aord-stage-' + order.id + '">' + stageOpts + '</select><button class="da-update-btn" onclick="window._updateOrderField(\'' + order.id + '\',\'stage\',\'aord-stage-' + order.id + '\',\'' + clientId + '\')">Update</button></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="aord-contract-' + order.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateOrderField(\'' + order.id + '\',\'contract_status\',\'aord-contract-' + order.id + '\',\'' + clientId + '\')">Update</button></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="aord-payment-' + order.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateOrderField(\'' + order.id + '\',\'payment_status\',\'aord-payment-' + order.id + '\',\'' + clientId + '\')">Update</button></div>'
+          + '  </div>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    } catch(e) { container.innerHTML = '<div style="font-size:11px;color:var(--error);padding:8px 0">Error loading orders</div>'; }
+  };
+
+  window._toggleAdminOrder = function(orderId) {
+    var det = document.getElementById('admin-order-det-' + orderId);
+    if (det) det.style.display = det.style.display === 'none' ? 'block' : 'none';
+  };
+
+  window._updateOrderField = async function(orderId, field, selectId, clientId) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    var val = sel.value;
+    var row = sel.closest('.da-action-row');
+    var btn = row ? row.querySelector('.da-update-btn') : null;
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    try {
+      var body = {}; body[field] = val || null;
+      var res = await apiFetch('/rest/v1/stone_orders?id=eq.' + orderId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
+      if (btn) { btn.textContent = res.ok ? 'Saved ✓' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function(){ if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2000); }
+      if (res.ok && field === 'stage') {
+        var stageLabel = (STONE_TIMELINE_ADMIN.find(function(t){return t.value===val;})||{label:val}).label;
+        showAdminToast('Stage updated: ' + stageLabel);
+        window._loadAdminOrders(clientId);
+      }
+    } catch(e) { if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function(){ if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); } }
+  };
+
+  window._showAdminNewOrder = function(clientId) {
+    var form = document.getElementById('admin-new-order-form-' + clientId);
+    if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+
+  window._submitAdminNewOrder = async function(clientId) {
+    var name   = (document.getElementById('ano-name-'   + clientId)||{}).value||'';
+    var stone  = (document.getElementById('ano-stone-'  + clientId)||{}).value||'';
+    var finish = (document.getElementById('ano-finish-' + clientId)||{}).value||'';
+    var qty    = (document.getElementById('ano-qty-'    + clientId)||{}).value||'';
+    var addr   = (document.getElementById('ano-addr-'   + clientId)||{}).value||'';
+    var use    = (document.getElementById('ano-use-'    + clientId)||{}).value||'';
+    var notes  = (document.getElementById('ano-notes-'  + clientId)||{}).value||'';
+    var msg    = document.getElementById('ano-msg-' + clientId);
+    try {
+      var res = await apiFetch('/rest/v1/stone_orders', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ client_id: clientId, order_name: name.trim()||'New Order', stone_type: stone||null, finish: finish.trim()||null, quantity_estimate: qty.trim()||null, delivery_address: addr.trim()||null, intended_use: use.trim()||null, notes: notes.trim()||null, stage: 'inquiry_submitted', contract_status: 'not_sent', payment_status: 'not_sent' })
+      });
+      if (res.ok) {
+        if (msg) { msg.textContent = 'Order created.'; msg.style.color = 'var(--success)'; }
+        ['ano-name-','ano-stone-','ano-finish-','ano-qty-','ano-addr-','ano-use-','ano-notes-'].forEach(function(pre) { var el = document.getElementById(pre+clientId); if(el) el.value=''; });
+        setTimeout(function() {
+          var form = document.getElementById('admin-new-order-form-' + clientId);
+          if (form) form.style.display = 'none';
+          if (msg) msg.textContent = '';
+          window._loadAdminOrders(clientId);
+        }, 1200);
+      } else {
+        if (msg) { msg.textContent = 'Error creating order.'; msg.style.color = 'var(--error)'; }
+      }
+    } catch(e) { if (msg) { msg.textContent = 'Something went wrong.'; msg.style.color = 'var(--error)'; } }
   };
 
   window._saveContactInfo = async function(id) {
