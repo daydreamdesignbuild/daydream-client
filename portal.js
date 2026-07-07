@@ -163,9 +163,14 @@
     /* SIDEBAR LAYOUT */
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
-    '#dd-portal .dd-dashboard-body { display: flex; flex: 1; width: 100%; min-height: 0; }',
 
-    /* Sidebar — desktop only, hidden on mobile */
+    /* tab bar hidden on desktop, shown on mobile via breakpoint */
+    '#dd-portal .dd-tabs { display: none; }',
+
+    /* dashboard body = sidebar + content side by side on desktop */
+    '#dd-portal .dd-dashboard-body { display: flex; flex-direction: row; flex: 1; width: 100%; min-height: 0; }',
+
+    /* Sidebar — desktop only */
     '#dd-portal .dd-sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }',
     '#dd-portal .dd-sidebar-section { font-size: 8px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--muted); padding: 20px 20px 8px; }',
     '#dd-portal .dd-sidebar-link { display: block; width: 100%; background: none; border: none; text-align: left; font-family: Jost, sans-serif; font-size: 11px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 11px 20px; cursor: pointer; transition: color 0.2s, background 0.2s, border-left 0.2s; border-left: 2px solid transparent; line-height: 1; }',
@@ -173,12 +178,8 @@
     '#dd-portal .dd-sidebar-link.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); font-weight: 400; }',
     '#dd-portal .dd-sidebar-rule { height: 1px; background: var(--border); margin: 8px 0; }',
 
-    /* Tab bar — mobile only, always hidden on desktop */
-    '#dd-portal .dd-tabs { display: none; background: var(--surface); border-bottom: 1px solid var(--border); width: 100%; overflow-x: auto; overflow-y: visible; scrollbar-width: none; -webkit-overflow-scrolling: touch; }',
-    '#dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
-
-    /* Content area */
-    '#dd-portal .dd-content { flex: 1; padding: 40px; min-width: 0; overflow-y: auto; }',
+    /* Content area — fills remaining space */
+    '#dd-portal .dd-content { flex: 1; padding: 40px 36px; min-width: 0; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
     '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
@@ -381,41 +382,11 @@
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 860px) {',
     '  #dd-portal .dd-sidebar { display: none !important; }',
-    '  #dd-portal .dd-tabs {',
-    '    display: flex !important;',
-    '    overflow-x: auto;',
-    '    overflow-y: visible;',
-    '    justify-content: flex-start;',
-    '    padding: 0;',
-    '    flex-shrink: 0;',
-    '    scrollbar-width: none;',
-    '    -webkit-overflow-scrolling: touch;',
-    '    background: var(--surface);',
-    '    border-bottom: 1px solid var(--border);',
-    '    width: 100%;',
-    '  }',
+    '  #dd-portal .dd-tabs { display: flex !important; overflow-x: auto; overflow-y: visible; justify-content: flex-start; padding: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; background: var(--surface); border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; }',
     '  #dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
-    '  #dd-portal .dd-tab {',
-    '    flex-shrink: 0;',
-    '    display: block !important;',
-    '    font-family: Jost, sans-serif;',
-    '    font-size: 10px;',
-    '    font-weight: 400;',
-    '    letter-spacing: 0.22em;',
-    '    text-transform: uppercase;',
-    '    color: var(--muted);',
-    '    padding: 18px 16px;',
-    '    white-space: nowrap;',
-    '    background: none;',
-    '    border: none;',
-    '    border-bottom: 2px solid transparent;',
-    '    cursor: pointer;',
-    '    transition: color 0.2s, border-color 0.2s;',
-    '    line-height: 1;',
-    '  }',
+    '  #dd-portal .dd-tab { flex-shrink: 0; display: block !important; font-family: Jost, sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 18px 14px; white-space: nowrap; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.2s, border-color 0.2s; line-height: 1; }',
     '  #dd-portal .dd-tab:hover { color: var(--text); }',
     '  #dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
-    '  #dd-portal .dd-tab-badge { font-size: 8px; background: var(--gold); color: var(--bg); padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
     '  #dd-portal .dd-dashboard-body { flex-direction: column; }',
     '  #dd-portal .dd-content { padding: 20px 16px; }',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
@@ -499,7 +470,6 @@
     '    </div>',
     '  </nav>',
 
-    '  <div class="dd-dashboard-body">',
     '  <div class="dd-tabs" id="ddTabBar">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
@@ -510,6 +480,7 @@
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '    <button class="dd-tab" data-tab="settings">Settings</button>',
     '  </div>',
+    '  <div class="dd-dashboard-body">',
     '  <nav class="dd-sidebar" id="ddSidebar">',
     '    <div class="dd-sidebar-section">Project</div>',
     '    <button class="dd-sidebar-link active" data-tab="overview">Overview</button>',
