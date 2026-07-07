@@ -126,7 +126,7 @@
 
     '  <div class="dd-row">',
     '    <div class="dd-field"><label>Who Are You?</label><div class="dd-select-wrap"><select id="ddIsContractor" onchange="window._onContractorChange(this.value)"><option value="">Select an option</option><option value="homeowner">Homeowner</option><option value="general_contractor">General Contractor</option><option value="custom_home_builder">Custom Home Builder</option><option value="designer">Designer</option><option value="architect">Architect</option><option value="engineer">Engineer</option><option value="other_trade">Other Trade / Professional</option></select><span class="dd-arrow">&#9662;</span></div></div>',
-    '    <div class="dd-field"><label>What Service Are You Interested In?</label><div class="dd-select-wrap"><select id="ddServiceType"><option value="">Select a service...</option><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="outdoor_showers">Custom Outdoor Showers</option><option value="both">Both (Design, Build &amp; Stone)</option></select><span class="dd-arrow">&#9662;</span></div></div>',
+    '    <div class="dd-field"><label>What Service Are You Interested In?</label><div class="dd-select-wrap"><select id="ddServiceType" onchange="window._onServiceTypeChange(this.value)"><option value="">Select a service...</option><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="outdoor_showers">Custom Outdoor Showers</option><option value="both">Both (Design, Build &amp; Stone)</option></select><span class="dd-arrow">&#9662;</span></div></div>',
     '  </div>',
     '  <div class="dd-row" id="ddCompanyWrap" style="display:none">',
     '    <div class="dd-field dd-full"><label>Company Name</label><input type="text" id="ddCompany" placeholder="e.g. Smith Architecture LLC" /></div>',
@@ -172,9 +172,10 @@
     '    </select>',
     '    <span class="dd-arrow">&#9662;</span>',
     '  </div>',
+    '  <div id="ddDesignServicesWrap" style="display:none">',
     '  <div class="dd-field dd-full">',
     '    <label>What Design Services Are You Interested In?</label>',
-    '    <select id="ddServices" required>',
+    '    <select id="ddServices">',
     '      <option value="" disabled selected>Select an option</option>',
     '      <option value="2d_concept">2D Concept Phase</option>',
     '      <option value="3d_concept">3D Concept Phase</option>',
@@ -183,6 +184,7 @@
     '      <option value="2d_3d_permit">2D + 3D Concept Phase &amp; Permit Plan Phase</option>',
     '    </select>',
     '    <span class="dd-arrow">&#9662;</span>',
+    '  </div>',
     '  </div>',
     '  <div class="dd-field dd-full"><label>What Level of Investment Are You Preparing for This Project?</label><input type="text" id="ddInvestment" placeholder="e.g. $75,000" /></div>',
     '  <div class="dd-field dd-full"><label>Anything Else We Need to Know?</label><textarea id="ddNotes" placeholder="Tell us about your vision, timeline, or any other details..."></textarea></div>',
@@ -209,6 +211,12 @@
   window._onContractorChange = function(val) {
     var wrap = document.getElementById('ddCompanyWrap');
     if (wrap) wrap.style.display = (val && val !== 'homeowner') ? 'block' : 'none';
+  };
+
+  // Show design services field only for design_build and both
+  window._onServiceTypeChange = function(val) {
+    var wrap = document.getElementById('ddDesignServicesWrap');
+    if (wrap) wrap.style.display = (val === 'design_build' || val === 'both') ? 'block' : 'none';
   };
 
   var contractorSelect = document.getElementById('ddIsContractor');
@@ -239,7 +247,7 @@
       referral:          document.getElementById('ddReferral').value || '',
       is_contractor:     roleVal !== '' && roleVal !== 'homeowner',
       company_name:      document.getElementById('ddCompany') ? document.getElementById('ddCompany').value.trim() || null : null,
-      project_type:      document.getElementById('ddServices').value,
+      project_type:      document.getElementById('ddServices') ? (document.getElementById('ddServices').value || null) : null,
       investment:        document.getElementById('ddInvestment').value.trim(),
       notes:             document.getElementById('ddNotes').value.trim(),
       status:            'client_inquiry_made',
