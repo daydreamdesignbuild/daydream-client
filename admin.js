@@ -212,11 +212,12 @@
     '#dd-admin .da-stat { background: var(--surface); padding: 16px 24px; flex: 1; }',
     '#dd-admin .da-stat-label { font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }',
     '#dd-admin .da-stat-value { font-family: "Cormorant Garamond", serif; font-size: 28px; color: var(--gold); font-weight: 400; }',
-    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 32px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; position: relative; }',
+    /* FIX: tabs scroll freely, no compress */
+    '#dd-admin .da-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; padding: 0 24px; overflow-x: auto; overflow-y: visible; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: flex-start; width: 100%; }',
     '#dd-admin .da-tabs::-webkit-scrollbar { display: none; }',
-    '#dd-admin .da-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; }',
-    '#dd-admin .da-tabs-wrap { position: relative; }',
-    '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; }',
+    '#dd-admin .da-tabs-wrap { position: relative; width: 100%; overflow: hidden; }',
+    '#dd-admin .da-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 32px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; z-index: 1; }',
+    '#dd-admin .da-tab { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); padding: 14px 18px; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; background: none; border-left: none; border-right: none; border-top: none; white-space: nowrap; flex-shrink: 0; line-height: 1; }',
     '#dd-admin .da-tab:hover { color: var(--text); }',
     '#dd-admin .da-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
     '#dd-admin .da-tab-add { color: var(--gold) !important; font-weight: 500; }',
@@ -388,6 +389,8 @@
     '  #dd-admin .da-client-subtabs { padding: 0 12px; }',
     '  #dd-admin .da-client-subtab { padding: 12px 14px; font-size: 8px; }',
     '  #dd-admin .da-section-title { font-size: 16px; }',
+    '  #dd-admin .da-tabs { padding: 0 4px; }',
+    '  #dd-admin .da-tab { padding: 14px 12px; font-size: 8px; letter-spacing: 0.18em; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
@@ -402,7 +405,6 @@
   if (!wrap) return;
 
   wrap.innerHTML = [
-    // ── LOGIN — FIX 5: Supabase auth, no plain text password ─────────
     '<div id="daLoginWrap" class="da-login-wrap">',
     '  <div class="da-login-card">',
     '    <div class="da-login-header"><div class="da-login-logo">Daydream</div><div class="da-login-sub">Admin Dashboard</div></div>',
@@ -415,7 +417,6 @@
     '  </div>',
     '</div>',
 
-    // ── DASHBOARD ─────────────────────────────────────────────────────
     '<div id="daDashboard" class="da-dashboard">',
     '  <nav class="da-nav"><div style="display:flex;align-items:center"><div class="da-nav-logo">Daydream</div><div class="da-nav-badge">Admin</div></div><button class="da-nav-logout" id="daLogoutBtn">Sign Out</button></nav>',
     '  <div class="da-stats">',
@@ -433,9 +434,7 @@
     '    <button class="da-tab" data-tab="messages">Messages</button>',
     '  </div></div>',
 
-    // CLIENTS TAB
     '  <div class="da-tab-content active" id="tab-clients">',
-    '    ',
     '    <div class="da-client-subtabs">',
     '      <button class="da-client-subtab active" data-status="all">All <span class="da-subtab-count" id="cnt-all"></span></button>',
     '      <button class="da-client-subtab" data-status="active_client">Active <span class="da-subtab-count" id="cnt-active"></span></button>',
@@ -454,7 +453,6 @@
     '    <div class="da-cards-wrap" id="daCardsWrap"></div>',
     '  </div>',
 
-    // ADD CLIENT TAB
     '  <div class="da-tab-content" id="tab-add-client">',
     '    <div class="da-add-client-wrap">',
     '      <div class="da-section-title">Add New Client</div>',
@@ -466,7 +464,7 @@
     '          <div class="da-modal-field"><label class="da-field-label">Company (contractors)</label><input class="da-field-input" type="text" id="acCompany" placeholder="Smith Contracting LLC" /></div>',
     '          <div class="da-modal-field"><label class="da-field-label">Investment</label><input class="da-field-input" type="text" id="acInvestment" placeholder="$75,000" /></div>',
     '          <div class="da-modal-field"><label class="da-field-label">How Did They Hear About Us?</label><select class="da-field-input" id="acReferral"><option value="">Select...</option><option>Google Search</option><option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>YouTube</option><option>Houzz</option><option>Nextdoor</option><option>Referral — Friend or Family</option><option>Referral — Past Client</option><option>Yard Sign / Drove By</option><option>Home Show / Event</option><option>Other</option></select></div>',
-    '          <div class="da-modal-field"><label class="da-field-label">Service Type</label><select class="da-field-input" id="acServiceType"><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="both">Both (Design, Build &amp; Stone)</option></select></div>',
+    '          <div class="da-modal-field"><label class="da-field-label">Service Type</label><select class="da-field-input" id="acServiceType"><option value="design_build">Design &amp; Build</option><option value="stone_sourcing">Stone Sourcing &amp; Procurement</option><option value="outdoor_showers">Custom Outdoor Showers</option><option value="both">Both (Design, Build &amp; Stone)</option></select></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Project Address</label><input class="da-field-input" type="text" id="acStreet" placeholder="123 Main St, Atlanta GA" /></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1"><label class="da-field-label">Notes</label><textarea class="da-field-input" id="acNotes" rows="3" placeholder="Any additional notes..."></textarea></div>',
     '          <div class="da-modal-field" style="grid-column:1/-1">',
@@ -483,7 +481,6 @@
     '    </div>',
     '  </div>',
 
-    // PROJECTS TAB
     '  <div class="da-tab-content" id="tab-projects">',
     '    <div class="da-add-client-wrap" style="max-width:900px">',
     '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">',
@@ -512,7 +509,6 @@
     '    </div>',
     '  </div>',
 
-    // JOB SITE PHOTOS TAB
     '  <div class="da-tab-content" id="tab-site-photos">',
     '    <div class="da-add-client-wrap" style="max-width:900px">',
     '      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">',
@@ -548,12 +544,10 @@
     '    </div>',
     '  </div>',
 
-    // ONBOARDING TAB
     '  <div class="da-tab-content" id="tab-checklist">',
     '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><div style="font-size:11px;color:var(--muted);margin:-12px 0 16px;letter-spacing:0.05em">Click any item to mark it received from the client.</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
     '  </div>',
 
-    // MESSAGES TAB
     '  <div class="da-tab-content" id="tab-messages">',
     '    <div class="da-messages-wrap"><div class="da-section-title">Client Messages</div><div id="daMsgList"></div></div>',
     '  </div>',
@@ -586,7 +580,6 @@
   function initials(name) { if (!name) return '?'; var p = name.trim().split(' '); return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase(); }
   function formatInvestment(inv) { if (!inv) return ''; var n = (inv || '').replace(/[^0-9.]/g, ''); return n && !isNaN(n) ? '$' + Number(n).toLocaleString() : inv; }
 
-  // FIX 6: Debounced search ──────────────────────────────────────────
   var searchTimeout;
   var activeSubtab = 'all';
 
@@ -646,7 +639,6 @@
     });
   });
 
-  // ── TABS ──────────────────────────────────────────────────────────
   document.querySelectorAll('#dd-admin .da-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
       document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -665,7 +657,6 @@
     });
   });
 
-  // ── FIX 5: LOGIN via Supabase Auth ────────────────────────────────
   document.getElementById('daLoginBtn').addEventListener('click', async function() {
     var password = document.getElementById('daPassword').value;
     var msg = document.getElementById('daLoginMsg');
@@ -726,7 +717,6 @@
     document.getElementById('daLoginWrap').style.display = 'flex';
   }
 
-  // ── LOAD CLIENTS ──────────────────────────────────────────────────
   async function loadClients() {
     try {
       var res = await apiFetch('/rest/v1/clients?order=created_at.desc');
@@ -773,7 +763,6 @@
     document.getElementById('daStatMonth').textContent = month;
   }
 
-  // ── RENDER CARDS ──────────────────────────────────────────────────
   function renderCards(clients) {
     try {
       var container = document.getElementById('daCardsWrap');
@@ -893,14 +882,13 @@
           + '</div>'
           + '</div>';
       }).join('');
-    } catch(e) { 
-      console.error('renderCards error:', e.message, e.stack); 
+    } catch(e) {
+      console.error('renderCards error:', e.message, e.stack);
       var errContainer = document.getElementById('daCardsWrap');
       if (errContainer) errContainer.innerHTML = '<div class="da-empty">Error rendering clients.</div>';
     }
   }
 
-  // ── TOGGLE CARD ───────────────────────────────────────────────────
   window._toggleCard = function(id) {
     var det = document.getElementById('det-' + id);
     var exp = document.getElementById('exp-' + id);
@@ -909,7 +897,6 @@
     else { det.classList.add('visible'); exp.classList.add('open'); loadClientServices(id); window._loadNotesLog(id); }
   };
 
-  // ── UPDATE FIELDS ─────────────────────────────────────────────────
   window._updateField = async function(id, field, selectId) {
     var sel = document.getElementById(selectId);
     if (!sel) return;
@@ -996,7 +983,6 @@
     try {
       var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_contractor: newState }) });
       if (!res.ok) {
-        console.error('_updateContractor error:', await res.text());
         if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
         return;
       }
@@ -1006,12 +992,10 @@
       if (badge) { badge.textContent = newState ? 'Contractor' : 'Client'; badge.className = 'da-role-badge ' + (newState ? 'contractor' : 'client'); }
       if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2000); }
     } catch(e) {
-      console.error('_updateContractor exception:', e);
       if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
     }
   };
 
-  // ── SERVICES ─────────────────────────────────────────────────────
   async function loadClientServices(clientId) {
     var wrap = document.getElementById('services-' + clientId);
     if (!wrap) return;
@@ -1020,7 +1004,7 @@
       var res = await apiFetch('/rest/v1/client_services?client_id=eq.' + clientId + '&order=created_at.asc');
       var services = await res.json() || [];
       renderClientServices(clientId, services);
-    } catch(e) { console.error('loadClientServices:', e); wrap.innerHTML = '<div style="font-size:11px;color:var(--error);padding:8px 0">Error loading services</div>'; }
+    } catch(e) { wrap.innerHTML = '<div style="font-size:11px;color:var(--error);padding:8px 0">Error loading services</div>'; }
   }
   window.loadClientServices = loadClientServices;
 
@@ -1029,7 +1013,6 @@
     if (!wrap) return;
     var addedKeys = {};
     services.forEach(function(sv) { if (sv.service_key) addedKeys[sv.service_key] = true; });
-
     var existingHtml = services.length
       ? services.map(function(sv) {
           return '<div class="da-service-item" id="svc-' + sv.id + '">'
@@ -1038,7 +1021,6 @@
             + '<button class="da-service-remove" onclick="window._removeService(\'' + sv.id + '\', \'' + clientId + '\')">&#10005;</button></div></div>';
         }).join('')
       : '<div style="font-size:11px;color:var(--muted);padding:4px 0 8px">No services added yet</div>';
-
     var checklistHtml = (window._ALL_SERVICES || []).map(function(sv) {
       var added = addedKeys[sv.key];
       return '<label class="da-svc-check-label' + (added ? ' da-svc-check-added' : '') + '">'
@@ -1047,7 +1029,6 @@
         + (added ? '<span class="da-svc-added-tag">Added</span>' : '')
         + '</label>';
     }).join('');
-
     wrap.innerHTML = existingHtml
       + '<div class="da-svc-checklist-wrap" id="svc-checklist-' + clientId + '">'
       + '  <div class="da-svc-checklist-header" onclick="window._toggleSvcChecklist(\'' + clientId + '\')">'
@@ -1060,7 +1041,6 @@
       + '    <button class="da-update-btn" style="margin-top:8px;width:100%" onclick="window._addSelectedServices(\'' + clientId + '\')">Add Selected Services</button>'
       + '  </div>'
       + '</div>';
-
     var checkboxes = wrap.querySelectorAll('.da-svc-checkbox:not(:disabled)');
     checkboxes.forEach(function(cb) {
       cb.addEventListener('change', function() {
@@ -1074,11 +1054,7 @@
   window._toggleSvcChecklist = function(clientId) {
     var body = document.getElementById('svc-checklist-body-' + clientId);
     var label = document.getElementById('svc-checklist-label-' + clientId);
-    if (body) {
-      var isOpen = body.style.display === 'block';
-      body.style.display = isOpen ? 'none' : 'block';
-      if (label) label.textContent = isOpen ? '+ Add Services' : '− Close';
-    }
+    if (body) { var isOpen = body.style.display === 'block'; body.style.display = isOpen ? 'none' : 'block'; if (label) label.textContent = isOpen ? '+ Add Services' : '− Close'; }
   };
 
   window._addSelectedServices = async function(clientId) {
@@ -1101,19 +1077,13 @@
   };
 
   window._updateServiceStatus = async function(serviceId, status) {
-    try {
-      await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) });
-    } catch(e) { console.error('_updateServiceStatus:', e); }
+    try { await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) }); } catch(e) {}
   };
 
   window._removeService = async function(serviceId, clientId) {
-    try {
-      var res = await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' });
-      if (res.ok) await loadClientServices(clientId);
-    } catch(e) { console.error('_removeService:', e); }
+    try { var res = await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' }); if (res.ok) await loadClientServices(clientId); } catch(e) {}
   };
 
-  // ── NOTES ─────────────────────────────────────────────────────────
   window._saveNewNote = async function(id) {
     var textarea = document.getElementById('note-new-' + id);
     if (!textarea || !textarea.value.trim()) return;
@@ -1122,11 +1092,7 @@
     if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
     try {
       var res = await apiFetch('/rest/v1/admin_notes', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: id, note: noteText }) });
-      if (res.ok) {
-        textarea.value = '';
-        if (btn) { btn.textContent = 'Note Added!'; btn.style.background = 'var(--success)'; }
-        window._loadNotesLog(id);
-      }
+      if (res.ok) { textarea.value = ''; if (btn) { btn.textContent = 'Note Added!'; btn.style.background = 'var(--success)'; } window._loadNotesLog(id); }
     } catch(e) { console.error('_saveNewNote exception:', e); }
     setTimeout(function() { if(btn){btn.textContent='Add Note'; btn.style.background='var(--gold)'; btn.disabled=false;} }, 2500);
   };
@@ -1146,7 +1112,6 @@
     } catch(e) { log.innerHTML = '<div class="da-notes-log-empty">Could not load notes</div>'; }
   };
 
-  // ── CONTACT INFO ──────────────────────────────────────────────────
   window._saveContactInfo = async function(id) {
     var name       = (document.getElementById('edit-name-' + id) || {}).value || '';
     var phone      = (document.getElementById('edit-phone-' + id) || {}).value || '';
@@ -1156,93 +1121,29 @@
     var btn = document.querySelector('[onclick*="_saveContactInfo(\'' + id + '\')"]');
     if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
     try {
-      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
-        method: 'PATCH',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({
-          full_name: name || null,
-          phone: phone || null,
-          street: street || null,
-          investment: investment || null,
-          notes: notes || null
-        })
-      });
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ full_name: name||null, phone: phone||null, street: street||null, investment: investment||null, notes: notes||null }) });
       if (res.ok) {
         var c = allClients.find(function(x) { return x.id === id; });
         if (c) { c.full_name = name; c.phone = phone; c.street = street; c.investment = investment; c.notes = notes; }
-        var cardName = document.querySelector('#card-' + id + ' .da-card-name');
-        if (cardName && name) cardName.childNodes[0].textContent = name;
         if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; }
       }
     } catch(e) { console.error('_saveContactInfo exception:', e); }
     setTimeout(function() { if(btn){ btn.textContent = 'Save Contact Info'; btn.style.background = 'var(--gold)'; btn.disabled = false; } }, 2500);
   };
 
-  window._quickStatus = async function(id, currentStatus) {
-    var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
-    var newStatus = next[currentStatus] || 'active_client';
-    try {
-      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_status: newStatus }) });
-      if (!res.ok) return;
-      var c = allClients.find(function(x) { return x.id === id; });
-      if (c) c.client_status = newStatus;
-      updateSubtabCounts();
-      var btn = document.getElementById('statusbtn-' + id);
-      var labels = { active_client: '\u2713 Active', lead: 'Mark Active', archived: '\u21a9 Unarchive', finished: '\u2713 Finished' };
-      var colors = { active_client: 'var(--success)', lead: 'var(--gold)', archived: 'var(--muted)', finished: 'var(--success)' };
-      if (btn) {
-        btn.textContent = labels[newStatus] || newStatus;
-        btn.style.color = colors[newStatus] || 'var(--gold)';
-        btn.style.borderColor = colors[newStatus] || 'var(--gold)';
-        btn.setAttribute('onclick', "window._quickStatus('" + id + "', '" + newStatus + "')");
-      }
-      var card = document.getElementById('card-' + id);
-      if (card) card.classList.toggle('archived', newStatus === 'archived' || newStatus === 'no_response');
-      if (activeSubtab !== 'all' && activeSubtab !== newStatus) {
-        if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(function() { applyFilters(); }, 300); }
-      }
-      var statusNames = { active_client: 'Active Client', lead: 'Lead', archived: 'Archived', finished: 'Finished' };
-      showAdminToast('Status updated → ' + (statusNames[newStatus] || newStatus));
-    } catch(e) { console.error('_quickStatus:', e); }
-  };
-
-  window._toggleContractor = async function(id, currentState) {
-    var newState = !currentState;
-    try {
-      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_contractor: newState }) });
-      if (!res.ok) return;
-      var c = allClients.find(function(x) { return x.id === id; }); if (c) c.is_contractor = newState;
-      var btn = document.getElementById('contractor-btn-' + id);
-      if (btn) {
-        btn.textContent = newState ? '✓ Contractor' : 'Mark as Contractor';
-        btn.style.color = newState ? 'var(--success)' : 'var(--muted)';
-        btn.style.borderColor = newState ? 'var(--success)' : 'var(--border)';
-        btn.setAttribute('onclick', 'window._toggleContractor("' + id + '", ' + newState + ')');
-      }
-      var badge = document.querySelector('#card-' + id + ' .da-role-badge');
-      if (badge) { badge.textContent = newState ? 'Contractor' : 'Client'; badge.className = 'da-role-badge ' + (newState ? 'contractor' : 'client'); }
-    } catch(e) { console.error('_toggleContractor exception:', e); }
-  };
-
-  // ── RESEND PORTAL ACCESS ──────────────────────────────────────────
   window._resendPortalAccess = async function(id, email, name, btn) {
     email = (email || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
     name  = (name  || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
     if (!email) { alert('No email address on file for this client.'); return; }
     if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
     try {
-      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY, 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({ email: email.toLowerCase().trim(), full_name: name })
-      });
+      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY, 'apikey': SUPABASE_KEY }, body: JSON.stringify({ email: email.toLowerCase().trim(), full_name: name }) });
       var data = await res.json();
       if (btn) { btn.textContent = data.success ? 'Link Sent!' : 'Error'; btn.style.color = data.success ? 'var(--success)' : 'var(--error)'; }
     } catch(e) { if (btn) { btn.textContent = 'Error'; btn.style.color = 'var(--error)'; } }
     setTimeout(function() { if(btn){btn.textContent='Resend Portal Link'; btn.style.color='var(--gold)'; btn.disabled=false;} }, 3000);
   };
 
-  // ── ADD CLIENT ────────────────────────────────────────────────────
   document.getElementById('acSubmit').addEventListener('click', async function() {
     var name = document.getElementById('acName').value.trim();
     var email = document.getElementById('acEmail').value.trim();
@@ -1290,11 +1191,10 @@
         msg.textContent = '';
         await loadClients();
       } else { var et = await res.text(); msg.textContent = 'Error: ' + et.substring(0,100); msg.className = 'da-modal-msg error'; }
-    } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; console.error('acSubmit:', e); }
+    } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
     this.disabled = false; this.textContent = 'Add Client';
   });
 
-  // ── PROJECTS ─────────────────────────────────────────────────────
   window._showAddProjectForm = function() {
     var form = document.getElementById('daAddProjectForm');
     if (!form) return;
@@ -1305,18 +1205,10 @@
         return '<option value="' + c.id + '" data-name="' + s(c.full_name || '') + '">' + s(c.full_name || c.email) + '</option>';
       }).join('');
     }
-    if (sel) {
-      sel.onchange = function() {
-        var opt = sel.options[sel.selectedIndex];
-        var nameInput = document.getElementById('apClientName');
-        if (nameInput && opt) nameInput.value = opt.dataset.name || '';
-      };
-    }
+    if (sel) { sel.onchange = function() { var opt = sel.options[sel.selectedIndex]; var nameInput = document.getElementById('apClientName'); if (nameInput && opt) nameInput.value = opt.dataset.name || ''; }; }
   };
 
-  window._hideAddProjectForm = function() {
-    var form = document.getElementById('daAddProjectForm'); if (form) form.style.display = 'none';
-  };
+  window._hideAddProjectForm = function() { var form = document.getElementById('daAddProjectForm'); if (form) form.style.display = 'none'; };
 
   window._openAddProjectForClient = function(clientId, clientName) {
     document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -1325,68 +1217,40 @@
     document.getElementById('tab-projects').classList.add('active');
     window._showAddProjectForm();
     setTimeout(function() {
-      var sel = document.getElementById('apClientId');
-      if (sel) sel.value = clientId;
-      var nameInput = document.getElementById('apClientName');
-      if (nameInput && clientName) nameInput.value = clientName;
+      var sel = document.getElementById('apClientId'); if (sel) sel.value = clientId;
+      var nameInput = document.getElementById('apClientName'); if (nameInput && clientName) nameInput.value = clientName;
     }, 150);
     loadProjects();
   };
 
   window._submitAddProject = async function() {
-    var clientId    = document.getElementById('apClientId').value;
-    var clientName  = (document.getElementById('apClientName') || {}).value ? document.getElementById('apClientName').value.trim() : '';
-    var address     = document.getElementById('apAddress').value.trim();
-    var name        = document.getElementById('apProjectName').value.trim();
-    var type        = document.getElementById('apProjectType').value;
-    var anything    = (document.getElementById('apAnything') || {}).value ? document.getElementById('apAnything').value.trim() : '';
-    var goals       = document.getElementById('apGoals').value.trim();
-    var investment  = document.getElementById('apInvestment').value;
-    var msg         = document.getElementById('apMsg');
-
-    if (!clientId)  { msg.textContent = 'Please select a client.';         msg.className = 'da-modal-msg error'; return; }
-    if (!address)   { msg.textContent = 'Project address is required.';    msg.className = 'da-modal-msg error'; document.getElementById('apAddress').focus(); return; }
-    if (!name)      { msg.textContent = 'Project name is required.';       msg.className = 'da-modal-msg error'; document.getElementById('apProjectName').focus(); return; }
-    if (!investment){ msg.textContent = 'Please enter an investment / budget level.'; msg.className = 'da-modal-msg error'; document.getElementById('apInvestment').focus(); return; }
-
+    var clientId   = document.getElementById('apClientId').value;
+    var clientName = (document.getElementById('apClientName') || {}).value ? document.getElementById('apClientName').value.trim() : '';
+    var address    = document.getElementById('apAddress').value.trim();
+    var name       = document.getElementById('apProjectName').value.trim();
+    var type       = document.getElementById('apProjectType').value;
+    var anything   = (document.getElementById('apAnything') || {}).value ? document.getElementById('apAnything').value.trim() : '';
+    var goals      = document.getElementById('apGoals').value.trim();
+    var investment = document.getElementById('apInvestment').value;
+    var msg        = document.getElementById('apMsg');
+    if (!clientId)   { msg.textContent = 'Please select a client.';         msg.className = 'da-modal-msg error'; return; }
+    if (!address)    { msg.textContent = 'Project address is required.';    msg.className = 'da-modal-msg error'; return; }
+    if (!name)       { msg.textContent = 'Project name is required.';       msg.className = 'da-modal-msg error'; return; }
+    if (!investment) { msg.textContent = 'Please enter an investment level.'; msg.className = 'da-modal-msg error'; return; }
     var btn = document.getElementById('apSubmit');
     btn.disabled = true; btn.textContent = 'Creating...'; msg.textContent = '';
     var description = [goals, anything ? 'Additional notes: ' + anything : ''].filter(Boolean).join('\n\n');
-
     try {
-      var res = await apiFetch('/rest/v1/projects', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({
-          client_id: clientId,
-          project_name: name,
-          project_type: type || null,
-          project_address: address || null,
-          description: description || null,
-          status: 'active'
-        })
-      });
-      if (investment) {
-        apiFetch('/rest/v1/clients?id=eq.' + clientId, {
-          method: 'PATCH',
-          headers: { 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ investment: investment })
-        }).catch(function(e) { console.error('investment patch:', e); });
-      }
+      var res = await apiFetch('/rest/v1/projects', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, project_name: name, project_type: type||null, project_address: address||null, description: description||null, status: 'active' }) });
+      if (investment) apiFetch('/rest/v1/clients?id=eq.' + clientId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ investment: investment }) }).catch(function(){});
       if (res.ok) {
         msg.textContent = 'Project created successfully!'; msg.className = 'da-modal-msg success';
-        ['apClientName','apAddress','apProjectName','apAnything','apGoals'].forEach(function(fid) {
-          var el = document.getElementById(fid); if (el) el.value = '';
-        });
-        ['apProjectType','apClientId'].forEach(function(fid) {
-          var el = document.getElementById(fid); if (el) el.value = '';
-        });
+        ['apClientName','apAddress','apProjectName','apAnything','apGoals'].forEach(function(fid) { var el = document.getElementById(fid); if (el) el.value = ''; });
+        ['apProjectType','apClientId'].forEach(function(fid) { var el = document.getElementById(fid); if (el) el.value = ''; });
         var inv = document.getElementById('apInvestment'); if (inv) inv.value = '';
         setTimeout(function() { window._hideAddProjectForm(); msg.textContent = ''; loadProjects(); }, 1500);
       }
-    } catch(e) {
-      msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error';
-    }
+    } catch(e) { msg.textContent = 'Something went wrong.'; msg.className = 'da-modal-msg error'; }
     btn.disabled = false; btn.textContent = 'Create Project';
   };
 
@@ -1401,13 +1265,11 @@
       container.innerHTML = projects.map(function(p) {
         var clientName = p.clients ? s(p.clients.full_name || p.clients.email) : 'Unknown';
         var typeLabel = s(PROJECT_TYPE_LABELS[p.project_type] || p.project_type || '—');
-        var startStr = p.start_date ? new Date(p.start_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
-        var endStr = p.end_date ? new Date(p.end_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
         return '<div class="da-client-card" style="margin-bottom:8px">'
           + '<div class="da-card-top" onclick="window._toggleProjectCard(\'' + p.id + '\')">'
           + '  <div class="da-card-left"><div class="da-card-avatar" style="font-size:11px">' + s((p.project_name||'P').charAt(0).toUpperCase()) + '</div>'
           + '  <div><div class="da-card-name">' + s(p.project_name || 'Unnamed Project') + '</div><div class="da-card-sub">' + clientName + ' · ' + typeLabel + '</div></div></div>'
-          + '  <div class="da-card-right"><div class="da-stage-pill" style="color:var(--gold);border-color:var(--gold);background:var(--gold-dim)">' + s(p.status||'active') + '</div><div class="da-card-date">' + startStr + ' → ' + endStr + '</div><div class="da-expand-icon" id="proj-exp-' + p.id + '">&#9660;</div></div>'
+          + '  <div class="da-card-right"><div class="da-stage-pill" style="color:var(--gold);border-color:var(--gold);background:var(--gold-dim)">' + s(p.status||'active') + '</div><div class="da-expand-icon" id="proj-exp-' + p.id + '">&#9660;</div></div>'
           + '</div>'
           + '<div class="da-card-details" id="proj-det-' + p.id + '">'
           + '  <div class="da-details-grid">'
@@ -1434,11 +1296,7 @@
     } catch(e) { container.innerHTML = '<div class="da-empty">Error loading projects</div>'; }
   }
 
-  window._toggleProjectCard = function(id) {
-    var det = document.getElementById('proj-det-' + id); var exp = document.getElementById('proj-exp-' + id);
-    if (det) det.classList.toggle('visible'); if (exp) exp.classList.toggle('open');
-  };
-
+  window._toggleProjectCard = function(id) { var det = document.getElementById('proj-det-' + id); var exp = document.getElementById('proj-exp-' + id); if (det) det.classList.toggle('visible'); if (exp) exp.classList.toggle('open'); };
   window._saveProjectLinks = async function(id, btn) {
     var design = (document.getElementById('plink-design-' + id)||{}).value||'';
     var permit = (document.getElementById('plink-permit-' + id)||{}).value||'';
@@ -1446,26 +1304,20 @@
     try {
       var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ drive_design_link: design.trim()||null, drive_permit_link: permit.trim()||null, drive_construction_link: cons.trim()||null }) });
       if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function(){if(btn){btn.textContent='Save Links';btn.style.background='var(--gold)';}},2000); }
-    } catch(e) { console.error('_saveProjectLinks exception:', e); }
+    } catch(e) {}
   };
-
   window._updateProjectStatus = async function(id, btn) {
     var val = (document.getElementById('pstatus-' + id)||{}).value;
     try {
       var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: val }) });
       if (btn) { btn.textContent = res.ok ? 'Saved ✓' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function(){if(btn){btn.textContent='Update';btn.style.background='var(--gold)';} loadProjects();},1500); }
-    } catch(e) { console.error('_updateProjectStatus:', e); }
+    } catch(e) {}
   };
-
   window._deleteProject = async function(id) {
     if (!confirm('Delete this project? This cannot be undone.')) return;
-    try {
-      var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'DELETE' });
-      if (res.ok) loadProjects();
-    } catch(e) { console.error('_deleteProject:', e); }
+    try { var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'DELETE' }); if (res.ok) loadProjects(); } catch(e) {}
   };
 
-  // ── CHECKLIST TAB ──────────────────────────────────────────────────
   async function loadAllChecklists() {
     try {
       var results = await Promise.all([apiFetch('/rest/v1/checklist_items?select=*'), apiFetch('/rest/v1/client_notes?select=*')]);
@@ -1489,7 +1341,7 @@
       var items = KEYS.map(function(key) {
         var isDone = cc[key] === true;
         var note = cn[key] || '';
-        return '<div class="da-check-row da-check-clickable" data-client="' + c.id + '" data-item="' + key + '" onclick="window._adminToggleCheck(this)" title="Click to toggle received">'
+        return '<div class="da-check-row da-check-clickable" data-client="' + c.id + '" data-item="' + key + '" onclick="window._adminToggleCheck(this)">'
           + '<div class="da-check-dot' + (isDone ? ' done' : '') + '"></div>'
           + '<div style="flex:1"><div class="da-check-row-label">' + s(CHECKLIST_LABELS[key] || key)
           + ' <span class="da-check-done-mark" style="color:var(--success);font-size:10px;display:' + (isDone ? 'inline' : 'none') + '">\u2713 Received</span></div>'
@@ -1505,18 +1357,12 @@
     var itemKey  = rowEl.dataset.item;
     var cc = allChecklists[clientId] = allChecklists[clientId] || {};
     var newVal = !cc[itemKey];
-
     var dot  = rowEl.querySelector('.da-check-dot');
     var mark = rowEl.querySelector('.da-check-done-mark');
     if (dot)  dot.classList.toggle('done', newVal);
     if (mark) mark.style.display = newVal ? 'inline' : 'none';
-
     try {
-      var res = await apiFetch('/rest/v1/checklist_items?on_conflict=client_id,item_key', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify({ client_id: clientId, item_key: itemKey, completed: newVal })
-      });
+      var res = await apiFetch('/rest/v1/checklist_items?on_conflict=client_id,item_key', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ client_id: clientId, item_key: itemKey, completed: newVal }) });
       if (!res.ok) throw new Error(await res.text());
       cc[itemKey] = newVal;
       var KEYS = ['goals','inspo','photos','survey','bylaws','houseplans'];
@@ -1525,10 +1371,9 @@
       if (prog) prog.textContent = doneCount;
       showAdminToast(newVal ? 'Marked received \u2713' : 'Marked not received');
     } catch(e) {
-      console.error('_adminToggleCheck:', e);
       if (dot)  dot.classList.toggle('done', !newVal);
       if (mark) mark.style.display = !newVal ? 'inline' : 'none';
-      showAdminToast('Error saving — see console');
+      showAdminToast('Error saving');
     }
   };
 
@@ -1543,7 +1388,6 @@
     }, 300);
   });
 
-  // ── MESSAGES ─────────────────────────────────────────────────────
   async function loadMessages() {
     try {
       var res = await apiFetch('/rest/v1/messages?order=created_at.asc&limit=200');
@@ -1580,23 +1424,18 @@
     try {
       var res = await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: projectId||null, client_id: clientId||null, sender: 'daydream_team', content: content, is_read: true }) });
       if (res.ok) { textarea.value = ''; await loadMessages(); }
-    } catch(e) { console.error('_sendReply:', e); }
+    } catch(e) {}
   };
 
-  // ── JOB SITE PHOTOS ──────────────────────────────────────────────
   var SIX_MB = 6 * 1024 * 1024;
 
   function populatePhotoClientFilter() {
     var filter = document.getElementById('daPhotoClientFilter');
     var uploadSel = document.getElementById('daPhotoUploadClient');
     if (!filter || !allClients.length) return;
-    var opts = '<option value="">All Clients</option>' + allClients.map(function(c) {
-      return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
-    }).join('');
+    var opts = '<option value="">All Clients</option>' + allClients.map(function(c) { return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>'; }).join('');
     filter.innerHTML = opts;
-    if (uploadSel) uploadSel.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
-      return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
-    }).join('');
+    if (uploadSel) uploadSel.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) { return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>'; }).join('');
     filter.onchange = function() { loadAdminPhotos(filter.value); };
   }
 
@@ -1605,19 +1444,13 @@
     if (form) form.style.display = 'block';
     var uploadClient = document.getElementById('daPhotoUploadClient');
     if (uploadClient && allClients.length && uploadClient.options.length <= 1) {
-      uploadClient.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
-        return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>';
-      }).join('');
+      uploadClient.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) { return '<option value="' + c.id + '">' + s(c.full_name || c.email) + '</option>'; }).join('');
     }
     populatePhotoClientFilter();
     var dateInput = document.getElementById('daPhotoVisitDate');
     if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
   };
-
-  window._hideAdminPhotoUpload = function() {
-    var form = document.getElementById('daAdminPhotoUploadForm');
-    if (form) form.style.display = 'none';
-  };
+  window._hideAdminPhotoUpload = function() { var form = document.getElementById('daAdminPhotoUploadForm'); if (form) form.style.display = 'none'; };
 
   window._submitAdminPhotos = async function() {
     var clientId = (document.getElementById('daPhotoUploadClient') || {}).value;
@@ -1628,68 +1461,42 @@
     var msg = document.getElementById('daPhotoMsg');
     var btn = document.getElementById('daPhotoSubmit');
     var statusEl = document.getElementById('daPhotoUploadStatus');
-
     if (!clientId) { msg.textContent = 'Please select a client.'; msg.className = 'da-modal-msg error'; return; }
     if (!files.length) { msg.textContent = 'Please select at least one photo.'; msg.className = 'da-modal-msg error'; return; }
-
     btn.disabled = true; btn.textContent = 'Uploading...'; msg.textContent = '';
     var client = allClients.find(function(c) { return c.id === clientId; });
     var clientName = client ? (client.full_name || client.email) : clientId;
     var folderPath = clientName + '/site-photos/' + visitDate + ' Site Visit';
-
     var uploadResults = await Promise.all(files.map(async function(file) {
       var safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
       var path = folderPath + '/' + Date.now() + '_' + safeName;
       try {
         var ok = false;
-        if (file.size > SIX_MB) {
-          ok = await adminUploadResumable(file, path);
-        } else {
-          var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': file.type },
-            body: file
-          });
+        if (file.size > SIX_MB) { ok = await adminUploadResumable(file, path); }
+        else {
+          var res = await fetch(SUPABASE_URL + '/storage/v1/object/client-documents/' + path, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': file.type }, body: file });
           ok = res.ok;
         }
         if (ok) {
-          await apiFetch('/rest/v1/documents', {
-            method: 'POST',
-            headers: { 'Prefer': 'return=minimal' },
-            body: JSON.stringify({
-              client_id: clientId,
-              file_name: file.name,
-              file_url: path,
-              uploaded_by: 'daydream_team',
-              photo_category: 'site_photos',
-              photo_notes: notes,
-              visit_date: visitDate
-            })
-          });
+          await apiFetch('/rest/v1/documents', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, file_name: file.name, file_url: path, uploaded_by: 'daydream_team', photo_category: 'site_photos', photo_notes: notes, visit_date: visitDate }) });
         }
         return ok;
-      } catch(e) { console.error('Admin photo upload error:', e); return false; }
+      } catch(e) { return false; }
     }));
-
     var uploaded = uploadResults.filter(Boolean).length;
     if (statusEl) statusEl.textContent = uploaded + ' of ' + files.length + ' photo(s) uploaded';
     if (uploaded > 0) {
       msg.textContent = uploaded + ' photo(s) saved successfully!'; msg.className = 'da-modal-msg success';
       if (fileInput) fileInput.value = '';
       setTimeout(function() { window._hideAdminPhotoUpload(); loadAdminPhotos(clientId); }, 1500);
-    } else {
-      msg.textContent = 'Upload failed. Please try again.'; msg.className = 'da-modal-msg error';
-    }
+    } else { msg.textContent = 'Upload failed. Please try again.'; msg.className = 'da-modal-msg error'; }
     btn.disabled = false; btn.textContent = 'Upload to Drive & Save';
   };
 
   async function adminUploadResumable(file, path) {
     var CHUNK = 6 * 1024 * 1024;
     try {
-      var createRes = await fetch(SUPABASE_URL + '/storage/v1/upload/resumable', {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': 'application/offset+octet-stream', 'Upload-Length': file.size, 'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'), 'Tus-Resumable': '1.0.0' }
-      });
+      var createRes = await fetch(SUPABASE_URL + '/storage/v1/upload/resumable', { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': 'application/offset+octet-stream', 'Upload-Length': file.size, 'Upload-Metadata': 'bucketName ' + btoa('client-documents') + ',objectName ' + btoa(path) + ',contentType ' + btoa(file.type || 'application/octet-stream'), 'Tus-Resumable': '1.0.0' } });
       if (!createRes.ok && createRes.status !== 201) return false;
       var uploadUrl = createRes.headers.get('Location');
       if (!uploadUrl) return false;
@@ -1715,14 +1522,8 @@
       var res = await apiFetch(url);
       var photos = await res.json() || [];
       if (!photos.length) { container.innerHTML = '<div class="da-empty">No site photos yet. Click + Upload Photos to add some.</div>'; return; }
-
       var groups = {};
-      photos.forEach(function(p) {
-        var d = p.visit_date || p.created_at.split('T')[0];
-        if (!groups[d]) groups[d] = [];
-        groups[d].push(p);
-      });
-
+      photos.forEach(function(p) { var d = p.visit_date || p.created_at.split('T')[0]; if (!groups[d]) groups[d] = []; groups[d].push(p); });
       container.innerHTML = Object.keys(groups).sort(function(a,b) { return b.localeCompare(a); }).map(function(date) {
         var datePhotos = groups[date];
         var client = allClients.find(function(c) { return c.id === datePhotos[0].client_id; });
@@ -1749,16 +1550,12 @@
     } catch(e) { container.innerHTML = '<div class="da-empty">Error loading photos</div>'; }
   }
 
-  // ── ADMIN REALTIME ────────────────────────────────────────────────
   var adminRealtimeChannels = [];
 
   function startAdminRealtime() {
     stopAdminRealtime();
-
     var msgChannel = new WebSocket('wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0');
-    msgChannel.onopen = function() {
-      msgChannel.send(JSON.stringify({ topic: 'realtime:public:messages', event: 'phx_join', payload: {}, ref: '1' }));
-    };
+    msgChannel.onopen = function() { msgChannel.send(JSON.stringify({ topic: 'realtime:public:messages', event: 'phx_join', payload: {}, ref: '1' })); };
     msgChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
@@ -1766,32 +1563,24 @@
           var msg = data.payload.record;
           if (msg.sender === 'daydream_team') return;
           var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
-          if (msgTab) {
-            var dot = msgTab.querySelector('.da-msg-dot');
-            if (!dot) { dot = document.createElement('span'); dot.className = 'da-msg-dot'; msgTab.appendChild(dot); }
-            var currentCount = parseInt(dot.textContent) || 0;
-            dot.textContent = currentCount + 1;
-          }
+          if (msgTab) { var dot = msgTab.querySelector('.da-msg-dot'); if (!dot) { dot = document.createElement('span'); dot.className = 'da-msg-dot'; msgTab.appendChild(dot); } var currentCount = parseInt(dot.textContent) || 0; dot.textContent = currentCount + 1; }
           var msgsTab = document.getElementById('tab-messages');
           if (msgsTab && msgsTab.classList.contains('active')) { loadMessages(); }
           showAdminToast('New message from client');
         }
-      } catch(e) { console.error('Admin realtime messages:', e); }
+      } catch(e) {}
     };
     adminRealtimeChannels.push(msgChannel);
 
     var clientChannel = new WebSocket('wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0');
-    clientChannel.onopen = function() {
-      clientChannel.send(JSON.stringify({ topic: 'realtime:public:clients', event: 'phx_join', payload: {}, ref: '2' }));
-    };
+    clientChannel.onopen = function() { clientChannel.send(JSON.stringify({ topic: 'realtime:public:clients', event: 'phx_join', payload: {}, ref: '2' })); };
     clientChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
         if (data.event === 'INSERT' && data.payload && data.payload.record) {
           var newClient = data.payload.record;
           allClients.unshift(newClient);
-          updateStats();
-          updateSubtabCounts();
+          updateStats(); updateSubtabCounts();
           var clientsTab = document.getElementById('tab-clients');
           if (clientsTab && clientsTab.classList.contains('active')) { applyFilters(); }
           showAdminToast('New lead: ' + (newClient.full_name || newClient.email || 'Unknown'));
@@ -1801,14 +1590,12 @@
           var idx = allClients.findIndex(function(c) { return c.id === updated.id; });
           if (idx > -1) allClients[idx] = Object.assign({}, allClients[idx], updated);
         }
-      } catch(e) { console.error('Admin realtime clients:', e); }
+      } catch(e) {}
     };
     adminRealtimeChannels.push(clientChannel);
 
     var projChannel = new WebSocket('wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0');
-    projChannel.onopen = function() {
-      projChannel.send(JSON.stringify({ topic: 'realtime:public:projects', event: 'phx_join', payload: {}, ref: '3' }));
-    };
+    projChannel.onopen = function() { projChannel.send(JSON.stringify({ topic: 'realtime:public:projects', event: 'phx_join', payload: {}, ref: '3' })); };
     projChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
@@ -1818,7 +1605,7 @@
           if (projTab && projTab.classList.contains('active')) { loadProjects(); }
           showAdminToast('New project created: ' + (proj.project_name || 'Unnamed'));
         }
-      } catch(e) { console.error('Admin realtime projects:', e); }
+      } catch(e) {}
     };
     adminRealtimeChannels.push(projChannel);
   }
