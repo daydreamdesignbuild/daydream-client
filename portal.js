@@ -806,6 +806,7 @@
     '    <button class="dd-tab active" data-order-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-order-tab="discussion">Discussion</button>',
     '    <button class="dd-tab" data-order-tab="documents">Documents</button>',
+    '    <button class="dd-tab" data-order-tab="files">Project Files</button>',
     '  </div>',
     '  <div class="dd-content">',
 
@@ -851,6 +852,12 @@
     '        <div class="dd-upload-card"><div class="dd-upload-card-header"><div class="dd-upload-card-title">Reference Photos</div><div class="dd-upload-card-desc">Inspiration, existing materials to match</div></div><div class="dd-upload-card-body"><div class="dd-drop-zone"><input type="file" multiple accept=".jpg,.jpeg,.png,.webp,.pdf" data-order-category="reference" class="dd-order-file-input" /><div class="dd-drop-icon">&#8679;</div><div class="dd-drop-text">Drop files or click to upload</div></div><div class="dd-upload-status" id="order-status-reference"></div></div></div>',
     '      </div>',
     '      <div id="ddOrderDocsList"><div class="dd-empty">Loading documents...</div></div>',
+    '    </div>',
+
+    '    <div class="dd-tab-content" id="order-tab-files">',
+    '      <div class="dd-section-title">Project Files</div>',
+    '      <div class="dd-section-sub">Your order folders in Google Drive. Open to view, download, or share files with your team.</div>',
+    '      <div id="ddOrderDriveList"><div class="dd-drive-empty">Your project files will appear here once your order is active.</div></div>',
     '    </div>',
 
     '  </div>',
@@ -975,6 +982,7 @@
         tab.classList.add('active');
         var target = document.getElementById('order-tab-' + tab.dataset.orderTab);
         if (target) target.classList.add('active');
+        if (tab.dataset.orderTab === 'files') renderOrderDriveLinks(currentClient);
       };
     });
     // wire order file uploads
@@ -1253,12 +1261,32 @@
   function renderDriveLinks(client) {
     var container = document.getElementById('ddDriveList');
     if (!container) return;
-    var links = [
+    var isStone = client && (client.service_type === 'stone_sourcing' || client.service_type === 'outdoor_showers');
+    var links = isStone ? [
+      { key: 'drive_design_link',       label: 'Design & Models',      sub: 'Base maps, 3D models and design files for your order' },
+      { key: 'drive_permit_link',        label: 'Permit & Documents',   sub: 'Permit documents, structural files and approvals' },
+      { key: 'drive_construction_link',  label: 'Project Site Data',    sub: 'CAD files, references, site photos, contracts and proposals' }
+    ] : [
       { key: 'drive_design_link',       label: 'Design Folder',       sub: 'Base maps, 3D models, renders and design deliverables' },
       { key: 'drive_permit_link',        label: 'Permit Folder',        sub: 'Permit plans, structural documents and approvals' },
       { key: 'drive_construction_link',  label: 'Construction Folder',  sub: 'Construction documents and site data' }
-    ].filter(function(l) { return client && client[l.key]; });
-    if (!links.length) { container.innerHTML = '<div class="dd-drive-empty">Your project files will appear here once your project is active.</div>'; return; }
+    ];
+    var available = links.filter(function(l) { return client && client[l.key]; });
+    if (!available.length) { container.innerHTML = '<div class="dd-drive-empty">Your project files will appear here once your order is active.</div>'; return; }
+    container.innerHTML = '<div class="dd-drive-list">' + available.map(function(l) {
+      return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + s(l.label) + '</div><div class="dd-drive-item-sub">' + s(l.sub) + '</div></div><a href="' + s(client[l.key]) + '" target="_blank" class="dd-drive-link">Open Folder</a></div>';
+    }).join('') + '</div>';
+  }
+
+  function renderOrderDriveLinks(client) {
+    var container = document.getElementById('ddOrderDriveList');
+    if (!container || !client) return;
+    var links = [
+      { key: 'drive_design_link',       label: 'Design & Models',    sub: 'Base maps, 3D models and design files for your order' },
+      { key: 'drive_permit_link',        label: 'Permit & Documents', sub: 'Permit documents, structural files and approvals' },
+      { key: 'drive_construction_link',  label: 'Project Site Data',  sub: 'CAD files, references, site photos, contracts and proposals' }
+    ].filter(function(l) { return client[l.key]; });
+    if (!links.length) { container.innerHTML = '<div class="dd-drive-empty">Your project files will appear here once your order is active.</div>'; return; }
     container.innerHTML = '<div class="dd-drive-list">' + links.map(function(l) {
       return '<div class="dd-drive-item"><div class="dd-drive-item-info"><div class="dd-drive-item-name">' + s(l.label) + '</div><div class="dd-drive-item-sub">' + s(l.sub) + '</div></div><a href="' + s(client[l.key]) + '" target="_blank" class="dd-drive-link">Open Folder</a></div>';
     }).join('') + '</div>';
