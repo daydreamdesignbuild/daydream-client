@@ -160,8 +160,25 @@
     '#dd-portal .dd-project-card-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; }',
     '#dd-portal .dd-project-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; }',
     '#dd-portal .dd-project-card:hover .dd-project-card-arrow { opacity: 1; }',
+    /* SIDEBAR LAYOUT */
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
+    '#dd-portal .dd-dashboard-body { display: flex; flex: 1; width: 100%; }',
+
+    /* Sidebar nav — desktop only */
+    '#dd-portal .dd-sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }',
+    '#dd-portal .dd-sidebar-section { font-size: 8px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--muted); padding: 20px 20px 8px; }',
+    '#dd-portal .dd-sidebar-link { display: block; width: 100%; background: none; border: none; text-align: left; font-family: Jost, sans-serif; font-size: 11px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 11px 20px; cursor: pointer; transition: color 0.2s, background 0.2s, border-left 0.2s; border-left: 2px solid transparent; line-height: 1; }',
+    '#dd-portal .dd-sidebar-link:hover { color: var(--text); background: var(--gold-dim); }',
+    '#dd-portal .dd-sidebar-link.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); font-weight: 400; }',
+    '#dd-portal .dd-sidebar-link .dd-msg-dot { margin-left: 6px; }',
+    '#dd-portal .dd-sidebar-rule { height: 1px; background: var(--border); margin: 8px 0; }',
+
+    /* Mobile tab bar — hidden on desktop */
+    '#dd-portal .dd-tabs { display: none; }',
+
+    /* Content area */
+    '#dd-portal .dd-content { flex: 1; padding: 40px 40px; max-width: 860px; min-width: 0; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
     '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
@@ -437,6 +454,23 @@
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '    <button class="dd-tab" data-tab="settings">Settings</button>',
     '  </div>',
+    '  <div class="dd-dashboard-body">',
+    '  <nav class="dd-sidebar" id="ddSidebar">',
+    '    <div class="dd-sidebar-section">Project</div>',
+    '    <button class="dd-sidebar-link active" data-tab="overview">Overview</button>',
+    '    <button class="dd-sidebar-link" data-tab="checklist">Checklist</button>',
+    '    <button class="dd-sidebar-link" data-tab="uploads">Documents</button>',
+    '    <button class="dd-sidebar-link" data-tab="site-photos">Site Photos</button>',
+    '    <div class="dd-sidebar-rule"></div>',
+    '    <div class="dd-sidebar-section">Communication</div>',
+    '    <button class="dd-sidebar-link" data-tab="messages">Messages</button>',
+    '    <button class="dd-sidebar-link" data-tab="schedule">Schedule</button>',
+    '    <div class="dd-sidebar-rule"></div>',
+    '    <div class="dd-sidebar-section">Files</div>',
+    '    <button class="dd-sidebar-link" data-tab="drive">Project Files</button>',
+    '    <div class="dd-sidebar-rule"></div>',
+    '    <button class="dd-sidebar-link" data-tab="settings">Settings</button>',
+    '  </nav>',
     '  <div class="dd-content">',
 
     // OVERVIEW
@@ -579,6 +613,7 @@
     '      </div>',
     '    </div>',
 
+    '  </div>',
     '  </div>',
     '</div>',
 
@@ -763,6 +798,7 @@
     '    </div>',
     '    <div class="dd-nav-right">',
     '      <button class="dd-nav-back visible" id="ddOrderBackBtn" onclick="window._showOrdersHome()">&#8592; All Orders</button>',
+    '      <button class="dd-nav-back visible" onclick="window._showNewOrderPanel()" style="background:var(--gold);color:var(--ow);border-color:var(--gold);margin-left:6px">+ New Order</button>',
     '      <button class="dd-nav-logout" id="ddOrderLogoutBtn">Sign Out</button>',
     '    </div>',
     '  </nav>',
@@ -1351,11 +1387,8 @@
   };
 
   document.getElementById('ddNavBack').addEventListener('click', function() {
-    stopRealtime(); // Stop subscriptions for this project before switching
-    document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
-    document.querySelector('[data-tab="overview"]').classList.add('active');
-    document.getElementById('tab-overview').classList.add('active');
+    stopRealtime();
+    switchTab('overview');
     document.getElementById('ddDashboard').classList.remove('visible');
     showProjectSelector();
   });
@@ -1774,21 +1807,37 @@
   document.getElementById('ddSelectorLogout').addEventListener('click', doLogout);
 
   // ── TABS ──────────────────────────────────────────────────────────
+  // Unified tab switcher — handles both mobile tab bar and desktop sidebar
+  function switchTab(tabName) {
+    // mobile tabs
+    document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
+    var mobileTab = document.querySelector('#dd-portal .dd-tab[data-tab="' + tabName + '"]');
+    if (mobileTab) mobileTab.classList.add('active');
+    // sidebar links
+    document.querySelectorAll('#dd-portal .dd-sidebar-link').forEach(function(t) { t.classList.remove('active'); });
+    var sidebarLink = document.querySelector('#dd-portal .dd-sidebar-link[data-tab="' + tabName + '"]');
+    if (sidebarLink) sidebarLink.classList.add('active');
+    // content panels
+    document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
+    var target = document.getElementById('tab-' + tabName);
+    if (target) target.classList.add('active');
+    // side effects
+    if (tabName === 'site-photos') loadClientSitePhotos();
+    if (tabName === 'messages') {
+      try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
+      var dot = document.querySelector('#dd-portal .dd-tab[data-tab="messages"] .dd-msg-dot');
+      if (dot) dot.remove();
+      var sdot = document.querySelector('#dd-portal .dd-sidebar-link[data-tab="messages"] .dd-msg-dot');
+      if (sdot) sdot.remove();
+    }
+  }
+
   document.querySelectorAll('#dd-portal .dd-tab').forEach(function(tab) {
-    tab.addEventListener('click', function() {
-      document.querySelectorAll('#dd-portal .dd-tab').forEach(function(t) { t.classList.remove('active'); });
-      document.querySelectorAll('#dd-portal .dd-tab-content').forEach(function(c) { c.classList.remove('active'); });
-      tab.classList.add('active');
-      var target = document.getElementById('tab-' + tab.dataset.tab);
-      if (target) target.classList.add('active');
+    tab.addEventListener('click', function() { switchTab(tab.dataset.tab); });
+  });
 
-      if (tab.dataset.tab === 'site-photos') loadClientSitePhotos();
-
-      if (tab.dataset.tab === 'messages') {
-        try { sessionStorage.setItem('dd_msgs_last_read', Date.now().toString()); } catch(e) {}
-        var dot = tab.querySelector('.dd-msg-dot'); if (dot) dot.remove();
-      }
-    });
+  document.querySelectorAll('#dd-portal .dd-sidebar-link').forEach(function(link) {
+    link.addEventListener('click', function() { switchTab(link.dataset.tab); });
   });
 
   // ── RESUMABLE UPLOAD (TUS) for files > 6MB ───────────────────────
