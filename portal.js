@@ -163,22 +163,22 @@
     /* SIDEBAR LAYOUT */
     '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
-    '#dd-portal .dd-dashboard-body { display: flex; flex: 1; width: 100%; }',
+    '#dd-portal .dd-dashboard-body { display: flex; flex: 1; width: 100%; min-height: 0; }',
 
-    /* Sidebar nav — desktop only */
+    /* Sidebar — desktop only, hidden on mobile */
     '#dd-portal .dd-sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }',
     '#dd-portal .dd-sidebar-section { font-size: 8px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--muted); padding: 20px 20px 8px; }',
     '#dd-portal .dd-sidebar-link { display: block; width: 100%; background: none; border: none; text-align: left; font-family: Jost, sans-serif; font-size: 11px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 11px 20px; cursor: pointer; transition: color 0.2s, background 0.2s, border-left 0.2s; border-left: 2px solid transparent; line-height: 1; }',
     '#dd-portal .dd-sidebar-link:hover { color: var(--text); background: var(--gold-dim); }',
     '#dd-portal .dd-sidebar-link.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); font-weight: 400; }',
-    '#dd-portal .dd-sidebar-link .dd-msg-dot { margin-left: 6px; }',
     '#dd-portal .dd-sidebar-rule { height: 1px; background: var(--border); margin: 8px 0; }',
 
-    /* Mobile tab bar — hidden on desktop */
-    '#dd-portal .dd-tabs { display: none; }',
+    /* Tab bar — mobile only, always hidden on desktop */
+    '#dd-portal .dd-tabs { display: none; background: var(--surface); border-bottom: 1px solid var(--border); width: 100%; overflow-x: auto; overflow-y: visible; scrollbar-width: none; -webkit-overflow-scrolling: touch; }',
+    '#dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
 
     /* Content area */
-    '#dd-portal .dd-content { flex: 1; padding: 40px 40px; max-width: 860px; min-width: 0; }',
+    '#dd-portal .dd-content { flex: 1; padding: 40px; min-width: 0; overflow-y: auto; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
     '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
@@ -341,6 +341,20 @@
     '#dd-portal .dd-orders-empty-icon { font-size: 28px; color: var(--gold); margin-bottom: 12px; }',
     '#dd-portal .dd-orders-empty-text { font-size: 13px; color: var(--muted); line-height: 1.9; }',
 
+    /* COMBINED HOME (both service type) */
+    '#dd-portal .dd-combined-home { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); width: 100%; align-items: center; }',
+    '#dd-portal .dd-combined-home.visible { display: flex; }',
+    '#dd-portal .dd-combined-content { flex: 1; padding: 40px 32px; max-width: 860px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-combined-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px; }',
+    '#dd-portal .dd-combined-card { background: var(--surface); border: 1px solid var(--border); padding: 28px; cursor: pointer; transition: border-color 0.2s, background 0.2s; }',
+    '#dd-portal .dd-combined-card:hover { border-color: var(--gold); background: var(--gold-dim); }',
+    '#dd-portal .dd-combined-card-icon { font-size: 24px; color: var(--gold); margin-bottom: 14px; }',
+    '#dd-portal .dd-combined-card-title { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; color: var(--gold); margin-bottom: 8px; }',
+    '#dd-portal .dd-combined-card-desc { font-size: 12px; color: var(--muted); line-height: 1.85; }',
+    '#dd-portal .dd-combined-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; margin-top: 16px; display: block; }',
+    '#dd-portal .dd-combined-card:hover .dd-combined-card-arrow { opacity: 1; }',
+    /* mobile handled in unified 860px breakpoint below */,
+
     /* STONE ORDER DASHBOARD */
     '#dd-portal .dd-order-dashboard { display: none; min-height: 100vh; flex-direction: column; width: 100%; align-items: center; }',
     '#dd-portal .dd-order-dashboard.visible { display: flex; }',
@@ -362,25 +376,66 @@
     '#dd-portal .dd-no-msg { font-size: 12px; min-height: 18px; margin-bottom: 10px; }',
     '#dd-portal .dd-no-msg.success { color: var(--success); }',
     '#dd-portal .dd-no-msg.error { color: var(--error); }',
-    '@media (max-width: 600px) { #dd-portal .dd-no-grid { grid-template-columns: 1fr; } #dd-portal .dd-orders-content { padding: 24px 16px; } #dd-portal .dd-new-order-body { padding: 24px 16px; } #dd-portal .dd-order-card { flex-direction: column; align-items: flex-start; } }',
+    /* mobile handled in unified 860px breakpoint below */,
 
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
-    '@media (max-width: 600px) {',
+    '@media (max-width: 860px) {',
+    '  #dd-portal .dd-sidebar { display: none !important; }',
+    '  #dd-portal .dd-tabs {',
+    '    display: flex !important;',
+    '    overflow-x: auto;',
+    '    overflow-y: visible;',
+    '    justify-content: flex-start;',
+    '    padding: 0;',
+    '    flex-shrink: 0;',
+    '    scrollbar-width: none;',
+    '    -webkit-overflow-scrolling: touch;',
+    '    background: var(--surface);',
+    '    border-bottom: 1px solid var(--border);',
+    '    width: 100%;',
+    '  }',
+    '  #dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
+    '  #dd-portal .dd-tab {',
+    '    flex-shrink: 0;',
+    '    display: block !important;',
+    '    font-family: Jost, sans-serif;',
+    '    font-size: 10px;',
+    '    font-weight: 400;',
+    '    letter-spacing: 0.22em;',
+    '    text-transform: uppercase;',
+    '    color: var(--muted);',
+    '    padding: 18px 16px;',
+    '    white-space: nowrap;',
+    '    background: none;',
+    '    border: none;',
+    '    border-bottom: 2px solid transparent;',
+    '    cursor: pointer;',
+    '    transition: color 0.2s, border-color 0.2s;',
+    '    line-height: 1;',
+    '  }',
+    '  #dd-portal .dd-tab:hover { color: var(--text); }',
+    '  #dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
+    '  #dd-portal .dd-tab-badge { font-size: 8px; background: var(--gold); color: var(--bg); padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
+    '  #dd-portal .dd-dashboard-body { flex-direction: column; }',
+    '  #dd-portal .dd-content { padding: 20px 16px; }',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
     '  #dd-portal .dd-nav-user { display: none; }',
     '  #dd-portal #ddRefreshBtn { display: none; }',
     '  #dd-portal .dd-nav-project-name { display: none !important; }',
-    '  #dd-portal .dd-tabs { padding: 0 4px; }',
-    '  #dd-portal .dd-tab { padding: 16px 10px; font-size: 8px; letter-spacing: 0.14em; }',
-    '  #dd-portal .dd-content { padding: 24px 16px; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
     '  #dd-portal .dd-status-grid { grid-template-columns: 1fr; }',
-    '  #dd-portal .dd-selector-content { padding: 24px 16px; }',
+    '  #dd-portal .dd-selector-content { padding: 20px 16px; }',
     '  #dd-portal .dd-project-card { flex-direction: column; align-items: flex-start; }',
     '  #dd-portal .dd-create-grid { grid-template-columns: 1fr; }',
-    '  #dd-portal .dd-create-project-body { padding: 24px 16px; }',
+    '  #dd-portal .dd-create-project-body { padding: 20px 16px; }',
+    '  #dd-portal .dd-no-grid { grid-template-columns: 1fr; }',
+    '  #dd-portal .dd-orders-content { padding: 20px 16px; }',
+    '  #dd-portal .dd-new-order-body { padding: 20px 16px; }',
+    '  #dd-portal .dd-order-card { flex-direction: column; align-items: flex-start; }',
+    '  #dd-portal .dd-combined-sections { grid-template-columns: 1fr; }',
+    '  #dd-portal .dd-combined-content { padding: 20px 16px; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
@@ -444,6 +499,7 @@
     '    </div>',
     '  </nav>',
 
+    '  <div class="dd-dashboard-body">',
     '  <div class="dd-tabs" id="ddTabBar">',
     '    <button class="dd-tab active" data-tab="overview">Overview</button>',
     '    <button class="dd-tab" data-tab="checklist">Checklist</button>',
@@ -454,7 +510,6 @@
     '    <button class="dd-tab" data-tab="drive">Project Files</button>',
     '    <button class="dd-tab" data-tab="settings">Settings</button>',
     '  </div>',
-    '  <div class="dd-dashboard-body">',
     '  <nav class="dd-sidebar" id="ddSidebar">',
     '    <div class="dd-sidebar-section">Project</div>',
     '    <button class="dd-sidebar-link active" data-tab="overview">Overview</button>',
@@ -699,6 +754,35 @@
     '  </div>',
     '</div>',
 
+    // COMBINED HOME (both service type)
+    '<div id="ddCombinedHome" class="dd-combined-home">',
+    '  <nav class="dd-nav">',
+    '    <div class="dd-nav-left"><div class="dd-nav-logo">Daydream</div></div>',
+    '    <div class="dd-nav-right">',
+    '      <span class="dd-nav-user" id="ddCombinedNavUser"></span>',
+    '      <button class="dd-nav-logout" id="ddCombinedLogoutBtn">Sign Out</button>',
+    '    </div>',
+    '  </nav>',
+    '  <div class="dd-combined-content">',
+    '    <div class="dd-orders-title" id="ddCombinedTitle">Welcome Back</div>',
+    '    <div class="dd-orders-sub">Select what you would like to work on today.</div>',
+    '    <div class="dd-combined-sections">',
+    '      <div class="dd-combined-card" onclick="window._goCombinedProject()">',
+    '        <div class="dd-combined-card-icon">&#9632;</div>',
+    '        <div class="dd-combined-card-title">Your Project</div>',
+    '        <div class="dd-combined-card-desc">View your outdoor living project timeline, documents, site photos, messages, and project files.</div>',
+    '        <span class="dd-combined-card-arrow">&#8594;</span>',
+    '      </div>',
+    '      <div class="dd-combined-card" onclick="window._goCombinedOrders()">',
+    '        <div class="dd-combined-card-icon">&#9671;</div>',
+    '        <div class="dd-combined-card-title">Stone Orders</div>',
+    '        <div class="dd-combined-card-desc">Track your stone sourcing orders, upload CAD files, view proposals, and start new stone orders.</div>',
+    '        <span class="dd-combined-card-arrow">&#8594;</span>',
+    '      </div>',
+    '    </div>',
+    '  </div>',
+    '</div>',
+
     // STONE ORDERS HOME
     '<div id="ddOrdersHome" class="dd-orders-home">',
     '  <nav class="dd-nav">',
@@ -920,7 +1004,7 @@
 
   // ── STONE CLIENT SCREENS ──────────────────────────────────────────
   function hideAllScreens() {
-    ['ddLoading','ddLoginWrap','ddDashboard','ddProjectSelector','ddCreateProject','ddOrdersHome','ddNewOrderPanel','ddOrderDashboard'].forEach(function(id) {
+    ['ddLoading','ddLoginWrap','ddDashboard','ddProjectSelector','ddCreateProject','ddOrdersHome','ddNewOrderPanel','ddOrderDashboard','ddCombinedHome'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) { el.style.display = ''; el.classList.remove('visible'); }
     });
@@ -946,6 +1030,40 @@
     if (logoutBtn) logoutBtn.onclick = function() { doLogout(); };
   }
   window._showOrdersHome = showOrdersHome;
+
+  function showCombinedHome() {
+    hideAllScreens();
+    var home = document.getElementById('ddCombinedHome');
+    if (home) home.classList.add('visible');
+    var navUser = document.getElementById('ddCombinedNavUser');
+    if (navUser) navUser.textContent = currentClient ? (currentClient.full_name || currentUser.email) : currentUser.email;
+    var title = document.getElementById('ddCombinedTitle');
+    if (title) title.textContent = currentClient ? ('Welcome, ' + (currentClient.full_name.split(' ')[0] || 'back')) : 'Welcome Back';
+    var logoutBtn = document.getElementById('ddCombinedLogoutBtn');
+    if (logoutBtn) logoutBtn.onclick = function() { doLogout(); };
+  }
+  window._showCombinedHome = showCombinedHome;
+
+  // From combined home → project dashboard
+  window._goCombinedProject = async function() {
+    if (!currentClient) return;
+    await loadProjectDashboard(currentClient);
+    // Add a back button to return to combined home
+    var backBtn = document.getElementById('ddNavBack');
+    if (backBtn) {
+      backBtn.textContent = '← Home';
+      backBtn.classList.add('visible');
+      backBtn.onclick = function() { stopRealtime(); showCombinedHome(); };
+    }
+  };
+
+  // From combined home → stone orders
+  window._goCombinedOrders = function() {
+    showOrdersHome();
+    // Override the logout on orders home to go back to combined home
+    var logoutBtn = document.getElementById('ddOrdersLogoutBtn');
+    if (logoutBtn) logoutBtn.onclick = function() { doLogout(); };
+  };
 
   function showNewOrderPanel() {
     hideAllScreens();
@@ -1631,9 +1749,12 @@
     allClientProjects = clients;
     if (!allClientProjects.length) { showLogin(); return; }
     isContractor = allClientProjects.some(function(c) { return c.is_contractor; });
-    // Route stone/shower clients to the multi-order home
     var firstClient = allClientProjects[0];
-    if (firstClient.service_type === 'stone_sourcing' || firstClient.service_type === 'outdoor_showers') {
+    // Route based on service_type
+    if (firstClient.service_type === 'both') {
+      currentClient = firstClient;
+      showCombinedHome();
+    } else if (firstClient.service_type === 'stone_sourcing' || firstClient.service_type === 'outdoor_showers') {
       currentClient = firstClient;
       showOrdersHome();
     } else if (isContractor || allClientProjects.length > 1) {
@@ -1766,7 +1887,7 @@
     stopRealtime();
     try { localStorage.removeItem('dd_token'); sessionStorage.removeItem('dd_token'); } catch(e) {}
     currentUser = null; currentClient = null; currentProject = null; currentOrder = null; isContractor = false;
-    ['ddDashboard','ddProjectSelector','ddCreateProject','ddOrdersHome','ddNewOrderPanel','ddOrderDashboard'].forEach(function(id) {
+    ['ddDashboard','ddProjectSelector','ddCreateProject','ddOrdersHome','ddNewOrderPanel','ddOrderDashboard','ddCombinedHome'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) { el.classList.remove('visible'); el.style.display = ''; }
     });
