@@ -98,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
   // Construction Phase Timeline
   var CONSTRUCTION_TIMELINE = [
-    { value: 'not_started',            label: 'Not Started' },
+    { value: 'not_started',             label: 'Not Started' },
     { value: 'pre_site_visit',         label: 'Pre Site Visit' },
     { value: 'erosion_control',        label: 'Erosion Control / BMP Installed' },
     { value: 'construction_scheduled', label: 'Construction Start Date Scheduled' },
@@ -150,9 +150,10 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
   var style = document.createElement('style');
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
-    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #ddd7ce; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
+    /* FIX: Grounded layout framework container explicitly centered with no float leakage */
+    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #ddd7ce; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }',
     '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
-    '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
+    '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; width: 100%; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
     '#dd-portal .dd-login-card { width: 100%; max-width: 440px; border: 1px solid var(--border); background: var(--surface); }',
     '#dd-portal .dd-login-header { background: var(--text); border-bottom: 2px solid var(--gold); padding: 42px 40px 34px; text-align: center; }',
@@ -174,11 +175,11 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-msg.visible { display: block; }',
     '#dd-portal .dd-msg.success { color: var(--success); }',
     '#dd-portal .dd-msg.error { color: var(--error); }',
-    '#dd-portal .dd-project-selector { display: none; min-height: 100vh; flex-direction: column; }',
+    '#dd-portal .dd-project-selector { display: none; min-height: 100vh; flex-direction: column; width: 100%; }',
     '#dd-portal .dd-project-selector.visible { display: flex; }',
-    '#dd-portal .dd-selector-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; }',
+    '#dd-portal .dd-selector-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; width: 100%; }',
     '#dd-portal .dd-selector-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
-    '#dd-portal .dd-selector-content { flex: 1; padding: 48px 32px; max-width: 800px; width: 100%; margin: 0 auto; }',
+    '#dd-portal .dd-selector-content { flex: 1; padding: 48px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-selector-title { font-family: "Cormorant Garamond", serif; font-size: 32px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
     '#dd-portal .dd-selector-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 40px; }',
     '#dd-portal .dd-project-cards { display: flex; flex-direction: column; gap: 12px; }',
@@ -191,9 +192,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-project-card-tag { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 3px 8px; }',
     '#dd-portal .dd-project-card-arrow { font-size: 18px; color: var(--gold); opacity: 0.5; }',
     '#dd-portal .dd-project-card:hover .dd-project-card-arrow { opacity: 1; }',
-    '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; }',
+    '#dd-portal .dd-dashboard { display: none; min-height: 100vh; flex-direction: column; width: 100%; align-items: center; }',
     '#dd-portal .dd-dashboard.visible { display: flex; }',
-    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
+    '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; width: 100%; }',
     '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
     '#dd-portal .dd-nav-project-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 4px 12px; border: 1px solid var(--border); display: none; }',
@@ -206,20 +207,21 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-nav-logout { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); cursor: pointer; background: none; border: none; transition: color 0.2s; }',
     '#dd-portal .dd-nav-logout:hover { color: var(--gold); }',
     
-    // MODIFIED: Enhanced menu bar container alignment, structure, and visual weight
-    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; scrollbar-width: none; -webkit-overflow-scrolling: touch; box-shadow: 0 2px 10px rgba(40,35,30,0.03); }',
+    /* FIX: Tab menu structure reset to full-width horizontal balance across desktop viewports */
+    '#dd-portal .dd-tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 32px; scrollbar-width: none; -webkit-overflow-scrolling: touch; box-shadow: 0 2px 10px rgba(40,35,30,0.03); width: 100%; justify-content: center; }',
     '#dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
-    '#dd-portal .dd-tabs-wrap { position: relative; }',
+    '#dd-portal .dd-tabs-wrap { position: relative; width: 100%; }',
     '#dd-portal .dd-tabs-wrap::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 48px; background: linear-gradient(to right, transparent, var(--surface)); pointer-events: none; }',
     
-    // MODIFIED: Strengthened tab layout, font styling, scaling, and precise border hover transition
     '#dd-portal .dd-tab { font-size: 10px; font-weight: 400; letter-spacing: 0.26em; text-transform: uppercase; color: var(--muted); padding: 22px 24px; cursor: pointer; border-bottom: 3px solid transparent; transition: color 0.25s ease, border-color 0.25s ease; white-space: nowrap; background: none; border-left: none; border-right: none; border-top: none; line-height: 1; margin-bottom: -1px; }',
     '#dd-portal .dd-tab:hover { color: var(--text); border-bottom-color: var(--border); }',
     '#dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 500; }',
     
     '#dd-portal .dd-tab-badge { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; }',
     '#dd-portal .dd-msg-dot { display: inline-block; background: var(--gold); color: var(--bg); font-size: 8px; font-family: Jost, sans-serif; padding: 1px 5px; border-radius: 8px; margin-left: 4px; vertical-align: middle; min-width: 16px; text-align: center; }',
-    '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 900px; width: 100%; margin: 0 auto; }',
+    
+    /* FIX: Centered the workspace, eliminating the right-push bug */
+    '#dd-portal .dd-content { flex: 1; padding: 40px 32px; max-width: 960px; width: 100%; margin: 0 auto; display: block; }',
     '#dd-portal .dd-section-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 300; color: var(--text); margin-bottom: 6px; }',
     '#dd-portal .dd-section-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 32px; }',
     '#dd-portal .dd-welcome-card { border: 1px solid var(--gold); background: var(--gold-dim); padding: 32px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }',
@@ -319,10 +321,10 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '#dd-portal .dd-drive-link { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); text-decoration: none; border: 1px solid var(--gold); padding: 10px 20px; white-space: nowrap; transition: background 0.2s, color 0.2s; }',
     '#dd-portal .dd-drive-link:hover { background: var(--gold); color: var(--bg); }',
     '#dd-portal .dd-drive-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; border: 1px solid var(--border); background: var(--surface); }',
-    '#dd-portal .dd-tab-content { display: none; }',
+    '#dd-portal .dd-tab-content { display: none; width: 100%; }',
     '#dd-portal .dd-tab-content.active { display: block; }',
     '#dd-portal .dd-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
-    '#dd-portal .dd-create-project { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); }',
+    '#dd-portal .dd-create-project { display: none; min-height: 100vh; flex-direction: column; background: var(--bg); width: 100%; }',
     '#dd-portal .dd-create-project.visible { display: flex; }',
     '#dd-portal .dd-create-project-body { flex: 1; padding: 40px 32px; max-width: 860px; width: 100%; margin: 0 auto; }',
     '#dd-portal .dd-create-section { margin-bottom: 32px; }',
@@ -344,7 +346,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     '  #dd-portal .dd-nav-user { display: none; }',
     '  #dd-portal #ddRefreshBtn { display: none; }',
     '  #dd-portal .dd-nav-project-name { display: none !important; }',
-    '  #dd-portal .dd-tabs { padding: 0 8px; }',
+    '  #dd-portal .dd-tabs { padding: 0 8px; justify-content: flex-start; }',
     '  #dd-portal .dd-content { padding: 24px 16px; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
@@ -1171,5 +1173,4 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     }
     this.disabled = false; this.textContent = 'Sign In';
   });
-
-  document.getElementById('ddLoginEmail').addEventListener('
+})();
