@@ -1,4 +1,3 @@
-```javascript
 (function () {
 
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
@@ -1841,5 +1840,3 @@
   }
 
 })();
-
-```
