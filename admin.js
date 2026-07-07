@@ -1,3 +1,4 @@
+```javascript
 (function () {
 
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
@@ -15,9 +16,9 @@
   }
 
   var PIPELINE_STAGES = [
-    { value: 'client_inquiry_made',                  label: 'Client Inquiry Made',                  color: '#8a8680' },
+    { value: 'client_inquiry_made',                 label: 'Client Inquiry Made',                  color: '#8a8680' },
     { value: 'client_qualified',                      label: 'Client Qualified',                      color: '#9e7b50' },
-    { value: 'discovery_call_booked',                 label: 'Discovery Call Booked',                 color: '#9e7b50' },
+    { value: 'discovery_call_booked',                  label: 'Discovery Call Booked',                  color: '#9e7b50' },
     { value: 'discovery_call_completed',              label: 'Discovery Call Completed',              color: '#9e7b50' },
     { value: 'design_proposal_drafting',              label: 'Design Proposal Drafting',              color: '#7a9e8a' },
     { value: 'design_proposal_presented',             label: 'Design Proposal Presented',             color: '#7a9e8a' },
@@ -46,7 +47,6 @@
     { value: 'project_complete',                      label: 'Project Complete',                      color: '#9e7b50' }
   ];
 
-  // Design & Permit Phase Timeline
   var CLIENT_STAGES = [
     { value: 'inquiry_submitted',            label: 'Inquiry Submitted' },
     { value: 'in_progress',                  label: 'In Progress' },
@@ -55,14 +55,13 @@
     { value: 'contract_signed',              label: 'Contract Signed' },
     { value: 'concept_design_phase',         label: 'Concept Design Phase' },
     { value: 'design_review_revisions',      label: 'Design Review & Revisions' },
-    { value: 'construction_document_phase',  label: 'Construction Document Phase' },
+    { value: 'construction_document_phase', label: 'Construction Document Phase' },
     { value: 'permit_submittal',             label: 'Permit Submittal' },
     { value: 'permit_design_revisions',      label: 'Permit Design Revisions' },
     { value: 'permit_approved',              label: 'Permit Approved' },
     { value: 'final_deliverables',           label: 'Final Deliverables' }
   ];
 
-  // Construction Phase Timeline
   var CONSTRUCTION_STAGES = [
     { value: 'not_started',                  label: 'Not Started' },
     { value: 'pre_site_visit',               label: 'Pre Site Visit' },
@@ -77,7 +76,7 @@
 
   var STONE_STAGES = [
     { value: 'discovery_call',        label: 'Discovery Call',         color: '#8a8680' },
-    { value: 'designs_received',      label: 'Designs Received',       color: '#7a9eb8' },
+    { value: 'designs_received',      label: 'Designs Received',        color: '#7a9eb8' },
     { value: 'model_started',         label: '3D Model Started',       color: '#6a8ea8' },
     { value: 'model_completed',       label: '3D Model Completed',     color: '#5a7e98' },
     { value: 'takeoffs_complete',     label: 'Take-offs Complete',     color: '#9e7b50' },
@@ -95,11 +94,11 @@
   var CONTRACT_STAGES = [
     { value: 'not_sent',   label: 'Not Yet Sent',               color: '#8a8680' },
     { value: 'sent',       label: 'Sent — Awaiting Signature',  color: '#9e7b50' },
-    { value: 'signed',     label: 'Signed ✓',                   color: '#6a9e7a' }
+    { value: 'signed',     label: 'Signed ✓',                    color: '#6a9e7a' }
   ];
 
   var PAYMENT_STAGES = [
-    { value: 'not_sent',          label: 'Invoice Not Yet Sent',            color: '#8a8680' },
+    { value: 'not_sent',          label: 'Invoice Not Yet Sent',             color: '#8a8680' },
     { value: 'invoice_sent',      label: 'Invoice Sent — Awaiting Payment', color: '#9e7b50' },
     { value: 'deposit_paid',      label: 'Deposit Paid — Balance Due',      color: '#5a8e9e' },
     { value: 'partially_paid',    label: 'Partially Paid',                  color: '#7a9e8a' },
@@ -130,7 +129,6 @@
     { key: 'site_consultation',     label: 'Site Consultation' }
   ];
 
-  // Client relationship status
   var CLIENT_STATUSES = [
     { value: 'active_client',    label: 'Active Client',        color: '#6a9e7a' },
     { value: 'lead',             label: 'Lead / Not Converted', color: '#9e7b50' },
@@ -138,7 +136,6 @@
     { value: 'archived',         label: 'Archived',             color: '#8a8680' }
   ];
 
-  // Work categories
   var WORK_CATEGORIES = [
     { value: 'design_only',      label: 'Design Only' },
     { value: 'build',            label: 'Build / Construction' },
@@ -168,7 +165,6 @@
     'houseplans': 'Existing House Architectural Plans'
   };
 
-  // Expose globals
   window._PROJECT_TYPES = PROJECT_TYPES;
   window._ALL_SERVICES  = ALL_SERVICES;
 
@@ -440,8 +436,7 @@
 
     // CLIENTS TAB
     '  <div class="da-tab-content active" id="tab-clients">',
-
-    '    <!-- Client subtabs -->',
+    '    ',
     '    <div class="da-client-subtabs">',
     '      <button class="da-client-subtab active" data-status="all">All <span class="da-subtab-count" id="cnt-all"></span></button>',
     '      <button class="da-client-subtab" data-status="active_client">Active <span class="da-subtab-count" id="cnt-active"></span></button>',
@@ -451,7 +446,6 @@
     '      <button class="da-client-subtab" data-status="archived">Archived <span class="da-subtab-count" id="cnt-archived"></span></button>',
     '      <button class="da-client-subtab" data-status="stone_sourcing" style="border-left:1px solid var(--border);margin-left:8px">Stone Sourcing <span class="da-subtab-count" id="cnt-stone"></span></button>',
     '    </div>',
-
     '    <div class="da-toolbar">',
     '      <input class="da-search" type="text" id="daSearch" placeholder="Search by name, email or phone..." />',
     '      <select class="da-filter" id="daFilter">' + filterOptions + '</select>',
@@ -555,7 +549,7 @@
     '    </div>',
     '  </div>',
 
-
+    // ONBOARDING TAB
     '  <div class="da-tab-content" id="tab-checklist">',
     '    <div class="da-checklist-wrap"><div class="da-section-title">Client Onboarding</div><div style="font-size:11px;color:var(--muted);margin:-12px 0 16px;letter-spacing:0.05em">Click any item to mark it received from the client.</div><input class="da-checklist-search" type="text" id="daCheckSearch" placeholder="Search clients..." /><div id="daChecklistWrap"></div></div>',
     '  </div>',
@@ -568,7 +562,7 @@
   ].join('\n');
 
   // ── STATE ─────────────────────────────────────────────────────────
-  var allClients  = [];
+  var allClients   = [];
   var allMessages = [];
   var allChecklists = {};
   var allNotes = {};
@@ -595,7 +589,7 @@
 
   // FIX 6: Debounced search ──────────────────────────────────────────
   var searchTimeout;
-  var activeSubtab = 'all'; // tracks which subtab is active
+  var activeSubtab = 'all';
 
   function applyFilters() {
     var q     = (document.getElementById('daSearch').value || '').toLowerCase();
@@ -605,11 +599,9 @@
       var mq  = !q     || (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q) || (c.company_name||'').toLowerCase().includes(q);
       var ms  = !stage || c.status === stage;
       var mcat = !cCat || c.work_category === cCat;
-      // Subtab filter
       var mst = true;
       var clientStatus = c.client_status || 'lead';
       if (activeSubtab === 'all') {
-        // FEATURE 1: archived AND no-response clients are hidden from the working pipeline
         mst = clientStatus !== 'archived' && clientStatus !== 'no_response';
       } else if (activeSubtab === 'stone_sourcing') {
         mst = c.service_type === 'stone_sourcing';
@@ -629,7 +621,7 @@
     allClients.forEach(function(c) {
       var st = c.client_status || 'lead';
       if (counts[st] !== undefined) counts[st]++;
-      else counts['lead']++; // treat unknown statuses as lead
+      else counts['lead']++;
       if (st !== 'archived' && st !== 'no_response') counts.all++;
       if (c.service_type === 'stone_sourcing') counts.stone_sourcing++;
     });
@@ -646,7 +638,6 @@
   document.getElementById('daFilter').addEventListener('change', applyFilters);
   document.getElementById('daCategoryFilter').addEventListener('change', applyFilters);
 
-  // Subtab click handlers
   document.querySelectorAll('#dd-admin .da-client-subtab').forEach(function(tab) {
     tab.addEventListener('click', function() {
       document.querySelectorAll('#dd-admin .da-client-subtab').forEach(function(t) { t.classList.remove('active'); });
@@ -693,7 +684,7 @@
         document.getElementById('daLoginWrap').style.display = 'none';
         document.getElementById('daDashboard').classList.add('visible');
         loadClients();
-        startAdminRealtime(); // Start live updates
+        startAdminRealtime();
       } else {
         msg.textContent = 'Incorrect password. Please try again.'; msg.className = 'da-login-msg error';
       }
@@ -702,12 +693,12 @@
   });
   document.getElementById('daPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('daLoginBtn').click(); });
   document.getElementById('daLogoutBtn').addEventListener('click', function() {
-    stopAdminRealtime(); // Clean up WebSocket connections
+    stopAdminRealtime();
     try { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); } catch(e) {}
     document.getElementById('daDashboard').classList.remove('visible');
     document.getElementById('daLoginWrap').style.display = 'flex';
   });
-  // Auto-login from session
+
   try {
     var savedToken = localStorage.getItem('dd_admin_token') || sessionStorage.getItem('dd_admin_token');
     if (savedToken) {
@@ -720,7 +711,6 @@
             loadClients();
             startAdminRealtime();
           } else {
-            // Token invalid — clear it and show login
             localStorage.removeItem('dd_admin_token');
             sessionStorage.removeItem('dd_admin_token');
             document.getElementById('daLoginWrap').style.display = 'flex';
@@ -731,7 +721,6 @@
           document.getElementById('daLoginWrap').style.display = 'flex';
         });
     } else {
-      // No saved token — ensure login is visible
       document.getElementById('daLoginWrap').style.display = 'flex';
     }
   } catch(e) {
@@ -745,7 +734,6 @@
       var data = await res.json();
       if (!res.ok) {
         console.error('loadClients API error:', res.status, JSON.stringify(data));
-        // Token may be expired — show login
         if (res.status === 401 || res.status === 403) {
           try { localStorage.removeItem('dd_admin_token'); sessionStorage.removeItem('dd_admin_token'); } catch(e) {}
           document.getElementById('daDashboard').classList.remove('visible');
@@ -789,131 +777,144 @@
   // ── RENDER CARDS ──────────────────────────────────────────────────
   function renderCards(clients) {
     try {
-    var container = document.getElementById('daCardsWrap');
-    if (!container) { console.error('daCardsWrap not found'); return; }
-    var countEl = document.getElementById('daCount');
-    if (countEl) countEl.textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
-    if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients found</div>'; return; }
+      var container = document.getElementById('daCardsWrap');
+      if (!container) { console.error('daCardsWrap not found'); return; }
+      var countEl = document.getElementById('daCount');
+      if (countEl) countEl.textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
+      if (!clients.length) { container.innerHTML = '<div class="da-empty">No clients found</div>'; return; }
 
-    // Group contractors by email
-    var seen = {};
-    var grouped = [];
-    clients.forEach(function(c) {
-      if (c.is_contractor) {
-        if (!seen[c.email]) { seen[c.email] = { lead: c, projects: [] }; grouped.push(seen[c.email]); }
-        seen[c.email].projects.push(c);
-      } else {
-        grouped.push({ lead: c, projects: [] });
-      }
-    });
+      var seen = {};
+      var grouped = [];
+      clients.forEach(function(c) {
+        if (c.is_contractor) {
+          if (!seen[c.email]) { seen[c.email] = { lead: c, projects: [] }; grouped.push(seen[c.email]); }
+          seen[c.email].projects.push(c);
+        } else {
+          grouped.push({ lead: c, projects: [] });
+        }
+      });
 
-    try {
       container.innerHTML = grouped.map(function(g) {
-      var c = g.lead;
-      var isContr = c.is_contractor && g.projects.length > 0;
-      var isStone = c.service_type === 'stone_sourcing';
-      var stage = getPipelineStage(c.status || 'client_inquiry_made');
-      var inv = formatInvestment(c.investment || '');
+        var c = g.lead;
+        var isContr = c.is_contractor && g.projects.length > 0;
+        var isStone = c.service_type === 'stone_sourcing';
+        var stage = getPipelineStage(c.status || 'client_inquiry_made');
+        var inv = formatInvestment(c.investment || '');
 
-      var pOpts = PIPELINE_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
-      var cOpts = CLIENT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.client_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
-      var conOpts = CONSTRUCTION_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.construction_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
-      var contractOpts = CONTRACT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.contract_status === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
-      var paymentOpts = PAYMENT_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.payment_status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
-      var ptOpts = (window._PROJECT_TYPES || []).map(function(t) { return '<option value="' + t.key + '"' + (c.project_type_category === t.key ? ' selected' : '') + '>' + t.label + '</option>'; }).join('');
+        var pOpts = PIPELINE_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
+        var cOpts = CLIENT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.client_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+        var conOpts = CONSTRUCTION_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.construction_stage === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+        var contractOpts = CONTRACT_STAGES.map(function(cs) { return '<option value="' + cs.value + '"' + (c.contract_status === cs.value ? ' selected' : '') + '>' + cs.label + '</option>'; }).join('');
+        var paymentOpts = PAYMENT_STAGES.map(function(ps) { return '<option value="' + ps.value + '"' + (c.payment_status === ps.value ? ' selected' : '') + '>' + ps.label + '</option>'; }).join('');
+        var ptOpts = (window._PROJECT_TYPES || []).map(function(t) { return '<option value="' + t.key + '"' + (c.project_type_category === t.key ? ' selected' : '') + '>' + t.label + '</option>'; }).join('');
 
-      var contractorProjectsHtml = '';
-      if (isContr && g.projects.length > 1) {
-        contractorProjectsHtml = '<div class="da-contractor-projects"><div class="da-contractor-projects-header">All Projects (' + g.projects.length + ')</div>'
-          + g.projects.map(function(p) {
-            var addr = [p.street, p.city, p.state].filter(Boolean).join(', ');
-            var pStage = getPipelineStage(p.status);
-            return '<div class="da-contractor-project-row"><div><div class="da-contractor-project-name">' + s(p.full_name || 'Project') + '</div><div class="da-contractor-project-address">' + s(addr || '—') + '</div></div><div class="da-stage-pill" style="color:' + pStage.color + ';border-color:' + pStage.color + ';background:' + pStage.color + '18;font-size:7px">' + s(pStage.label) + '</div></div>';
-          }).join('')
-          + '</div>';
-      }
+        var contractorProjectsHtml = '';
+        if (isContr && g.projects.length > 1) {
+          contractorProjectsHtml = '<div class="da-contractor-projects"><div class="da-contractor-projects-header">All Projects (' + g.projects.length + ')</div>'
+            + g.projects.map(function(p) {
+              var addr = [p.street, p.city, p.state].filter(Boolean).join(', ');
+              var pStage = getPipelineStage(p.status);
+              return '<div class="da-contractor-project-row"><div><div class="da-contractor-project-name">' + s(p.full_name || 'Project') + '</div><div class="da-contractor-project-address">' + s(addr || '—') + '</div></div><div class="da-stage-pill" style="color:' + pStage.color + ';border-color:' + pStage.color + ';background:' + pStage.color + '18;font-size:7px">' + s(pStage.label) + '</div></div>';
+            }).join('')
+            + '</div>';
+        }
 
-      return '<div class="da-client-card' + (c.client_status === 'archived' || c.client_status === 'no_response' ? ' archived' : '') + '" id="card-' + c.id + '">'
-        + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
-        + '  <div class="da-card-left"><div class="da-card-avatar">' + s(initials(c.full_name)) + '</div>'
-        + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + (function(){ var cs = c.client_status; if(!cs||cs==='active_client') return ''; var csMap={'lead':'<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #9e7b50;color:#9e7b50;background:rgba(158,123,80,0.08);margin-left:6px;vertical-align:middle">Lead</span>','no_response':'<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #c07a6a;color:#c07a6a;background:rgba(192,122,106,0.08);margin-left:6px;vertical-align:middle">No Response</span>','archived':'<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'}; return csMap[cs]||''; })() + '</div>'
-        + '  <div class="da-card-sub">' + s(c.email || '') + (c.phone ? ' · ' + s(c.phone) : '') + (isContr && g.projects.length > 1 ? ' · ' + g.projects.length + ' projects' : '') + '</div></div></div>'
-        + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + s(stage.label) + '</div><div class="da-card-investment">' + s(inv) + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
-        + '</div>'
-        + '<div class="da-card-details" id="det-' + c.id + '">'
-        + '  <div class="da-details-grid">'
-        + '    <div class="da-detail-item"><div class="da-detail-label">Service</div><div class="da-detail-value">' + s(serviceLabel(c.project_type)) + '</div></div>'
-        + '    <div class="da-detail-item"><div class="da-detail-label">Investment</div><div class="da-detail-value">' + s(inv || '—') + '</div></div>'
-        + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + s([c.street, c.city, c.state, c.zip].filter(Boolean).join(', ') || '—') + '</div></div>'
-        + '    <div class="da-detail-item"><div class="da-detail-label">Referral</div><div class="da-detail-value">' + s(c.referral || '—') + '</div></div>'
-        + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + s(c.notes || '—') + '</div></div>'
-        + '  </div>'
-        + '  <div class="da-card-actions" style="border-top:1px solid var(--border)">'
-        + '    <div class="da-section-divider">Edit Contact Info</div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Name</div><input class="da-text-input" id="edit-name-' + c.id + '" type="text" value="' + s(c.full_name || '') + '" placeholder="Full name" /></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Phone</div><input class="da-text-input" id="edit-phone-' + c.id + '" type="text" value="' + s(c.phone || '') + '" placeholder="Phone number" /></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Address</div><input class="da-text-input" id="edit-street-' + c.id + '" type="text" value="' + s(c.street || '') + '" placeholder="Street address" /></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Investment</div><input class="da-text-input" id="edit-investment-' + c.id + '" type="text" value="' + s(c.investment || '') + '" placeholder="e.g. $75,000" /></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Notes</div><input class="da-text-input" id="edit-notes-' + c.id + '" type="text" value="' + s(c.notes || '') + '" placeholder="Internal notes" /></div>'
-        + '    <button class="da-update-btn" onclick="window._saveContactInfo(\'' + c.id + '\')">Save Contact Info</button>'
-        + '  </div>'
-        + contractorProjectsHtml
-        + '  <div class="da-card-actions">'
-        + '    <div class="da-section-divider">Internal Pipeline</div>'
-        + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'status\', \'psel-' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-section-divider">Project Type</div>'
-        + '    <div class="da-action-row"><select class="da-select" id="ptypesel-' + c.id + '"><option value="">Select project type...</option>' + ptOpts + '</select><button class="da-update-btn" id="ptypebtn-' + c.id + '" onclick="window._updateProjType(\'' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-section-divider">Design &amp; Permit Phase</div>'
-        + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-section-divider">Construction Phase <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none">(set to not_started to hide from client)</span></div>'
-        + (c.service_type === 'stone_sourcing'
+        var statusBadgeInline = '';
+        if (c.client_status && c.client_status !== 'active_client') {
+          var csMap = {
+            'lead': '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #9e7b50;color:#9e7b50;background:rgba(158,123,80,0.08);margin-left:6px;vertical-align:middle">Lead</span>',
+            'no_response': '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #c07a6a;color:#c07a6a;background:rgba(192,122,106,0.08);margin-left:6px;vertical-align:middle">No Response</span>',
+            'archived': '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>'
+          };
+          statusBadgeInline = csMap[c.client_status] || '';
+        }
+
+        var constructionOrStoneHtml = (c.service_type === 'stone_sourcing')
           ? '    <div class="da-action-row"><select class="da-select" id="stonesel-' + c.id + '">' + STONE_STAGES.map(function(ss) { return '<option value="' + ss.value + '"' + (c.stone_stage === ss.value ? ' selected' : '') + '>' + ss.label + '</option>'; }).join('') + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'stone_stage\', \'stonesel-' + c.id + '\')">Update</button></div>'
-          : '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>')
-        + '    <div class="da-section-divider">Client Status</div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="no_response"' + (c.client_status==='no_response'?' selected':'') + '>No Response / Ghosted</option><option value="finished"' + (c.client_status==='finished'?' selected':'') + '>Finished</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Contractor</div><select class="da-select" id="contrsel-' + c.id + '"><option value="false"' + (!c.is_contractor?' selected':'') + '>No — Homeowner / Client</option><option value="true"' + (c.is_contractor?' selected':'') + '>Yes — Contractor</option></select><button class="da-update-btn" onclick="window._updateContractor(\'' + c.id + '\', \'contrsel-' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Category</div><select class="da-select" id="catsel-' + c.id + '"><option value="">— Not Set —</option><option value="design_only"' + (c.work_category==='design_only'?' selected':'') + '>Design Only</option><option value="build"' + (c.work_category==='build'?' selected':'') + '>Build / Construction</option><option value="full_service"' + (c.work_category==='full_service'?' selected':'') + '>Full Service</option><option value="consultation"' + (c.work_category==='consultation'?' selected':'') + '>Consultation</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'work_category\', \'catsel-' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Relationship</div><select class="da-select" id="relsel-' + c.id + '"><option value="">— Not Set —</option><option value="owner"' + (c.client_relationship === 'owner' ? ' selected' : '') + '>Owner</option><option value="contractor"' + (c.client_relationship === 'contractor' ? ' selected' : '') + '>Contractor</option><option value="builder"' + (c.client_relationship === 'builder' ? ' selected' : '') + '>Builder</option><option value="designer"' + (c.client_relationship === 'designer' ? ' selected' : '') + '>Designer / Architect</option><option value="property_manager"' + (c.client_relationship === 'property_manager' ? ' selected' : '') + '>Property Manager</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_relationship\', \'relsel-' + c.id + '\')" >Update</button></div>'
-        + '    <div class="da-section-divider">Contract &amp; Payment</div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'contract_status\', \'contractsel-' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'payment_status\', \'paymentsel-' + c.id + '\')">Update</button></div>'
-        + '    <div class="da-section-divider">Client Drive Links</div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Design</div><input class="da-text-input" id="dlink-design-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_design_link || '') + '" /></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Permit</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_permit_link || '') + '" /></div>'
-        + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_construction_link || '') + '" /></div>'
-        + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
-        + '    <div class="da-section-divider">Services</div>'
-        + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
-        + '    <div class="da-section-divider">Admin Notes</div>'
-        + '    <div class="da-notes-log" id="notes-log-' + c.id + '"><div class="da-notes-log-empty">No notes yet</div></div>'
-        + '    <div class="da-notes-new"><textarea class="da-note-textarea" id="note-new-' + c.id + '" placeholder="Write a note..."></textarea><button class="da-update-btn" style="margin-top:8px;width:100%" id="note-add-btn-' + c.id + '" onclick="window._saveNewNote(\'' + c.id + '\')">Add Note</button></div>'
-        + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
-        + '      <a class="da-email-link" href="mailto:' + s(c.email || '') + '">Email Client</a>'
-        + '      <button class="da-email-link" style="cursor:pointer;background:none" id="resend-' + c.id + '" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + s(c.email || '') + '\', \'' + s(c.full_name || '') + '\', this)">Resend Portal Link</button>'
-        + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._openAddProjectForClient(\'' + c.id + '\', \'' + s(c.full_name || '') + '\')">+ Add Project</button>'
-        + '    </div>'
-        + '  </div>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-    } catch(e) { console.error('renderCards HTML error:', e.message, e.stack); container.innerHTML = '<div class="da-empty">Error rendering clients: ' + e.message + '</div>'; }
-    } catch(e) { console.error('renderCards error:', e.message, e.stack); }
+          : '    <div class="da-action-row"><select class="da-select" id="consel-' + c.id + '">' + conOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'construction_stage\', \'consel-' + c.id + '\')">Update</button></div>';
+
+        return '<div class="da-client-card' + (c.client_status === 'archived' || c.client_status === 'no_response' ? ' archived' : '') + '" id="card-' + c.id + '">'
+          + '<div class="da-card-top" onclick="window._toggleCard(\'' + c.id + '\')">'
+          + '  <div class="da-card-left"><div class="da-card-avatar">' + s(initials(c.full_name)) + '</div>'
+          + '  <div><div class="da-card-name">' + s(c.company_name || c.full_name || 'Unknown') + '<span class="da-role-badge ' + (isContr ? 'contractor' : 'client') + '">' + (isContr ? 'Contractor' : 'Client') + '</span>' + (isStone ? '<span style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #7a9eb8;color:#7a9eb8;background:rgba(122,158,184,0.08);margin-left:6px;vertical-align:middle">Stone</span>' : '') + statusBadgeInline + '</div>'
+          + '  <div class="da-card-sub">' + s(c.email || '') + (c.phone ? ' · ' + s(c.phone) : '') + (isContr && g.projects.length > 1 ? ' · ' + g.projects.length + ' projects' : '') + '</div></div></div>'
+          + '  <div class="da-card-right"><div class="da-stage-pill" style="color:' + stage.color + ';border-color:' + stage.color + ';background:' + stage.color + '18">' + s(stage.label) + '</div><div class="da-card-investment">' + s(inv) + '</div><div class="da-card-date">' + formatDate(c.created_at) + '</div><div class="da-expand-icon" id="exp-' + c.id + '">&#9660;</div></div>'
+          + '</div>'
+          + '<div class="da-card-details" id="det-' + c.id + '">'
+          + '  <div class="da-details-grid">'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Service</div><div class="da-detail-value">' + s(serviceLabel(c.project_type)) + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Investment</div><div class="da-detail-value">' + s(inv || '—') + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Address</div><div class="da-detail-value">' + s([c.street, c.city, c.state, c.zip].filter(Boolean).join(', ') || '—') + '</div></div>'
+          + '    <div class="da-detail-item"><div class="da-detail-label">Referral</div><div class="da-detail-value">' + s(c.referral || '—') + '</div></div>'
+          + '    <div class="da-detail-item" style="grid-column:1/-1"><div class="da-detail-label">Notes</div><div class="da-detail-value">' + s(c.notes || '—') + '</div></div>'
+          + '  </div>'
+          + '  <div class="da-card-actions" style="border-top:1px solid var(--border)">'
+          + '    <div class="da-section-divider">Edit Contact Info</div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Name</div><input class="da-text-input" id="edit-name-' + c.id + '" type="text" value="' + s(c.full_name || '') + '" placeholder="Full name" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Phone</div><input class="da-text-input" id="edit-phone-' + c.id + '" type="text" value="' + s(c.phone || '') + '" placeholder="Phone number" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Address</div><input class="da-text-input" id="edit-street-' + c.id + '" type="text" value="' + s(c.street || '') + '" placeholder="Street address" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Investment</div><input class="da-text-input" id="edit-investment-' + c.id + '" type="text" value="' + s(c.investment || '') + '" placeholder="e.g. $75,000" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Notes</div><input class="da-text-input" id="edit-notes-' + c.id + '" type="text" value="' + s(c.notes || '') + '" placeholder="Internal notes" /></div>'
+          + '    <button class="da-update-btn" onclick="window._saveContactInfo(\'' + c.id + '\')">Save Contact Info</button>'
+          + '  </div>'
+          + contractorProjectsHtml
+          + '  <div class="da-card-actions">'
+          + '    <div class="da-section-divider">Internal Pipeline</div>'
+          + '    <div class="da-action-row"><select class="da-select" id="psel-' + c.id + '">' + pOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'status\', \'psel-' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-section-divider">Project Type</div>'
+          + '    <div class="da-action-row"><select class="da-select" id="ptypesel-' + c.id + '"><option value="">Select project type...</option>' + ptOpts + '</select><button class="da-update-btn" id="ptypebtn-' + c.id + '" onclick="window._updateProjType(\'' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-section-divider">Design &amp; Permit Phase</div>'
+          + '    <div class="da-action-row"><select class="da-select" id="csel-' + c.id + '">' + cOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_stage\', \'csel-' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-section-divider">Construction Phase <span style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:none">(set to not_started to hide from client)</span></div>'
+          + constructionOrStoneHtml
+          + '    <div class="da-section-divider">Client Status</div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Lead Status</div><select class="da-select" id="cstatsel-' + c.id + '"><option value="">— Not Set —</option><option value="active_client"' + (c.client_status==='active_client'?' selected':'') + '>Active Client</option><option value="lead"' + (c.client_status==='lead'?' selected':'') + '>Lead / Not Converted</option><option value="no_response"' + (c.client_status==='no_response'?' selected':'') + '>No Response / Ghosted</option><option value="finished"' + (c.client_status==='finished'?' selected':'') + '>Finished</option><option value="archived"' + (c.client_status==='archived'?' selected':'') + '>Archived</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_status\', \'cstatsel-' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Contractor</div><select class="da-select" id="contrsel-' + c.id + '"><option value="false"' + (!c.is_contractor?' selected':'') + '>No — Homeowner / Client</option><option value="true"' + (c.is_contractor?' selected':'') + '>Yes — Contractor</option></select><button class="da-update-btn" onclick="window._updateContractor(\'' + c.id + '\', \'contrsel-' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Category</div><select class="da-select" id="catsel-' + c.id + '"><option value="">— Not Set —</option><option value="design_only"' + (c.work_category==='design_only'?' selected':'') + '>Design Only</option><option value="build"' + (c.work_category==='build'?' selected':'') + '>Build / Construction</option><option value="full_service"' + (c.work_category==='full_service'?' selected':'') + '>Full Service</option><option value="consultation"' + (c.work_category==='consultation'?' selected':'') + '>Consultation</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'work_category\', \'catsel-' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Relationship</div><select class="da-select" id="relsel-' + c.id + '"><option value="">— Not Set —</option><option value="owner"' + (c.client_relationship === 'owner' ? ' selected' : '') + '>Owner</option><option value="contractor"' + (c.client_relationship === 'contractor' ? ' selected' : '') + '>Contractor</option><option value="builder"' + (c.client_relationship === 'builder' ? ' selected' : '') + '>Builder</option><option value="designer"' + (c.client_relationship === 'designer' ? ' selected' : '') + '>Designer / Architect</option><option value="property_manager"' + (c.client_relationship === 'property_manager' ? ' selected' : '') + '>Property Manager</option></select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'client_relationship\', \'relsel-' + c.id + '\')" >Update</button></div>'
+          + '    <div class="da-section-divider">Contract &amp; Payment</div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'contract_status\', \'contractsel-' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'payment_status\', \'paymentsel-' + c.id + '\')">Update</button></div>'
+          + '    <div class="da-section-divider">Client Drive Links</div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Design</div><input class="da-text-input" id="dlink-design-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_design_link || '') + '" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Permit</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_permit_link || '') + '" /></div>'
+          + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_construction_link || '') + '" /></div>'
+          + '    <div class="da-action-row"><button class="da-update-btn" onclick="window._updateDriveLinks(\'' + c.id + '\')">Save Drive Links</button></div>'
+          + '    <div class="da-section-divider">Services</div>'
+          + '    <div class="da-services-wrap" id="services-' + c.id + '"><div style="font-size:11px;color:var(--muted);padding:8px 0">Loading services...</div></div>'
+          + '    <div class="da-section-divider">Admin Notes</div>'
+          + '    <div class="da-notes-log" id="notes-log-' + c.id + '"><div class="da-notes-log-empty">No notes yet</div></div>'
+          + '    <div class="da-notes-new"><textarea class="da-note-textarea" id="note-new-' + c.id + '" placeholder="Write a note..."></textarea><button class="da-update-btn" style="margin-top:8px;width:100%" id="note-add-btn-' + c.id + '" onclick="window._saveNewNote(\'' + c.id + '\')">Add Note</button></div>'
+          + '    <div class="da-action-row" style="margin-top:4px;gap:8px">'
+          + '      <a class="da-email-link" href="mailto:' + s(c.email || '') + '">Email Client</a>'
+          + '      <button class="da-email-link" style="cursor:pointer;background:none" id="resend-' + c.id + '" onclick="window._resendPortalAccess(\'' + c.id + '\', \'' + s(c.email || '') + '\', \'' + s(c.full_name || '') + '\', this)">Resend Portal Link</button>'
+          + '      <button class="da-email-link" style="cursor:pointer;background:none" onclick="window._openAddProjectForClient(\'' + c.id + '\', \'' + s(c.full_name || '') + '\')">+ Add Project</button>'
+          + '    </div>'
+          + '  </div>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    } catch(e) { 
+      console.error('renderCards error:', e.message, e.stack); 
+      var errContainer = document.getElementById('daCardsWrap');
+      if (errContainer) errContainer.innerHTML = '<div class="da-empty">Error rendering clients.</div>';
+    }
   }
 
   // ── TOGGLE CARD ───────────────────────────────────────────────────
   window._toggleCard = function(id) {
     var det = document.getElementById('det-' + id);
     var exp = document.getElementById('exp-' + id);
+    if (!det || !exp) return;
     if (det.classList.contains('visible')) { det.classList.remove('visible'); exp.classList.remove('open'); }
     else { det.classList.add('visible'); exp.classList.add('open'); loadClientServices(id); window._loadNotesLog(id); }
   };
 
-  // ── UPDATE FIELDS (all use direct fetch for reliability) ──────────
+  // ── UPDATE FIELDS ─────────────────────────────────────────────────
   window._updateField = async function(id, field, selectId) {
     var sel = document.getElementById(selectId);
     if (!sel) return;
     var val = sel.value;
-    // Find the Update button — it may not be the direct next sibling if there's a label div
     var row = sel.closest('.da-action-row');
     var btn = row ? row.querySelector('.da-update-btn') : sel.nextElementSibling;
     if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
@@ -921,15 +922,12 @@
       var body = {}; body[field] = val || null;
       var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
       if (!res.ok) {
-        var errText = await res.text();
-        console.error('_updateField error [' + field + ']:', errText);
+        console.error('_updateField error:', await res.text());
         if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
         return;
       }
-      // Update local cache
       var c = allClients.find(function(x) { return x.id === id; });
       if (c) c[field] = val;
-      // Special UI updates per field
       if (field === 'status') {
         var stage = getPipelineStage(val);
         var card = document.getElementById('card-' + id);
@@ -937,12 +935,9 @@
         updateStats();
       }
       if (field === 'client_status') {
-        // Update subtab counts
         updateSubtabCounts();
-        // FEATURE 1: dim card for archived AND no-response
         var card2 = document.getElementById('card-' + id);
         if (card2) { card2.classList.toggle('archived', val === 'archived' || val === 'no_response'); }
-        // Update badge in card name
         var nameDiv = card2 ? card2.querySelector('.da-card-name') : null;
         if (nameDiv) {
           var existingBadge = nameDiv.querySelector('.da-status-badge-inline');
@@ -955,7 +950,6 @@
             nameDiv.insertAdjacentHTML('beforeend', '<span class="da-status-badge-inline" style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 8px;border:1px solid #8a8680;color:#8a8680;background:rgba(138,134,128,0.08);margin-left:6px;vertical-align:middle">Archived</span>');
           }
         }
-        // FEATURE 1: if the client no longer belongs in the current view, fade it out
         var shouldHide = false;
         if (activeSubtab === 'all' && (val === 'archived' || val === 'no_response')) shouldHide = true;
         else if (activeSubtab !== 'all' && activeSubtab !== 'stone_sourcing' && val !== activeSubtab) shouldHide = true;
@@ -967,7 +961,7 @@
       }
       if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2000); }
     } catch(e) {
-      console.error('_updateField exception [' + field + ']:', e);
+      console.error('_updateField exception:', e);
       if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
     }
   };
@@ -981,7 +975,6 @@
       var card = document.getElementById('card-' + id);
       var btn = card ? card.querySelector('[onclick*="_updateDriveLinks"]') : null;
       if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Save Drive Links'; btn.style.background='var(--gold)';} }, 2000); }
-      if (!res.ok) console.error('_updateDriveLinks error:', await res.text());
     } catch(e) { console.error('_updateDriveLinks exception:', e); }
   };
 
@@ -991,11 +984,9 @@
       var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_type_category: val || null }) });
       var btn = document.getElementById('ptypebtn-' + id);
       if (btn) { btn.textContent = res.ok ? 'Saved ✓' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update'; btn.style.background='var(--gold)';} }, 2000); }
-      if (!res.ok) console.error('_updateProjType error:', await res.text());
     } catch(e) { console.error('_updateProjType exception:', e); }
   };
 
-  // Contractor select Update button (was previously unwired)
   window._updateContractor = async function(id, selectId) {
     var sel = document.getElementById(selectId);
     if (!sel) return;
@@ -1020,16 +1011,6 @@
       if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; setTimeout(function() { if(btn){btn.textContent='Update';btn.style.background='var(--gold)';btn.disabled=false;} }, 2500); }
     }
   };
-
-  function flashSaved(selectId) {
-    var sel = document.getElementById(selectId);
-    if (!sel) return;
-    var btn = sel.nextElementSibling;
-    if (!btn || btn.tagName !== 'BUTTON') return;
-    var orig = btn.textContent;
-    btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)';
-    setTimeout(function() { if (btn) { btn.textContent = orig; btn.style.background = 'var(--gold)'; } }, 2000);
-  }
 
   // ── SERVICES ─────────────────────────────────────────────────────
   async function loadClientServices(clientId) {
@@ -1113,8 +1094,7 @@
     if (!toAdd.length) return;
     try {
       for (var i = 0; i < toAdd.length; i++) {
-        var res = await apiFetch('/rest/v1/client_services', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, service_name: toAdd[i].label, service_key: toAdd[i].key, status: 'pending' }) });
-        if (!res.ok) console.error('Add service error:', await res.text());
+        await apiFetch('/rest/v1/client_services', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: clientId, service_name: toAdd[i].label, service_key: toAdd[i].key, status: 'pending' }) });
       }
       if (customInput) customInput.value = '';
       await loadClientServices(clientId);
@@ -1123,8 +1103,7 @@
 
   window._updateServiceStatus = async function(serviceId, status) {
     try {
-      var res = await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) });
-      if (!res.ok) console.error('_updateServiceStatus error:', await res.text());
+      await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: status }) });
     } catch(e) { console.error('_updateServiceStatus:', e); }
   };
 
@@ -1132,7 +1111,6 @@
     try {
       var res = await apiFetch('/rest/v1/client_services?id=eq.' + serviceId, { method: 'DELETE' });
       if (res.ok) await loadClientServices(clientId);
-      else console.error('_removeService error:', await res.text());
     } catch(e) { console.error('_removeService:', e); }
   };
 
@@ -1149,12 +1127,8 @@
         textarea.value = '';
         if (btn) { btn.textContent = 'Note Added!'; btn.style.background = 'var(--success)'; }
         window._loadNotesLog(id);
-      } else {
-        var errText = await res.text();
-        console.error('_saveNewNote error:', res.status, errText);
-        if (btn) { btn.textContent = 'Error — check console'; btn.style.background = 'var(--error)'; }
       }
-    } catch(e) { console.error('_saveNewNote exception:', e); if(btn){btn.textContent='Error';btn.style.background='var(--error)';} }
+    } catch(e) { console.error('_saveNewNote exception:', e); }
     setTimeout(function() { if(btn){btn.textContent='Add Note'; btn.style.background='var(--gold)'; btn.disabled=false;} }, 2500);
   };
 
@@ -1168,7 +1142,6 @@
       log.innerHTML = notes.map(function(n) {
         var d = new Date(n.created_at);
         var dateStr = d.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-        // FIX 4: full XSS sanitization on note content
         return '<div class="da-note-entry"><div class="da-note-entry-meta">' + dateStr + '</div><div class="da-note-entry-text">' + s(n.note) + '</div></div>';
       }).join('');
     } catch(e) { log.innerHTML = '<div class="da-notes-log-empty">Could not load notes</div>'; }
@@ -1196,35 +1169,22 @@
         })
       });
       if (res.ok) {
-        // Update local cache
         var c = allClients.find(function(x) { return x.id === id; });
         if (c) { c.full_name = name; c.phone = phone; c.street = street; c.investment = investment; c.notes = notes; }
-        // Update visible card name + sub
         var cardName = document.querySelector('#card-' + id + ' .da-card-name');
         if (cardName && name) cardName.childNodes[0].textContent = name;
         if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = 'var(--success)'; }
-      } else {
-        var err = await res.text();
-        console.error('_saveContactInfo error:', err);
-        if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; }
       }
-    } catch(e) {
-      console.error('_saveContactInfo exception:', e);
-      if (btn) { btn.textContent = 'Error'; btn.style.background = 'var(--error)'; }
-    }
+    } catch(e) { console.error('_saveContactInfo exception:', e); }
     setTimeout(function() { if(btn){ btn.textContent = 'Save Contact Info'; btn.style.background = 'var(--gold)'; btn.disabled = false; } }, 2500);
   };
-
 
   window._quickStatus = async function(id, currentStatus) {
     var next = { lead: 'active_client', active_client: 'finished', finished: 'archived', archived: 'lead' };
     var newStatus = next[currentStatus] || 'active_client';
     try {
-      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, {
-        method: 'PATCH', headers: { 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ client_status: newStatus })
-      });
-      if (!res.ok) { console.error('_quickStatus error:', await res.text()); return; }
+      var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_status: newStatus }) });
+      if (!res.ok) return;
       var c = allClients.find(function(x) { return x.id === id; });
       if (c) c.client_status = newStatus;
       updateSubtabCounts();
@@ -1251,7 +1211,7 @@
     var newState = !currentState;
     try {
       var res = await apiFetch('/rest/v1/clients?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_contractor: newState }) });
-      if (!res.ok) { console.error('_toggleContractor error:', await res.text()); return; }
+      if (!res.ok) return;
       var c = allClients.find(function(x) { return x.id === id; }); if (c) c.is_contractor = newState;
       var btn = document.getElementById('contractor-btn-' + id);
       if (btn) {
@@ -1267,7 +1227,6 @@
 
   // ── RESEND PORTAL ACCESS ──────────────────────────────────────────
   window._resendPortalAccess = async function(id, email, name, btn) {
-    // Decode HTML entities from escaped strings (fixes mobile payload issue)
     email = (email || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
     name  = (name  || '').replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').trim();
     if (!email) { alert('No email address on file for this client.'); return; }
@@ -1275,11 +1234,7 @@
     try {
       var res = await fetch(SUPABASE_URL + '/functions/v1/invite-client', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'apikey': SUPABASE_KEY
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY, 'apikey': SUPABASE_KEY },
         body: JSON.stringify({ email: email.toLowerCase().trim(), full_name: name })
       });
       var data = await res.json();
@@ -1311,13 +1266,11 @@
       if (res.ok) {
         var newClient = await res.json();
         var newClientId = newClient && newClient[0] ? newClient[0].id : null;
-        // Add services
         if (newClientId && selectedServices.length) {
           for (var si = 0; si < selectedServices.length; si++) {
             await apiFetch('/rest/v1/client_services', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ client_id: newClientId, service_name: selectedServices[si].label, service_key: selectedServices[si].key, status: 'pending' }) }).catch(function(){});
           }
         }
-        // Send welcome email
         if (document.getElementById('acSendEmail').checked && email) {
           try {
             await fetch(SUPABASE_URL + '/functions/v1/invite-client', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY }, body: JSON.stringify({ email: email, full_name: name }) });
@@ -1325,14 +1278,12 @@
           } catch(e) { msg.textContent = 'Client added! (Email send failed)'; }
         } else { msg.textContent = 'Client added successfully!'; }
         msg.className = 'da-modal-msg success';
-        // Reset form
         ['acName','acEmail','acPhone','acCompany','acInvestment','acStreet','acNotes'].forEach(function(fid) { var el = document.getElementById(fid); if (el) el.value = ''; });
         if (document.getElementById('acCustomService')) document.getElementById('acCustomService').value = '';
         document.getElementById('acContractor').checked = false;
         document.getElementById('acReferral').value = '';
         var svcSel = document.getElementById('acServicesSelect');
         if (svcSel) Array.from(svcSel.options).forEach(function(o) { o.selected = false; });
-        // Switch to clients tab then reload
         document.querySelectorAll('#dd-admin .da-tab').forEach(function(t) { t.classList.remove('active'); });
         document.querySelectorAll('#dd-admin .da-tab-content').forEach(function(tc) { tc.classList.remove('active'); });
         document.querySelector('[data-tab="clients"]').classList.add('active');
@@ -1355,7 +1306,6 @@
         return '<option value="' + c.id + '" data-name="' + s(c.full_name || '') + '">' + s(c.full_name || c.email) + '</option>';
       }).join('');
     }
-    // Auto-fill client name when client is selected
     if (sel) {
       sel.onchange = function() {
         var opt = sel.options[sel.selectedIndex];
@@ -1395,7 +1345,6 @@
     var investment  = document.getElementById('apInvestment').value;
     var msg         = document.getElementById('apMsg');
 
-    // Validation — unified required fields
     if (!clientId)  { msg.textContent = 'Please select a client.';         msg.className = 'da-modal-msg error'; return; }
     if (!address)   { msg.textContent = 'Project address is required.';    msg.className = 'da-modal-msg error'; document.getElementById('apAddress').focus(); return; }
     if (!name)      { msg.textContent = 'Project name is required.';       msg.className = 'da-modal-msg error'; document.getElementById('apProjectName').focus(); return; }
@@ -1403,8 +1352,6 @@
 
     var btn = document.getElementById('apSubmit');
     btn.disabled = true; btn.textContent = 'Creating...'; msg.textContent = '';
-
-    // Combine goals + anything into description
     var description = [goals, anything ? 'Additional notes: ' + anything : ''].filter(Boolean).join('\n\n');
 
     try {
@@ -1420,7 +1367,6 @@
           status: 'active'
         })
       });
-      // Also update investment on client record
       if (investment) {
         apiFetch('/rest/v1/clients?id=eq.' + clientId, {
           method: 'PATCH',
@@ -1430,7 +1376,6 @@
       }
       if (res.ok) {
         msg.textContent = 'Project created successfully!'; msg.className = 'da-modal-msg success';
-        // Reset all unified fields
         ['apClientName','apAddress','apProjectName','apAnything','apGoals'].forEach(function(fid) {
           var el = document.getElementById(fid); if (el) el.value = '';
         });
@@ -1439,13 +1384,9 @@
         });
         var inv = document.getElementById('apInvestment'); if (inv) inv.value = '';
         setTimeout(function() { window._hideAddProjectForm(); msg.textContent = ''; loadProjects(); }, 1500);
-      } else {
-        var et = await res.text();
-        msg.textContent = 'Error: ' + et.substring(0,120); msg.className = 'da-modal-msg error';
       }
     } catch(e) {
       msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'da-modal-msg error';
-      console.error('_submitAddProject:', e);
     }
     btn.disabled = false; btn.textContent = 'Create Project';
   };
@@ -1491,7 +1432,7 @@
           + '</div>'
           + '</div>';
       }).join('');
-    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading projects</div>'; console.error('loadProjects:', e); }
+    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading projects</div>'; }
   }
 
   window._toggleProjectCard = function(id) {
@@ -1506,7 +1447,6 @@
     try {
       var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ drive_design_link: design.trim()||null, drive_permit_link: permit.trim()||null, drive_construction_link: cons.trim()||null }) });
       if (btn) { btn.textContent = res.ok ? 'Saved!' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function(){if(btn){btn.textContent='Save Links';btn.style.background='var(--gold)';}},2000); }
-      if (!res.ok) console.error('_saveProjectLinks error:', await res.text());
     } catch(e) { console.error('_saveProjectLinks exception:', e); }
   };
 
@@ -1515,7 +1455,6 @@
     try {
       var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ status: val }) });
       if (btn) { btn.textContent = res.ok ? 'Saved ✓' : 'Error'; btn.style.background = res.ok ? 'var(--success)' : 'var(--error)'; setTimeout(function(){if(btn){btn.textContent='Update';btn.style.background='var(--gold)';} loadProjects();},1500); }
-      if (!res.ok) console.error('_updateProjectStatus error:', await res.text());
     } catch(e) { console.error('_updateProjectStatus:', e); }
   };
 
@@ -1523,11 +1462,11 @@
     if (!confirm('Delete this project? This cannot be undone.')) return;
     try {
       var res = await apiFetch('/rest/v1/projects?id=eq.' + id, { method: 'DELETE' });
-      if (res.ok) loadProjects(); else console.error('_deleteProject error:', await res.text());
+      if (res.ok) loadProjects();
     } catch(e) { console.error('_deleteProject:', e); }
   };
 
-  // ── CHECKLIST TAB (FEATURE 2: click to toggle documents received) ──
+  // ── CHECKLIST TAB ──────────────────────────────────────────────────
   async function loadAllChecklists() {
     try {
       var results = await Promise.all([apiFetch('/rest/v1/checklist_items?select=*'), apiFetch('/rest/v1/client_notes?select=*')]);
@@ -1568,14 +1507,12 @@
     var cc = allChecklists[clientId] = allChecklists[clientId] || {};
     var newVal = !cc[itemKey];
 
-    // Optimistic UI
     var dot  = rowEl.querySelector('.da-check-dot');
     var mark = rowEl.querySelector('.da-check-done-mark');
     if (dot)  dot.classList.toggle('done', newVal);
     if (mark) mark.style.display = newVal ? 'inline' : 'none';
 
     try {
-      // UPSERT on (client_id, item_key) — requires the unique constraint from the patch SQL
       var res = await apiFetch('/rest/v1/checklist_items?on_conflict=client_id,item_key', {
         method: 'POST',
         headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
@@ -1590,7 +1527,6 @@
       showAdminToast(newVal ? 'Marked received \u2713' : 'Marked not received');
     } catch(e) {
       console.error('_adminToggleCheck:', e);
-      // Roll back optimistic UI so it never lies about what saved
       if (dot)  dot.classList.toggle('done', !newVal);
       if (mark) mark.style.display = !newVal ? 'inline' : 'none';
       showAdminToast('Error saving — see console');
@@ -1599,7 +1535,6 @@
 
   window._toggleClientChecklist = function(id) { var b = document.getElementById('client-checklist-' + id); if (b) b.classList.toggle('visible'); };
 
-  // FIX 6: Debounced checklist search
   var checkSearchTimeout;
   document.getElementById('daCheckSearch').addEventListener('input', function() {
     var q = this.value.toLowerCase();
@@ -1646,7 +1581,6 @@
     try {
       var res = await apiFetch('/rest/v1/messages', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ project_id: projectId||null, client_id: clientId||null, sender: 'daydream_team', content: content, is_read: true }) });
       if (res.ok) { textarea.value = ''; await loadMessages(); }
-      else console.error('_sendReply error:', await res.text());
     } catch(e) { console.error('_sendReply:', e); }
   };
 
@@ -1670,7 +1604,6 @@
   window._showAdminPhotoUpload = function() {
     var form = document.getElementById('daAdminPhotoUploadForm');
     if (form) form.style.display = 'block';
-    // Populate client selector
     var uploadClient = document.getElementById('daPhotoUploadClient');
     if (uploadClient && allClients.length && uploadClient.options.length <= 1) {
       uploadClient.innerHTML = '<option value="">Select client...</option>' + allClients.map(function(c) {
@@ -1678,7 +1611,6 @@
       }).join('');
     }
     populatePhotoClientFilter();
-    // Default visit date to today
     var dateInput = document.getElementById('daPhotoVisitDate');
     if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
   };
@@ -1686,8 +1618,6 @@
   window._hideAdminPhotoUpload = function() {
     var form = document.getElementById('daAdminPhotoUploadForm');
     if (form) form.style.display = 'none';
-    var msg = document.getElementById('daPhotoMsg');
-    if (msg) msg.textContent = '';
   };
 
   window._submitAdminPhotos = async function() {
@@ -1708,7 +1638,6 @@
     var clientName = client ? (client.full_name || client.email) : clientId;
     var folderPath = clientName + '/site-photos/' + visitDate + ' Site Visit';
 
-    // Upload all photos in parallel
     var uploadResults = await Promise.all(files.map(async function(file) {
       var safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g, '_');
       var path = folderPath + '/' + Date.now() + '_' + safeName;
@@ -1788,7 +1717,6 @@
       var photos = await res.json() || [];
       if (!photos.length) { container.innerHTML = '<div class="da-empty">No site photos yet. Click + Upload Photos to add some.</div>'; return; }
 
-      // Group by visit date
       var groups = {};
       photos.forEach(function(p) {
         var d = p.visit_date || p.created_at.split('T')[0];
@@ -1812,46 +1740,32 @@
           + datePhotos.map(function(p) {
               var signedUrl = SUPABASE_URL + '/storage/v1/object/public/client-documents/' + p.file_url;
               return '<div style="position:relative;aspect-ratio:1;overflow:hidden;background:var(--surface-2);border:1px solid var(--border)">'
-                + '<img src="' + signedUrl + '" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="window.open(\'' + signedUrl + '\', \'_blank\')" onerror="this.parentNode.innerHTML=\'<div style=\\"display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--muted);\\">No preview</div>\'" />'
+                + '<img src="' + signedUrl + '" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="window.open(\'' + signedUrl + '\', \'_blank\')" onerror="this.parentNode.innerHTML=\'<div style=\\&quot;display:flex;align-items:center;justify-content:center;height:100%;font-size:11px;color:var(--muted);\\&quot;>No preview</div>\'" />'
                 + '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);padding:4px 6px;font-size:9px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + s(p.file_name) + '</div>'
                 + '</div>';
             }).join('')
           + '</div>'
           + '</div>';
       }).join('');
-    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading photos</div>'; console.error('loadAdminPhotos:', e); }
+    } catch(e) { container.innerHTML = '<div class="da-empty">Error loading photos</div>'; }
   }
 
-  // ── ADMIN REALTIME — Live updates when clients act ────────────────
+  // ── ADMIN REALTIME ────────────────────────────────────────────────
   var adminRealtimeChannels = [];
 
   function startAdminRealtime() {
     stopAdminRealtime();
 
-    // ── 1. LIVE NEW MESSAGES from clients ─────────────────────────
-    // Admin sees gold dot and unread count update the moment a client sends a message
-    var msgChannel = new WebSocket(
-      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0'
-    );
-
+    var msgChannel = new WebSocket('wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0');
     msgChannel.onopen = function() {
-      // Subscribe to ALL new messages (admin sees everything)
-      msgChannel.send(JSON.stringify({
-        topic: 'realtime:public:messages',
-        event: 'phx_join',
-        payload: {},
-        ref: '1'
-      }));
+      msgChannel.send(JSON.stringify({ topic: 'realtime:public:messages', event: 'phx_join', payload: {}, ref: '1' }));
     };
-
     msgChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
         if (data.event === 'INSERT' && data.payload && data.payload.record) {
           var msg = data.payload.record;
-          // Only react to client messages, not admin replies
           if (msg.sender === 'daydream_team') return;
-          // Update unread dot on Messages tab
           var msgTab = document.querySelector('#dd-admin [data-tab="messages"]');
           if (msgTab) {
             var dot = msgTab.querySelector('.da-msg-dot');
@@ -1859,104 +1773,62 @@
             var currentCount = parseInt(dot.textContent) || 0;
             dot.textContent = currentCount + 1;
           }
-          // If messages tab is open, reload it live
           var msgsTab = document.getElementById('tab-messages');
-          if (msgsTab && msgsTab.classList.contains('active')) {
-            loadMessages();
-          }
-          // Show admin toast
+          if (msgsTab && msgsTab.classList.contains('active')) { loadMessages(); }
           showAdminToast('New message from client');
         }
       } catch(e) { console.error('Admin realtime messages:', e); }
     };
-
-    msgChannel.onerror = function(e) { console.error('Admin realtime msg error:', e); };
     adminRealtimeChannels.push(msgChannel);
 
-    // ── 2. LIVE NEW CLIENTS from intake form ──────────────────────
-    // Admin sees new leads instantly when someone submits the intake form
-    var clientChannel = new WebSocket(
-      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0'
-    );
-
+    var clientChannel = new WebSocket('wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0');
     clientChannel.onopen = function() {
-      clientChannel.send(JSON.stringify({
-        topic: 'realtime:public:clients',
-        event: 'phx_join',
-        payload: {},
-        ref: '2'
-      }));
+      clientChannel.send(JSON.stringify({ topic: 'realtime:public:clients', event: 'phx_join', payload: {}, ref: '2' }));
     };
-
     clientChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
         if (data.event === 'INSERT' && data.payload && data.payload.record) {
           var newClient = data.payload.record;
-          // Add to local cache
           allClients.unshift(newClient);
           updateStats();
           updateSubtabCounts();
-          // If clients tab is active, re-render
           var clientsTab = document.getElementById('tab-clients');
-          if (clientsTab && clientsTab.classList.contains('active')) {
-            applyFilters();
-          }
+          if (clientsTab && clientsTab.classList.contains('active')) { applyFilters(); }
           showAdminToast('New lead: ' + (newClient.full_name || newClient.email || 'Unknown'));
         }
         if (data.event === 'UPDATE' && data.payload && data.payload.record) {
           var updated = data.payload.record;
-          // Update local cache
           var idx = allClients.findIndex(function(c) { return c.id === updated.id; });
           if (idx > -1) allClients[idx] = Object.assign({}, allClients[idx], updated);
         }
       } catch(e) { console.error('Admin realtime clients:', e); }
     };
-
-    clientChannel.onerror = function(e) { console.error('Admin realtime client error:', e); };
     adminRealtimeChannels.push(clientChannel);
 
-    // ── 3. LIVE NEW PROJECTS from client portal ───────────────────
-    var projChannel = new WebSocket(
-      'wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0'
-    );
-
+    var projChannel = new WebSocket('wss://wboqkfqibztjmdwrwsch.supabase.co/realtime/v1/websocket?apikey=' + SUPABASE_KEY + '&vsn=1.0.0');
     projChannel.onopen = function() {
-      projChannel.send(JSON.stringify({
-        topic: 'realtime:public:projects',
-        event: 'phx_join',
-        payload: {},
-        ref: '3'
-      }));
+      projChannel.send(JSON.stringify({ topic: 'realtime:public:projects', event: 'phx_join', payload: {}, ref: '3' }));
     };
-
     projChannel.onmessage = function(event) {
       try {
         var data = JSON.parse(event.data);
         if (data.event === 'INSERT' && data.payload && data.payload.record) {
           var proj = data.payload.record;
-          // If projects tab is active, reload it
           var projTab = document.getElementById('tab-projects');
-          if (projTab && projTab.classList.contains('active')) {
-            loadProjects();
-          }
+          if (projTab && projTab.classList.contains('active')) { loadProjects(); }
           showAdminToast('New project created: ' + (proj.project_name || 'Unnamed'));
         }
       } catch(e) { console.error('Admin realtime projects:', e); }
     };
-
-    projChannel.onerror = function(e) { console.error('Admin realtime proj error:', e); };
     adminRealtimeChannels.push(projChannel);
   }
 
   function stopAdminRealtime() {
-    adminRealtimeChannels.forEach(function(ch) {
-      try { ch.close(); } catch(e) {}
-    });
+    adminRealtimeChannels.forEach(function(ch) { try { ch.close(); } catch(e) {} });
     adminRealtimeChannels = [];
   }
 
-  // Admin toast notification
   function showAdminToast(message) {
     var existing = document.getElementById('daRealtimeToast');
     if (existing) existing.remove();
@@ -1969,3 +1841,5 @@
   }
 
 })();
+
+```
