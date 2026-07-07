@@ -172,6 +172,7 @@
 
     /* Sidebar — desktop only */
     '#dd-portal .dd-sidebar { width: 200px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }',
+    '@media screen and (max-width: 860px) { #dd-portal .dd-sidebar, #dd-portal #ddSidebar { display: none !important; width: 0 !important; overflow: hidden !important; } }',
     '#dd-portal .dd-sidebar-section { font-size: 8px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--muted); padding: 20px 20px 8px; }',
     '#dd-portal .dd-sidebar-link { display: block; width: 100%; background: none; border: none; text-align: left; font-family: Jost, sans-serif; font-size: 11px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 11px 20px; cursor: pointer; transition: color 0.2s, background 0.2s, border-left 0.2s; border-left: 2px solid transparent; line-height: 1; }',
     '#dd-portal .dd-sidebar-link:hover { color: var(--text); background: var(--gold-dim); }',
@@ -951,11 +952,12 @@
     document.getElementById('ddProjectSelector').classList.remove('visible');
     document.getElementById('ddCreateProject').classList.remove('visible');
     document.getElementById('ddDashboard').classList.add('visible');
-    // Start live WebSocket subscriptions
+    // Hide sidebar on mobile via JS as well as CSS
+    var sidebar = document.getElementById('ddSidebar');
+    if (sidebar) sidebar.style.display = window.innerWidth <= 860 ? 'none' : 'flex';
     startRealtime();
     var backBtn = document.getElementById('ddNavBack');
     if (isContractor && backBtn) backBtn.classList.add('visible');
-    // Only show New Project button for contractors
     var dashBtn = document.getElementById('ddDashNewProjectBtn');
     if (dashBtn) dashBtn.style.display = isContractor ? 'block' : 'none';
     var navUser = document.getElementById('ddNavUser');
@@ -967,6 +969,13 @@
       navProject.textContent = currentClient ? (currentClient.full_name || '') : '';
       navProject.classList.add('visible');
     }
+    // Handle resize — show/hide sidebar and tabs dynamically
+    window.addEventListener('resize', function() {
+      var sb = document.getElementById('ddSidebar');
+      var tabs = document.getElementById('ddTabBar');
+      if (sb) sb.style.display = window.innerWidth <= 860 ? 'none' : 'flex';
+      if (tabs) tabs.style.display = window.innerWidth <= 860 ? 'flex' : 'none';
+    }, { passive: true });
   }
 
   function showMsg(el, text, type) { el.textContent = text; el.className = 'dd-msg visible ' + (type || ''); }
