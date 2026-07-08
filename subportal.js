@@ -150,10 +150,12 @@
     '    <div class="dd-login-head"><div class="dd-login-logo">Daydream</div><div class="dd-login-sub">Partner Portal</div></div>',
     '    <div class="dd-login-body">',
     '      <div class="dd-login-title">Partner Sign In</div>',
-    '      <div class="dd-login-text">Enter the email you signed up with and we will send you a secure sign-in link.</div>',
-    '      <div class="dd-input-wrap"><label class="dd-input-label">Email Address</label><input class="dd-input" type="email" id="spEmail" placeholder="you@company.com" /></div>',
-    '      <button class="dd-btn" id="spLoginBtn">Send Sign-In Link</button>',
+    '      <div class="dd-login-text">Sign in with the email and password sent to you when you joined. You can change your password once inside.</div>',
+    '      <div class="dd-input-wrap"><label class="dd-input-label">Email Address</label><input class="dd-input" type="email" id="spEmail" placeholder="you@company.com" autocomplete="username" /></div>',
+    '      <div class="dd-input-wrap"><label class="dd-input-label">Password</label><input class="dd-input" type="password" id="spPassword" placeholder="Your password" autocomplete="current-password" /></div>',
+    '      <button class="dd-btn" id="spLoginBtn">Sign In</button>',
     '      <div class="dd-login-msg" id="spLoginMsg"></div>',
+    '      <div style="text-align:center;margin-top:14px"><button id="spForgotBtn" style="background:none;border:none;color:var(--muted);font-size:11px;letter-spacing:0.05em;cursor:pointer;text-decoration:underline;font-family:Jost,sans-serif">Forgot password? Email me a reset</button></div>',
     '    </div>',
     '  </div>',
     '</div>',
@@ -177,6 +179,16 @@
     '      <div class="dd-sec-desc">Questions about a document or your status? Send us a note here.</div>',
     '      <div class="dd-msg-log" id="spMsgLog"><div class="dd-msg-empty">No messages yet.</div></div>',
     '      <div class="dd-msg-compose"><textarea id="spMsgInput" placeholder="Type your message..."></textarea><button class="dd-msg-send" id="spMsgSend">Send</button></div>',
+    '    </div>',
+
+    '    <div class="dd-msg-section">',
+    '      <div class="dd-sec-title">Account &amp; Password</div>',
+    '      <div class="dd-sec-desc">Signed in as <span id="spAcctEmail"></span>. Set a new password below.</div>',
+    '      <div style="max-width:360px">',
+    '        <div class="dd-input-wrap" style="background:var(--surface)"><label class="dd-input-label">New Password</label><input class="dd-input" type="password" id="spNewPass" placeholder="At least 6 characters" autocomplete="new-password" /></div>',
+    '        <button class="dd-btn" id="spChangePassBtn" style="margin-top:4px">Update Password</button>',
+    '        <div class="dd-login-msg" id="spPassMsg"></div>',
+    '      </div>',
     '    </div>',
     '  </div>',
     '</div>'
@@ -240,39 +252,82 @@
   // ── LOGIN (magic link request) ─────────────────────────────────────
   document.getElementById('spLoginBtn').addEventListener('click', async function() {
     var email = (document.getElementById('spEmail').value || '').trim().toLowerCase();
+    var password = document.getElementById('spPassword').value || '';
     var msg = document.getElementById('spLoginMsg');
-    if (!email) { msg.textContent = 'Please enter your email.'; msg.className = 'dd-login-msg error'; return; }
-    this.disabled = true; this.textContent = 'Sending...'; msg.textContent = '';
+    if (!email || !password) { msg.textContent = 'Please enter your email and password.'; msg.className = 'dd-login-msg error'; return; }
+    this.disabled = true; this.textContent = 'Signing in...'; msg.textContent = '';
     try {
-      // Look up the sub to personalize the invite
-      var subRes = await fetch(SUPABASE_URL + '/rest/v1/subcontractors?contact_email=ilike.' + encodeURIComponent(email) + '&select=company_legal_name,contact_name&limit=1', {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-      });
-      var subs = await subRes.json() || [];
-      var company = subs[0] ? subs[0].company_legal_name : null;
-      var contact = subs[0] ? subs[0].contact_name : null;
-
-      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-subcontractor', {
+      var res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
-        body: JSON.stringify({ email: email, company: company, contact_name: contact })
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email: email, password: password })
       });
-      if (res.ok) {
-        msg.textContent = 'Check your email for your secure sign-in link.'; msg.className = 'dd-login-msg success';
+      var data = await res.json();
+      if (res.ok && data.access_token) {
+        try { localStorage.setItem('dd_sub_token', data.access_token); sessionStorage.setItem('dd_sub_token', data.access_token); } catch(e) {}
+        currentUser = { access_token: data.access_token, email: email, id: (data.user || {}).id };
+        msg.textContent = ''; 
+        await loadSub();
       } else {
-        msg.textContent = 'We could not find that email. Please use the address you signed up with.'; msg.className = 'dd-login-msg error';
+        msg.textContent = 'Incorrect email or password. Please try again.'; msg.className = 'dd-login-msg error';
       }
     } catch(e) {
       msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'dd-login-msg error';
     }
-    this.disabled = false; this.textContent = 'Send Sign-In Link';
+    this.disabled = false; this.textContent = 'Sign In';
   });
-  document.getElementById('spEmail').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('spLoginBtn').click(); });
+  document.getElementById('spPassword').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('spLoginBtn').click(); });
+  document.getElementById('spEmail').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('spPassword').focus(); });
+
+  // Forgot password: re-run the invite function to regenerate + email a new password
+  document.getElementById('spForgotBtn').addEventListener('click', async function() {
+    var email = (document.getElementById('spEmail').value || '').trim().toLowerCase();
+    var msg = document.getElementById('spLoginMsg');
+    if (!email) { msg.textContent = 'Enter your email above first, then click reset.'; msg.className = 'dd-login-msg error'; return; }
+    this.disabled = true; this.textContent = 'Sending...'; msg.textContent = '';
+    try {
+      var subRes = await fetch(SUPABASE_URL + '/rest/v1/subcontractors?contact_email=ilike.' + encodeURIComponent(email) + '&select=company_legal_name,contact_name&limit=1', {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+      var subs = await subRes.json() || [];
+      var res = await fetch(SUPABASE_URL + '/functions/v1/invite-subcontractor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
+        body: JSON.stringify({ email: email, company: subs[0] ? subs[0].company_legal_name : null, contact_name: subs[0] ? subs[0].contact_name : null })
+      });
+      if (res.ok) { msg.textContent = 'A new password has been emailed to you.'; msg.className = 'dd-login-msg success'; }
+      else { msg.textContent = 'We could not find that email. Use the address you signed up with.'; msg.className = 'dd-login-msg error'; }
+    } catch(e) {
+      msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'dd-login-msg error';
+    }
+    this.disabled = false; this.textContent = 'Forgot password? Email me a reset';
+  });
 
   document.getElementById('spSignout').addEventListener('click', function() {
     try { localStorage.removeItem('dd_sub_token'); sessionStorage.removeItem('dd_sub_token'); } catch(e) {}
     currentUser = null; currentSub = null;
     showLogin();
+  });
+
+  document.getElementById('spChangePassBtn').addEventListener('click', async function() {
+    var np = document.getElementById('spNewPass').value || '';
+    var msg = document.getElementById('spPassMsg');
+    if (np.length < 6) { msg.textContent = 'Password must be at least 6 characters.'; msg.className = 'dd-login-msg error'; return; }
+    var token = (currentUser && currentUser.access_token) || localStorage.getItem('dd_sub_token');
+    if (!token) { msg.textContent = 'Please sign in again.'; msg.className = 'dd-login-msg error'; return; }
+    this.disabled = true; this.textContent = 'Updating...'; msg.textContent = '';
+    try {
+      var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ password: np })
+      });
+      if (res.ok) { msg.textContent = 'Password updated.'; msg.className = 'dd-login-msg success'; document.getElementById('spNewPass').value = ''; }
+      else { msg.textContent = 'Could not update password. Try signing out and back in.'; msg.className = 'dd-login-msg error'; }
+    } catch(e) {
+      msg.textContent = 'Something went wrong. Please try again.'; msg.className = 'dd-login-msg error';
+    }
+    this.disabled = false; this.textContent = 'Update Password';
   });
 
   // ── TOKEN HANDLING ─────────────────────────────────────────────────
@@ -358,6 +413,8 @@
 
   function renderDash() {
     document.getElementById('spCompany').textContent = currentSub.dba_name || currentSub.company_legal_name || 'Your Company';
+    var acctEmail = document.getElementById('spAcctEmail');
+    if (acctEmail && currentUser) acctEmail.textContent = currentUser.email;
     document.getElementById('spTrade').textContent = currentSub.primary_trade || '';
     renderStatus();
     showDash();
