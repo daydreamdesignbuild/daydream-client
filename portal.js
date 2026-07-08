@@ -383,8 +383,8 @@
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 860px) {',
     '  #dd-portal .dd-sidebar { display: none !important; }',
-    '  #dd-portal .dd-tabs { display: flex !important; overflow-x: auto; overflow-y: visible; justify-content: flex-start; padding: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; background: var(--surface); border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: sticky; top: 60px; z-index: 50; }',
-    '  #dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
+    '  #dd-portal .dd-nav { display: none !important; }',
+    '  #dd-portal .dd-tabs { display: flex !important; overflow-x: auto; overflow-y: visible; justify-content: flex-start; padding: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; background: var(--surface); border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: relative; z-index: 50; }',
     '  #dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
     '  #dd-portal .dd-tab { flex-shrink: 0; display: block !important; font-family: Jost, sans-serif; font-size: 9px; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); padding: 14px 12px; white-space: nowrap; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.2s, border-color 0.2s; line-height: 1; }',
     '  #dd-portal .dd-tab:hover { color: var(--text); }',
@@ -392,15 +392,7 @@
     '  #dd-portal .dd-dashboard-body { flex-direction: column; }',
     '  #dd-portal .dd-content { padding: 20px 16px; }',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
-    '  #dd-portal .dd-nav { padding: 0 16px; height: 56px; }',
-    '  #dd-portal .dd-nav-user { display: none; }',
     '  #dd-portal #ddRefreshBtn { display: none; }',
-    '  #dd-portal .dd-nav-project-name { display: none !important; }',
-    '  #dd-portal .dd-nav { display: none; }',
-    '  #dd-portal .dd-sidebar { top: 0; height: 100vh; }',
-    '  #dd-portal .dd-section-title { font-size: 22px; }',
-    '  #dd-portal .dd-welcome-card h3 { font-size: 17px; }',
-    '  #dd-portal .dd-welcome-card p { font-size: 13px; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
     '  #dd-portal .dd-drive-item { flex-direction: column; align-items: flex-start; }',
     '  #dd-portal .dd-status-grid { grid-template-columns: 1fr; }',
@@ -421,6 +413,26 @@
   // ── HTML ──────────────────────────────────────────────────────────
   var wrap = document.getElementById('dd-portal');
   if (!wrap) return;
+
+  // On mobile, detect the fixed site header and push the portal below it
+  function applyHeaderOffset() {
+    if (window.innerWidth > 860) {
+      wrap.style.paddingTop = '';
+      return;
+    }
+    var header = document.querySelector('header, #brx-header, .brx-header, [id*="header"], [class*="header"]');
+    var offset = 80; // safe default matching your Bricks header
+    if (header) {
+      var pos = window.getComputedStyle(header).position;
+      if (pos === 'fixed' || pos === 'sticky') {
+        offset = header.getBoundingClientRect().height || header.offsetHeight || 80;
+      }
+    }
+    wrap.style.paddingTop = offset + 'px';
+  }
+
+  applyHeaderOffset();
+  window.addEventListener('resize', applyHeaderOffset);
 
   wrap.innerHTML = [
     '<div id="ddLoading" class="dd-loading">Loading your portal...</div>',
