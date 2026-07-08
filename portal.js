@@ -396,6 +396,7 @@
     '  #dd-portal .dd-orders-content, #dd-portal .dd-new-order-body, #dd-portal .dd-combined-content { max-width: 100%; overflow-x: hidden; }',
     '  #dd-portal .dd-nav { display: none !important; }',
     '  #dd-portal .dd-tabs { display: flex !important; overflow-x: auto; overflow-y: visible; justify-content: flex-start; padding: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; background: var(--surface); border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: sticky; top: var(--dd-header-h, 80px); z-index: 90; }',
+    '  #dd-portal .dd-tabs::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 100vh; background: var(--surface); z-index: -1; }',
     '  #dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
     '  #dd-portal .dd-tab { flex-shrink: 0; display: block !important; font-family: Jost, sans-serif; font-size: 9px; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); padding: 14px 12px; white-space: nowrap; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.2s, border-color 0.2s; line-height: 1; }',
     '  #dd-portal .dd-tab:hover { color: var(--text); }',
