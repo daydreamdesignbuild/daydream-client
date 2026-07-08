@@ -785,7 +785,7 @@
       container.innerHTML = grouped.map(function(g) {
         var c = g.lead;
         var isContr = c.is_contractor && g.projects.length > 0;
-        var isStone = c.service_type === 'stone_sourcing';
+        var isStone = c.service_type === 'stone_sourcing' || c.service_type === 'outdoor_showers' || c.service_type === 'both';
         var stage = getPipelineStage(c.status || 'client_inquiry_made');
         var inv = formatInvestment(c.investment || '');
 
@@ -864,6 +864,7 @@
           + '    <div class="da-action-row"><div class="da-action-label">Contract</div><select class="da-select" id="contractsel-' + c.id + '">' + contractOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'contract_status\', \'contractsel-' + c.id + '\')">Update</button></div>'
           + '    <div class="da-action-row"><div class="da-action-label">Payment</div><select class="da-select" id="paymentsel-' + c.id + '">' + paymentOpts + '</select><button class="da-update-btn" onclick="window._updateField(\'' + c.id + '\', \'payment_status\', \'paymentsel-' + c.id + '\')">Update</button></div>'
           + '    <div class="da-section-divider">Client Drive Links</div>'
+          + (isStone ? '    <div style="font-size:10px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold);padding:8px 12px;margin-bottom:8px;letter-spacing:0.05em">&#9671; Use the <strong>Stone Atelier Drive</strong> for this client\'s folders.</div>' : '')
           + '    <div class="da-action-row"><div class="da-action-label">Design</div><input class="da-text-input" id="dlink-design-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_design_link || '') + '" /></div>'
           + '    <div class="da-action-row"><div class="da-action-label">Permit</div><input class="da-text-input" id="dlink-permit-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_permit_link || '') + '" /></div>'
           + '    <div class="da-action-row"><div class="da-action-label">Construction</div><input class="da-text-input" id="dlink-construction-' + c.id + '" type="text" placeholder="Google Drive link..." value="' + s(c.drive_construction_link || '') + '" /></div>'
