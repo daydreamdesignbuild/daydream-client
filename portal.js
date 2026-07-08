@@ -969,22 +969,10 @@
     var portal = document.getElementById('dd-portal');
     if (!portal) return;
     var nav = document.getElementById('ddNav');
-    var navFound = !!nav;
     var h = nav ? Math.ceil(nav.getBoundingClientRect().bottom) : 80;
     if (!h || h < 80) h = 80;
     portal.style.paddingTop = (h + 12) + 'px';
     portal.style.setProperty('--dd-header-h', h + 'px');
-    // On-screen debug readout (mobile only) — remove once dialed in
-    if (window.innerWidth <= 860) {
-      var dbg = document.getElementById('ddDbg');
-      if (!dbg) {
-        dbg = document.createElement('div');
-        dbg.id = 'ddDbg';
-        dbg.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:99999;background:#9e7b50;color:#fff;font:11px monospace;padding:6px 10px;border-radius:4px;pointer-events:none';
-        document.body.appendChild(dbg);
-      }
-      dbg.textContent = 'ddNav found: ' + navFound + ' | header bottom: ' + h + 'px | pad: ' + (h+12) + 'px';
-    }
   }
   ddSyncHeaderOffset();
   window.addEventListener('resize', ddSyncHeaderOffset, { passive: true });
