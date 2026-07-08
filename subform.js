@@ -177,7 +177,7 @@
     '  <h3>Welcome to the Network</h3>',
     '  <p>Your company has been added to our trade partner list. We have created your secure partner portal where you can upload your W-9, insurance certificates, and other documents when requested.</p>',
     '  <p>Check your email for a secure sign-in link to access your portal.</p>',
-    '  <a href="https://daydreamdesignandbuild.com/vendor-portal/" class="dd-portal-btn">Go to Partner Portal</a>',
+    '  <a href="https://daydreamdesignandbuild.com/partner-portal/" class="dd-portal-btn">Go to Partner Portal</a>',
     '</div>'
   ].join('\n');
 
