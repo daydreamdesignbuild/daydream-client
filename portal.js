@@ -116,10 +116,40 @@
   document.head.appendChild(font);
 
   // ── STYLES ────────────────────────────────────────────────────────
-  // Lock horizontal scroll on the portal page — prevents left/right drift on mobile
+  // Lock horizontal scroll and detect fixed header height
   var pageStyle = document.createElement('style');
   pageStyle.textContent = 'html, body { overflow-x: hidden !important; max-width: 100vw !important; } * { box-sizing: border-box !important; }';
   document.head.appendChild(pageStyle);
+
+  // On mobile, measure the fixed Bricks header and offset the portal below it
+  function ddApplyHeaderOffset() {
+    if (window.innerWidth > 860) {
+      document.getElementById('dd-portal').style.marginTop = '';
+      return;
+    }
+    var maxBottom = 0;
+    var all = document.querySelectorAll('body > *:not(#dd-portal), .brxe-section:first-child > * > *:not(#dd-portal)');
+    // Check all fixed/sticky elements not inside the portal
+    document.querySelectorAll('*').forEach(function(el) {
+      if (el.id === 'dd-portal' || el.closest('#dd-portal')) return;
+      var cs = window.getComputedStyle(el);
+      if (cs.position === 'fixed' && el.getBoundingClientRect().top < 5) {
+        maxBottom = Math.max(maxBottom, el.getBoundingClientRect().height);
+      }
+    });
+    if (maxBottom < 20) maxBottom = 80; // safe fallback
+    var portal = document.getElementById('dd-portal');
+    if (portal) portal.style.marginTop = maxBottom + 'px';
+    console.log('[portal] header offset applied:', maxBottom + 'px');
+  }
+
+  // Run after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ddApplyHeaderOffset);
+  } else {
+    setTimeout(ddApplyHeaderOffset, 100);
+  }
+  window.addEventListener('resize', ddApplyHeaderOffset, { passive: true });
 
   var style = document.createElement('style');
   style.textContent = [
