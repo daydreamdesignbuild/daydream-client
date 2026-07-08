@@ -116,41 +116,6 @@
   document.head.appendChild(font);
 
   // ── STYLES ────────────────────────────────────────────────────────
-  // Lock horizontal scroll and detect fixed header height
-  var pageStyle = document.createElement('style');
-  pageStyle.textContent = 'html, body { overflow-x: hidden !important; max-width: 100vw !important; } * { box-sizing: border-box !important; }';
-  document.head.appendChild(pageStyle);
-
-  // On mobile, measure the fixed Bricks header and offset the portal below it
-  function ddApplyHeaderOffset() {
-    if (window.innerWidth > 860) {
-      document.getElementById('dd-portal').style.marginTop = '';
-      return;
-    }
-    var maxBottom = 0;
-    var all = document.querySelectorAll('body > *:not(#dd-portal), .brxe-section:first-child > * > *:not(#dd-portal)');
-    // Check all fixed/sticky elements not inside the portal
-    document.querySelectorAll('*').forEach(function(el) {
-      if (el.id === 'dd-portal' || el.closest('#dd-portal')) return;
-      var cs = window.getComputedStyle(el);
-      if (cs.position === 'fixed' && el.getBoundingClientRect().top < 5) {
-        maxBottom = Math.max(maxBottom, el.getBoundingClientRect().height);
-      }
-    });
-    if (maxBottom < 20) maxBottom = 80; // safe fallback
-    var portal = document.getElementById('dd-portal');
-    if (portal) portal.style.marginTop = maxBottom + 'px';
-    console.log('[portal] header offset applied:', maxBottom + 'px');
-  }
-
-  // Run after DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ddApplyHeaderOffset);
-  } else {
-    setTimeout(ddApplyHeaderOffset, 100);
-  }
-  window.addEventListener('resize', ddApplyHeaderOffset, { passive: true });
-
   var style = document.createElement('style');
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
@@ -420,11 +385,11 @@
 
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 860px) {',
-    '  #dd-portal { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; }',
-    '  #dd-portal .dd-content, #dd-portal .dd-dashboard, #dd-portal .dd-dashboard-body { overflow-x: hidden !important; max-width: 100% !important; }',
-    '  #dd-portal .dd-status-grid { overflow-x: hidden; }',
-    '  #dd-portal .dd-welcome-card { overflow-x: hidden; max-width: 100%; }',
-    '  #dd-portal table { max-width: 100%; overflow-x: auto; display: block; }',
+    '  #dd-portal { width: 100%; }',
+
+
+
+
     '  #dd-portal .dd-sidebar { display: none !important; }',
     '  #dd-portal .dd-content { max-width: 100%; overflow-x: hidden; }',
     '  #dd-portal .dd-orders-content, #dd-portal .dd-new-order-body, #dd-portal .dd-combined-content { max-width: 100%; overflow-x: hidden; }',
