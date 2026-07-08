@@ -968,9 +968,11 @@
     var portal = document.getElementById('dd-portal');
     if (!portal) return;
     var nav = document.getElementById('ddNav');
-    var h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 80;
+    // Use the nav's BOTTOM edge, not just its height, so anything stacked
+    // above it (e.g. the WP admin bar when logged in) is included too.
+    var h = nav ? Math.ceil(nav.getBoundingClientRect().bottom) : 80;
     if (!h || h < 40) h = 80;
-    portal.style.paddingTop = h + 'px';
+    portal.style.paddingTop = (h + 8) + 'px';
   }
   ddSyncHeaderOffset();
   window.addEventListener('resize', ddSyncHeaderOffset, { passive: true });
