@@ -403,6 +403,7 @@
     '  #dd-portal .dd-tab.active { color: var(--gold); border-bottom-color: var(--gold); }',
     '  #dd-portal .dd-dashboard-body { flex-direction: column; }',
     '  #dd-portal .dd-content { padding: 20px 16px; }',
+    '  #dd-portal .dd-cal-btn { white-space: normal; letter-spacing: 0.2em; padding: 13px 18px; text-align: center; line-height: 1.4; word-break: break-word; }',
     '  #dd-portal .dd-upload-grid { grid-template-columns: 1fr; }',
     '  #dd-portal #ddRefreshBtn { display: none; }',
     '  #dd-portal .dd-welcome-card { flex-direction: column; }',
