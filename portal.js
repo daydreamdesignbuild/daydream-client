@@ -2,6 +2,7 @@
   // Prevent double initialization if script loads twice
   if (window.__ddPortalInit) return;
   window.__ddPortalInit = true;
+  console.log('[dd-portal] build 2026-07-07-A');
 
   var SUPABASE_URL = 'https://wboqkfqibztjmdwrwsch.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU';
@@ -971,8 +972,8 @@
     // Use the nav's BOTTOM edge, not just its height, so anything stacked
     // above it (e.g. the WP admin bar when logged in) is included too.
     var h = nav ? Math.ceil(nav.getBoundingClientRect().bottom) : 80;
-    if (!h || h < 40) h = 80;
-    portal.style.paddingTop = (h + 8) + 'px';
+    if (!h || h < 80) h = 80;
+    portal.style.paddingTop = (h + 12) + 'px';
   }
   ddSyncHeaderOffset();
   window.addEventListener('resize', ddSyncHeaderOffset, { passive: true });
