@@ -116,6 +116,11 @@
   document.head.appendChild(font);
 
   // ── STYLES ────────────────────────────────────────────────────────
+  // Lock horizontal scroll on the portal page — prevents left/right drift on mobile
+  var pageStyle = document.createElement('style');
+  pageStyle.textContent = 'html, body { overflow-x: hidden !important; max-width: 100vw !important; } * { box-sizing: border-box !important; }';
+  document.head.appendChild(pageStyle);
+
   var style = document.createElement('style');
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
@@ -385,7 +390,11 @@
 
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 860px) {',
-    '  #dd-portal { overflow-x: hidden; width: 100%; max-width: 100vw; }',
+    '  #dd-portal { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; }',
+    '  #dd-portal .dd-content, #dd-portal .dd-dashboard, #dd-portal .dd-dashboard-body { overflow-x: hidden !important; max-width: 100% !important; }',
+    '  #dd-portal .dd-status-grid { overflow-x: hidden; }',
+    '  #dd-portal .dd-welcome-card { overflow-x: hidden; max-width: 100%; }',
+    '  #dd-portal table { max-width: 100%; overflow-x: auto; display: block; }',
     '  #dd-portal .dd-sidebar { display: none !important; }',
     '  #dd-portal .dd-content { max-width: 100%; overflow-x: hidden; }',
     '  #dd-portal .dd-orders-content, #dd-portal .dd-new-order-body, #dd-portal .dd-combined-content { max-width: 100%; overflow-x: hidden; }',
