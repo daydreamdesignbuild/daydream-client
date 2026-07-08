@@ -364,6 +364,39 @@
     '#dd-admin .da-msg-reply textarea::placeholder { color: var(--muted); }',
     '#dd-admin .da-reply-btn { background: var(--gold); border: none; color: var(--bg); font-family: Jost, sans-serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; padding: 0 20px; cursor: pointer; }',
     '#dd-admin .da-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; }',
+    // Subcontractor styles
+    '#dd-admin .da-sub-flag { font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase; padding: 2px 7px; border: 1px solid; margin-left: 8px; vertical-align: middle; }',
+    '#dd-admin .da-sub-flag.expired { color: var(--error); border-color: var(--error); }',
+    '#dd-admin .da-sub-flag.expiring { color: var(--gold); border-color: var(--gold); }',
+    '#dd-admin .da-sub-compliance { text-align: right; flex-shrink: 0; }',
+    '#dd-admin .da-sub-pct { font-family: "Cormorant Garamond", serif; font-size: 22px; line-height: 1; }',
+    '#dd-admin .da-sub-pct-label { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }',
+    '#dd-admin .da-sub-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 16px; }',
+    '#dd-admin .da-sub-info { background: var(--surface); padding: 10px 14px; }',
+    '#dd-admin .da-sub-info-label { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }',
+    '#dd-admin .da-sub-info-val { font-size: 13px; color: var(--text); word-break: break-word; }',
+    '#dd-admin .da-sub-notes { font-size: 12px; color: var(--text); line-height: 1.6; padding: 10px 0; border-top: 1px solid var(--border); }',
+    '#dd-admin .da-sub-drive { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }',
+    '#dd-admin .da-sub-drive-btn { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); padding: 8px 16px; text-decoration: none; transition: background 0.2s, color 0.2s; }',
+    '#dd-admin .da-sub-drive-btn:hover { background: var(--gold); color: var(--surface); }',
+    '#dd-admin .da-sub-section-title { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin: 20px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }',
+    '#dd-admin .da-sub-doc { border: 1px solid var(--border); margin-bottom: 8px; background: var(--surface); }',
+    '#dd-admin .da-sub-doc-head { padding: 10px 14px; background: var(--surface-2); }',
+    '#dd-admin .da-sub-doc-name { font-size: 13px; color: var(--text); }',
+    '#dd-admin .da-sub-req { font-size: 7px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); padding: 1px 6px; margin-left: 6px; }',
+    '#dd-admin .da-sub-doc-empty { padding: 10px 14px; font-size: 12px; color: var(--muted); font-style: italic; }',
+    '#dd-admin .da-sub-file { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }',
+    '#dd-admin .da-sub-file-main { flex: 1; min-width: 0; }',
+    '#dd-admin .da-sub-file-name { font-size: 12px; color: var(--gold); text-decoration: none; word-break: break-word; }',
+    '#dd-admin .da-sub-file-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }',
+    '#dd-admin .da-sub-file-meta.expiring { color: var(--gold); }',
+    '#dd-admin .da-sub-file-meta.expired { color: var(--error); }',
+    '#dd-admin .da-sub-status-sel, #dd-admin .da-sub-master-status { font-family: Jost, sans-serif; font-size: 11px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 6px 10px; outline: none; cursor: pointer; }',
+    '#dd-admin .da-sub-actions { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }',
+    '#dd-admin .da-sub-action-label { font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }',
+    '#dd-admin .da-sub-admin-notes { width: 100%; font-family: Jost, sans-serif; font-size: 13px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 10px 12px; outline: none; min-height: 70px; margin: 12px 0 10px; resize: vertical; }',
+    '#dd-admin .da-sub-save-notes { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); background: none; padding: 9px 20px; cursor: pointer; transition: background 0.2s, color 0.2s; }',
+    '#dd-admin .da-sub-save-notes:hover { background: var(--gold); color: var(--surface); }',
     '#dd-admin .da-section-title { font-family: "Cormorant Garamond", serif; font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 20px; }',
     '@keyframes daFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }',
     '#dd-admin .da-mobile-menu .da-tab { text-align: left; padding: 14px 20px; border-bottom: 1px solid var(--border); border-radius: 0; width: 100%; font-size: 9px; letter-spacing: 0.25em; }',
@@ -394,6 +427,20 @@
     '}'
   ].join('\n');
   document.head.appendChild(style);
+
+  // ── Measure site header (#ddNav) and offset the admin panel below it ──
+  function ddAdminHeaderOffset() {
+    var admin = document.getElementById('dd-admin');
+    if (!admin) return;
+    var nav = document.getElementById('ddNav');
+    var h = nav ? Math.ceil(nav.getBoundingClientRect().bottom) : 80;
+    if (!h || h < 80) h = 80;
+    admin.style.paddingTop = h + 'px';
+  }
+  ddAdminHeaderOffset();
+  window.addEventListener('resize', ddAdminHeaderOffset, { passive: true });
+  window.addEventListener('load', ddAdminHeaderOffset, { passive: true });
+  setTimeout(ddAdminHeaderOffset, 400);
 
   // ── BUILD FILTER OPTIONS ──────────────────────────────────────────
   var filterOptions = '<option value="">All Pipeline Stages</option>' + PIPELINE_STAGES.map(function(s) {
@@ -432,6 +479,7 @@
     '    <button class="da-tab" data-tab="checklist">Onboarding</button>',
     '    <button class="da-tab" data-tab="site-photos">Job Site Photos</button>',
     '    <button class="da-tab" data-tab="messages">Messages</button>',
+    '    <button class="da-tab" data-tab="subcontractors">Subcontractors</button>',
     '  </div></div>',
 
     '  <div class="da-tab-content active" id="tab-clients">',
@@ -551,6 +599,21 @@
     '  <div class="da-tab-content" id="tab-messages">',
     '    <div class="da-messages-wrap"><div class="da-section-title">Client Messages</div><div id="daMsgList"></div></div>',
     '  </div>',
+
+    '  <div class="da-tab-content" id="tab-subcontractors">',
+    '    <div class="da-sub-subtabs" id="daSubSubtabs">',
+    '      <button class="da-client-subtab active" data-sub-status="all">All <span class="da-subtab-count" id="scnt-all"></span></button>',
+    '      <button class="da-client-subtab" data-sub-status="needs_review">Needs Review <span class="da-subtab-count" id="scnt-review"></span></button>',
+    '      <button class="da-client-subtab" data-sub-status="compliant">Compliant <span class="da-subtab-count" id="scnt-compliant"></span></button>',
+    '      <button class="da-client-subtab" data-sub-status="expiring">Expiring Soon <span class="da-subtab-count" id="scnt-expiring"></span></button>',
+    '      <button class="da-client-subtab" data-sub-status="new">New <span class="da-subtab-count" id="scnt-new"></span></button>',
+    '    </div>',
+    '    <div class="da-toolbar">',
+    '      <input class="da-search" type="text" id="daSubSearch" placeholder="Search by company, trade, or contact..." />',
+    '      <div class="da-count" id="daSubCount"></div>',
+    '    </div>',
+    '    <div class="da-cards-wrap" id="daSubCardsWrap"></div>',
+    '  </div>',
     '</div>'
   ].join('\n');
 
@@ -559,6 +622,9 @@
   var allMessages = [];
   var allChecklists = {};
   var allNotes = {};
+  var allSubs = [];
+  var allSubDocs = {};
+  var subSubtabStatus = 'all';
 
   // ── API ───────────────────────────────────────────────────────────
   function getAdminToken() {
@@ -654,6 +720,7 @@
         apiFetch('/rest/v1/messages?sender=neq.daydream_team&is_read=eq.false', { method: 'PATCH', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ is_read: true }) }).catch(function() {});
         var dot = tab.querySelector('.da-msg-dot'); if (dot) dot.remove();
       }
+      if (tab.dataset.tab === 'subcontractors') loadSubcontractors();
     });
   });
 
@@ -1832,5 +1899,259 @@
     document.body.appendChild(toast);
     setTimeout(function() { if (toast.parentNode) toast.remove(); }, 4000);
   }
+
+
+  // ══════════════════════════════════════════════════════════════════
+  // SUBCONTRACTORS
+  // ══════════════════════════════════════════════════════════════════
+  var SUB_DOC_TYPES = [
+    { key: 'w9', label: 'W-9 Form', required: true },
+    { key: 'business_license', label: 'Business License', required: false },
+    { key: 'general_liability', label: 'General Liability', required: true, ai: true },
+    { key: 'workers_comp', label: "Workers' Comp", required: true },
+    { key: 'professional_liability', label: 'Professional Liability', required: false },
+    { key: 'auto', label: 'Commercial Auto', required: false },
+    { key: 'bond', label: 'Bond', required: false },
+    { key: 'subcontractor_agreement', label: 'Subcontractor Agreement', required: true },
+    { key: 'trade_references', label: 'Trade References', required: false },
+    { key: 'other', label: 'Other', required: false }
+  ];
+
+  function subEsc(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+  function subFmtDate(str) {
+    if (!str) return '';
+    try { return new Date(str + (str.length === 10 ? 'T12:00:00' : '')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch(e) { return ''; }
+  }
+  function daysUntil(dateStr) {
+    if (!dateStr) return null;
+    try { return Math.ceil((new Date(dateStr + 'T12:00:00') - new Date()) / 86400000); } catch(e) { return null; }
+  }
+
+  async function loadSubcontractors() {
+    var wrap = document.getElementById('daSubCardsWrap');
+    if (wrap && !allSubs.length) wrap.innerHTML = '<div class="da-empty">Loading subcontractors...</div>';
+    try {
+      var res = await apiFetch('/rest/v1/subcontractors?order=created_at.desc');
+      allSubs = await res.json() || [];
+      // Load all docs in one query
+      var dRes = await apiFetch('/rest/v1/subcontractor_documents?order=created_at.desc');
+      var docs = await dRes.json() || [];
+      allSubDocs = {};
+      docs.forEach(function(d) {
+        if (!allSubDocs[d.subcontractor_id]) allSubDocs[d.subcontractor_id] = [];
+        allSubDocs[d.subcontractor_id].push(d);
+      });
+      renderSubCounts();
+      renderSubcontractors();
+    } catch(e) {
+      console.error('loadSubcontractors:', e);
+      if (wrap) wrap.innerHTML = '<div class="da-empty">Could not load subcontractors.</div>';
+    }
+  }
+
+  function subComplianceInfo(sub) {
+    var docs = allSubDocs[sub.id] || [];
+    var required = SUB_DOC_TYPES.filter(function(d){ return d.required; });
+    var doneReq = required.filter(function(rd) {
+      return docs.some(function(x){ return x.doc_type === rd.key && (x.status === 'submitted' || x.status === 'approved'); });
+    }).length;
+    // Expiration check
+    var expiring = false, expired = false;
+    docs.forEach(function(x) {
+      var du = daysUntil(x.expiration_date);
+      if (du !== null) { if (du < 0) expired = true; else if (du <= 30) expiring = true; }
+    });
+    return { doneReq: doneReq, totalReq: required.length, pct: required.length ? Math.round(doneReq/required.length*100) : 0, expiring: expiring, expired: expired, docCount: docs.length };
+  }
+
+  function renderSubCounts() {
+    var all = allSubs.length;
+    var review = 0, compliant = 0, expiring = 0, newc = 0;
+    allSubs.forEach(function(sub) {
+      var ci = subComplianceInfo(sub);
+      if (sub.status === 'new' || ci.docCount === 0) newc++;
+      if (ci.pct === 100 && !ci.expired) compliant++;
+      else review++;
+      if (ci.expiring || ci.expired) expiring++;
+    });
+    var set = function(id, n) { var el = document.getElementById(id); if (el) el.textContent = n; };
+    set('scnt-all', all); set('scnt-review', review); set('scnt-compliant', compliant); set('scnt-expiring', expiring); set('scnt-new', newc);
+  }
+
+  function subMatchesSubtab(sub) {
+    var ci = subComplianceInfo(sub);
+    if (subSubtabStatus === 'all') return true;
+    if (subSubtabStatus === 'compliant') return ci.pct === 100 && !ci.expired;
+    if (subSubtabStatus === 'needs_review') return !(ci.pct === 100 && !ci.expired);
+    if (subSubtabStatus === 'expiring') return ci.expiring || ci.expired;
+    if (subSubtabStatus === 'new') return sub.status === 'new' || ci.docCount === 0;
+    return true;
+  }
+
+  function renderSubcontractors() {
+    var wrap = document.getElementById('daSubCardsWrap');
+    if (!wrap) return;
+    var search = (document.getElementById('daSubSearch').value || '').toLowerCase();
+    var list = allSubs.filter(function(sub) {
+      if (!subMatchesSubtab(sub)) return false;
+      if (!search) return true;
+      return [sub.company_legal_name, sub.dba_name, sub.primary_trade, sub.contact_name, sub.contact_email].join(' ').toLowerCase().indexOf(search) !== -1;
+    });
+    var cntEl = document.getElementById('daSubCount');
+    if (cntEl) cntEl.textContent = list.length + (list.length === 1 ? ' partner' : ' partners');
+    if (!list.length) { wrap.innerHTML = '<div class="da-empty">No subcontractors match.</div>'; return; }
+
+    wrap.innerHTML = list.map(function(sub) {
+      var ci = subComplianceInfo(sub);
+      var badge = ci.expired ? '<span class="da-sub-flag expired">Expired</span>' : (ci.expiring ? '<span class="da-sub-flag expiring">Expiring</span>' : '');
+      var pctColor = ci.pct === 100 ? 'var(--success)' : (ci.pct > 0 ? 'var(--gold)' : 'var(--muted)');
+      return '<div class="da-card da-sub-card" data-sub-id="' + sub.id + '">'
+        + '<div class="da-card-head" onclick="window._toggleSub(\'' + sub.id + '\')">'
+        + '  <div class="da-card-head-main">'
+        + '    <div class="da-card-name">' + subEsc(sub.dba_name || sub.company_legal_name) + ' ' + badge + '</div>'
+        + '    <div class="da-card-sub">' + subEsc(sub.primary_trade || 'Trade not set') + '  ·  ' + subEsc(sub.contact_name || '') + '</div>'
+        + '  </div>'
+        + '  <div class="da-sub-compliance"><div class="da-sub-pct" style="color:' + pctColor + '">' + ci.pct + '%</div><div class="da-sub-pct-label">' + ci.doneReq + '/' + ci.totalReq + ' required</div></div>'
+        + '</div>'
+        + '<div class="da-card-body" id="sub-body-' + sub.id + '" style="display:none"></div>'
+        + '</div>';
+    }).join('');
+  }
+
+  window._toggleSub = function(id) {
+    var body = document.getElementById('sub-body-' + id);
+    if (!body) return;
+    if (body.style.display === 'block') { body.style.display = 'none'; return; }
+    body.style.display = 'block';
+    renderSubDetail(id, body);
+  };
+
+  function renderSubDetail(id, body) {
+    var sub = allSubs.find(function(x){ return x.id === id; });
+    if (!sub) return;
+    var docs = allSubDocs[id] || [];
+
+    var info = [
+      ['Legal Name', sub.company_legal_name],
+      ['DBA', sub.dba_name],
+      ['Structure', sub.business_structure],
+      ['EIN', sub.ein],
+      ['Years in Business', sub.years_in_business],
+      ['Address', sub.business_address],
+      ['Business Phone', sub.business_phone],
+      ['Website', sub.website],
+      ['Contact', sub.contact_name],
+      ['Title', sub.contact_title],
+      ['Email', sub.contact_email],
+      ['Direct Phone', sub.contact_phone],
+      ['Primary Trade', sub.primary_trade],
+      ['All Trades', sub.trades],
+      ['Service Area', sub.service_area],
+      ['Crew Size', sub.crew_size],
+      ['License', (sub.license_number ? sub.license_number + (sub.license_state ? ' (' + sub.license_state + ')' : '') : '')]
+    ].filter(function(r){ return r[1]; });
+
+    var infoHtml = '<div class="da-sub-info-grid">' + info.map(function(r) {
+      return '<div class="da-sub-info"><div class="da-sub-info-label">' + subEsc(r[0]) + '</div><div class="da-sub-info-val">' + subEsc(String(r[1])) + '</div></div>';
+    }).join('') + '</div>';
+
+    if (sub.trade_references) infoHtml += '<div class="da-sub-notes"><strong>Trade References:</strong> ' + subEsc(sub.trade_references) + '</div>';
+    if (sub.notes) infoHtml += '<div class="da-sub-notes"><strong>Notes:</strong> ' + subEsc(sub.notes) + '</div>';
+
+    // Drive links
+    var driveHtml = '';
+    if (sub.drive_folder_link) {
+      driveHtml = '<div class="da-sub-drive"><a href="' + subEsc(sub.drive_folder_link) + '" target="_blank" class="da-sub-drive-btn">Open Drive Folder</a>'
+        + (sub.drive_insurance_link ? '<a href="' + subEsc(sub.drive_insurance_link) + '" target="_blank" class="da-sub-drive-btn">Insurance</a>' : '')
+        + '</div>';
+    }
+
+    // Documents review
+    var docsHtml = '<div class="da-sub-section-title">Documents</div>';
+    SUB_DOC_TYPES.forEach(function(dt) {
+      var files = docs.filter(function(x){ return x.doc_type === dt.key; });
+      if (!files.length && !dt.required) return; // hide empty optional types
+      docsHtml += '<div class="da-sub-doc">';
+      docsHtml += '<div class="da-sub-doc-head"><span class="da-sub-doc-name">' + subEsc(dt.label) + (dt.required ? ' <span class="da-sub-req">Required</span>' : '') + '</span></div>';
+      if (!files.length) {
+        docsHtml += '<div class="da-sub-doc-empty">Not yet submitted</div>';
+      } else {
+        files.forEach(function(f) {
+          var du = daysUntil(f.expiration_date);
+          var expTxt = f.expiration_date ? ('Expires ' + subFmtDate(f.expiration_date) + (du !== null && du < 0 ? ' (EXPIRED)' : (du !== null && du <= 30 ? ' (' + du + 'd)' : ''))) : '';
+          var expClass = (du !== null && du < 0) ? 'expired' : ((du !== null && du <= 30) ? 'expiring' : '');
+          docsHtml += '<div class="da-sub-file">'
+            + '<div class="da-sub-file-main"><a href="' + subEsc(sub.drive_folder_link || '#') + '" target="_blank" class="da-sub-file-name">' + subEsc(f.file_name || 'Document') + '</a>'
+            + '<div class="da-sub-file-meta ' + expClass + '">' + subFmtDate(f.created_at) + (expTxt ? '  ·  ' + expTxt : '') + (f.additional_insured_confirmed ? '  ·  AI confirmed' : '') + '</div></div>'
+            + '<div class="da-sub-file-actions">'
+            + '<select class="da-sub-status-sel" data-doc="' + f.id + '">'
+            + '<option value="submitted"' + (f.status==='submitted'?' selected':'') + '>Submitted</option>'
+            + '<option value="approved"' + (f.status==='approved'?' selected':'') + '>Approved</option>'
+            + '<option value="rejected"' + (f.status==='rejected'?' selected':'') + '>Rejected</option>'
+            + '<option value="expired"' + (f.status==='expired'?' selected':'') + '>Expired</option>'
+            + '</select>'
+            + '</div></div>';
+        });
+      }
+      docsHtml += '</div>';
+    });
+
+    // Status + actions
+    var actionsHtml = '<div class="da-sub-actions">'
+      + '<label class="da-sub-action-label">Partner Status</label>'
+      + '<select class="da-sub-master-status" data-sub="' + sub.id + '">'
+      + '<option value="new"' + (sub.status==='new'?' selected':'') + '>New</option>'
+      + '<option value="under_review"' + (sub.status==='under_review'?' selected':'') + '>Under Review</option>'
+      + '<option value="approved"' + (sub.status==='approved'?' selected':'') + '>Approved</option>'
+      + '<option value="active"' + (sub.status==='active'?' selected':'') + '>Active</option>'
+      + '<option value="not_approved"' + (sub.status==='not_approved'?' selected':'') + '>Not Approved</option>'
+      + '<option value="archived"' + (sub.status==='archived'?' selected':'') + '>Archived</option>'
+      + '</select>'
+      + '<textarea class="da-sub-admin-notes" data-sub="' + sub.id + '" placeholder="Internal notes about this partner...">' + subEsc(sub.admin_notes || '') + '</textarea>'
+      + '<button class="da-sub-save-notes" data-sub="' + sub.id + '">Save Notes</button>'
+      + '</div>';
+
+    body.innerHTML = infoHtml + driveHtml + docsHtml + actionsHtml;
+
+    // Wire document status changes
+    body.querySelectorAll('.da-sub-status-sel').forEach(function(sel) {
+      sel.addEventListener('change', async function() {
+        await apiFetch('/rest/v1/subcontractor_documents?id=eq.' + sel.dataset.doc, { method:'PATCH', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({ status: sel.value }) });
+        showAdminToast('Document ' + sel.value);
+        await loadSubcontractors();
+      });
+    });
+    // Master status
+    var masterSel = body.querySelector('.da-sub-master-status');
+    if (masterSel) masterSel.addEventListener('change', async function() {
+      await apiFetch('/rest/v1/subcontractors?id=eq.' + masterSel.dataset.sub, { method:'PATCH', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({ status: masterSel.value }) });
+      sub.status = masterSel.value;
+      showAdminToast('Partner status: ' + masterSel.value);
+      renderSubCounts();
+    });
+    // Save notes
+    var saveBtn = body.querySelector('.da-sub-save-notes');
+    if (saveBtn) saveBtn.addEventListener('click', async function() {
+      var ta = body.querySelector('.da-sub-admin-notes');
+      await apiFetch('/rest/v1/subcontractors?id=eq.' + saveBtn.dataset.sub, { method:'PATCH', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({ admin_notes: ta.value }) });
+      sub.admin_notes = ta.value;
+      saveBtn.textContent = 'Saved'; setTimeout(function(){ saveBtn.textContent = 'Save Notes'; }, 1800);
+    });
+  }
+
+  // Sub subtab + search wiring (deferred until elements exist)
+  document.addEventListener('click', function(e) {
+    var t = e.target.closest('[data-sub-status]');
+    if (!t || !document.getElementById('daSubSubtabs') || !document.getElementById('daSubSubtabs').contains(t)) return;
+    document.querySelectorAll('#daSubSubtabs [data-sub-status]').forEach(function(b){ b.classList.remove('active'); });
+    t.classList.add('active');
+    subSubtabStatus = t.dataset.subStatus;
+    renderSubcontractors();
+  });
+  document.addEventListener('input', function(e) {
+    if (e.target && e.target.id === 'daSubSearch') renderSubcontractors();
+  });
 
 })();
