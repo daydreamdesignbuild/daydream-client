@@ -119,7 +119,9 @@
   var style = document.createElement('style');
   style.textContent = [
     '#dd-portal * { box-sizing: border-box; margin: 0; padding: 0; }',
-    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #ddd7ce; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); min-height: 100vh; width: 100%; }',
+    '#dd-portal { --bg: #ede8df; --surface: #faf8f5; --surface-2: #f7f3ed; --border: #ddd7ce; --text: #28231e; --muted: #8a7d73; --gold: #9e7b50; --gold-light: #c4a07a; --gold-dim: rgba(158,123,80,0.10); --error: #c07a6a; --success: #6a9e7a; font-family: Jost, sans-serif; font-weight: 300; background: var(--bg); color: var(--text); width: 100%; max-width: 100%; overflow-x: hidden; }',
+    '#dd-portal * { max-width: 100%; }',
+    '@media (max-width: 860px) { #dd-portal .dd-dashboard, #dd-portal .dd-loading, #dd-portal .dd-login-wrap, #dd-portal .dd-project-selector, #dd-portal .dd-create-project, #dd-portal .dd-orders-home, #dd-portal .dd-new-order-panel, #dd-portal .dd-order-dashboard, #dd-portal .dd-combined-home { min-height: unset; } }',
     '#dd-portal .dd-loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }',
     '#dd-portal .dd-login-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }',
     '#dd-portal .dd-login-wrap.visible { display: flex; animation: ddFadeUp 0.8s ease both; }',
@@ -182,6 +184,7 @@
     /* Content area — fills remaining space */
     '#dd-portal .dd-content { flex: 1; padding: 40px 36px; min-width: 0; }',
     '#dd-portal .dd-nav { background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; position: sticky; top: 0; z-index: 100; }',
+    '@media (max-width: 860px) { #dd-portal .dd-nav { position: relative; top: auto; z-index: auto; } }',
     '#dd-portal .dd-nav-left { display: flex; align-items: center; gap: 16px; min-width: 0; }',
     '#dd-portal .dd-nav-logo { font-family: "Cormorant Garamond", serif; font-size: 22px; font-weight: 400; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; }',
     '#dd-portal .dd-nav-project-name { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 4px 12px; border: 1px solid var(--border); display: none; }',
@@ -382,7 +385,10 @@
 
     '@keyframes ddFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }',
     '@media (max-width: 860px) {',
+    '  #dd-portal { overflow-x: hidden; width: 100%; max-width: 100vw; }',
     '  #dd-portal .dd-sidebar { display: none !important; }',
+    '  #dd-portal .dd-content { max-width: 100%; overflow-x: hidden; }',
+    '  #dd-portal .dd-orders-content, #dd-portal .dd-new-order-body, #dd-portal .dd-combined-content { max-width: 100%; overflow-x: hidden; }',
     '  #dd-portal .dd-nav { display: none !important; }',
     '  #dd-portal .dd-tabs { display: flex !important; overflow-x: auto; overflow-y: visible; justify-content: flex-start; padding: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; background: var(--surface); border-bottom: 1px solid var(--border); width: 100%; flex-shrink: 0; position: relative; z-index: 50; }',
     '  #dd-portal .dd-tabs::-webkit-scrollbar { display: none; }',
@@ -951,7 +957,7 @@
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
-  function showLogin()   { hideLoading(); document.getElementById('ddLoginWrap').classList.add('visible'); }
+  function showLogin()   { hideLoading(); try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) { window.scrollTo(0, 0); } document.getElementById('ddLoginWrap').classList.add('visible'); }
 
   function showProjectSelector() {
     hideLoading();
@@ -1008,6 +1014,8 @@
     });
     var loading = document.getElementById('ddLoading');
     if (loading) loading.style.display = 'none';
+    // Always scroll to top when switching screens on mobile
+    try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) { window.scrollTo(0, 0); }
   }
 
   function isStoneClient() {
