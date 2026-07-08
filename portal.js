@@ -961,9 +961,26 @@
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
+  // Measure the site's fixed header (#ddNav from the Bricks header template)
+  // and pad the portal down by exactly that height. Runs on load + resize.
+  // Only touches #dd-portal's own paddingTop. Nothing global.
+  function ddSyncHeaderOffset() {
+    var portal = document.getElementById('dd-portal');
+    if (!portal) return;
+    var nav = document.getElementById('ddNav');
+    var h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 80;
+    if (!h || h < 40) h = 80;
+    portal.style.paddingTop = h + 'px';
+  }
+  ddSyncHeaderOffset();
+  window.addEventListener('resize', ddSyncHeaderOffset, { passive: true });
+  window.addEventListener('load', ddSyncHeaderOffset, { passive: true });
+  setTimeout(ddSyncHeaderOffset, 400);
+
   function showLogin() {
     hideLoading();
     try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) { window.scrollTo(0, 0); }
+    ddSyncHeaderOffset();
     document.getElementById('ddLoginWrap').classList.add('visible');
   }
 
