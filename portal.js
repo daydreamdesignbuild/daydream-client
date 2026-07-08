@@ -957,7 +957,11 @@
 
   // ── HELPERS ───────────────────────────────────────────────────────
   function hideLoading() { var el = document.getElementById('ddLoading'); if (el) el.style.display = 'none'; }
-  function showLogin()   { hideLoading(); try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) { window.scrollTo(0, 0); } document.getElementById('ddLoginWrap').classList.add('visible'); }
+  function showLogin() {
+    hideLoading();
+    try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch(e) { window.scrollTo(0, 0); }
+    document.getElementById('ddLoginWrap').classList.add('visible');
+  }
 
   function showProjectSelector() {
     hideLoading();
