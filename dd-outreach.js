@@ -151,8 +151,8 @@
     mount.innerHTML = `
       <div id="dd-outreach-login" class="dd-outreach-login">
         <h2>Outreach Control</h2>
-        <input type="email" id="dd-login-email" placeholder="Email">
-        <input type="password" id="dd-login-password" placeholder="Password">
+        <input type="email" id="dd-login-email" placeholder="Email" autocomplete="off">
+        <input type="password" id="dd-login-password" placeholder="Password" autocomplete="new-password">
         <button class="dd-btn-primary" style="width:100%" id="dd-login-btn">Sign in</button>
         <div id="dd-login-error" style="color:#a14b3f; font-size:13px; margin-top:10px;"></div>
       </div>
@@ -174,6 +174,10 @@
       </div>
     `;
 
+    // Scoped lookup - only ever finds elements inside OUR container, immune to
+    // any duplicate ID elsewhere on the WordPress page (a real risk on a live site).
+    const $ = (id) => mount.querySelector("#" + id);
+
     if (!document.getElementById("dd-outreach-toast")) {
       const toast = document.createElement("div");
       toast.id = "dd-outreach-toast";
@@ -190,7 +194,7 @@
     function showTab(tab) {
       mount.querySelectorAll("nav.dd-tabs button").forEach((b) => b.classList.toggle("dd-active", b.dataset.tab === tab));
       mount.querySelectorAll(".dd-tab-panel").forEach((p) => (p.style.display = "none"));
-      document.getElementById("dd-tab-" + tab).style.display = "block";
+      $("dd-tab-" + tab).style.display = "block";
     }
     mount.querySelectorAll("nav.dd-tabs button").forEach((b) => {
       b.addEventListener("click", () => showTab(b.dataset.tab));
@@ -222,8 +226,8 @@
         .eq("outreach_mode", "none")
         .order("created_at", { ascending: false });
 
-      document.getElementById("dd-count-new").textContent = leads?.length ?? 0;
-      const container = document.getElementById("dd-tab-new");
+      $("dd-count-new").textContent = leads?.length ?? 0;
+      const container = $("dd-tab-new");
 
       if (!leads || leads.length === 0) {
         container.innerHTML = `<div class="dd-empty">No unassigned leads. New contacts you import will show up here — nothing sends until you choose single or funnel.</div>`;
@@ -263,7 +267,7 @@
           const mode = btn.dataset.action;
           btn.disabled = true;
           btn.textContent = "Generating draft...";
-          const sendFrom = document.getElementById(`dd-sendfrom-${leadId}`).value;
+          const sendFrom = $(`dd-sendfrom-${leadId}`).value;
           const ok = await requestDraft(leadId, mode, sendFrom);
           if (ok) {
             toast(mode === "single" ? "Draft ready for review" : "Funnel started — first draft ready for review");
@@ -291,8 +295,8 @@
         .eq("status", "pending_review")
         .order("created_at", { ascending: true });
 
-      document.getElementById("dd-count-review").textContent = drafts?.length ?? 0;
-      const container = document.getElementById("dd-tab-review");
+      $("dd-count-review").textContent = drafts?.length ?? 0;
+      const container = $("dd-tab-review");
 
       if (!drafts || drafts.length === 0) {
         container.innerHTML = `<div class="dd-empty">Nothing waiting on you right now.</div>`;
@@ -328,8 +332,8 @@
         btn.addEventListener("click", async () => {
           btn.disabled = true;
           const draftId = btn.dataset.id;
-          const subject = document.getElementById(`dd-subject-${draftId}`).value;
-          const body = document.getElementById(`dd-body-${draftId}`).value;
+          const subject = $(`dd-subject-${draftId}`).value;
+          const body = $(`dd-body-${draftId}`).value;
           await sb
             .from("outreach_drafts")
             .update({ subject, body, status: "approved", approved_at: new Date().toISOString(), edited: true })
@@ -357,8 +361,8 @@
         .eq("funnel_status", "active")
         .order("next_step_due_at", { ascending: true });
 
-      document.getElementById("dd-count-active").textContent = leads?.length ?? 0;
-      const container = document.getElementById("dd-tab-active");
+      $("dd-count-active").textContent = leads?.length ?? 0;
+      const container = $("dd-tab-active");
 
       if (!leads || leads.length === 0) {
         container.innerHTML = `<div class="dd-empty">No active funnels right now.</div>`;
@@ -396,23 +400,32 @@
       });
     }
 
-    document.getElementById("dd-login-btn").addEventListener("click", async () => {
-      const email = document.getElementById("dd-login-email").value;
-      const password = document.getElementById("dd-login-password").value;
+    $("dd-login-btn").addEventListener("click", async () => {
+      const email = $("dd-login-email").value.trim();
+      const password = $("dd-login-password").value;
+
+      // Temporary debug line - safe to leave in, never logs the actual password
+      console.log("[dd-outreach] attempting login with email:", JSON.stringify(email), "| password length:", password.length);
+      const dupeCheck = document.querySelectorAll("#dd-login-email").length;
+      if (dupeCheck > 1) {
+        console.warn(`[dd-outreach] WARNING: found ${dupeCheck} elements with id="dd-login-email" on this page. The Code block may be duplicated.`);
+      }
+
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
-        document.getElementById("dd-login-error").textContent = error.message;
+        $("dd-login-error").textContent = error.message;
+        console.error("[dd-outreach] login failed:", error);
         return;
       }
-      document.getElementById("dd-outreach-login").style.display = "none";
-      document.getElementById("dd-outreach-shell").style.display = "block";
+      $("dd-outreach-login").style.display = "none";
+      $("dd-outreach-shell").style.display = "block";
       loadAll();
     });
 
     const { data: sessionData } = await sb.auth.getSession();
     if (sessionData.session) {
-      document.getElementById("dd-outreach-login").style.display = "none";
-      document.getElementById("dd-outreach-shell").style.display = "block";
+      $("dd-outreach-login").style.display = "none";
+      $("dd-outreach-shell").style.display = "block";
       loadAll();
     }
   }
