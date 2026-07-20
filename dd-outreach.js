@@ -34,6 +34,9 @@
         font-size: 15px;
         color: var(--dd-charcoal);
         background: var(--dd-off-white);
+        display: block;
+        min-height: 85vh;
+        padding-bottom: 60px;
       }
       #${MOUNT_ID} * { box-sizing: border-box; }
       #${MOUNT_ID} h1, #${MOUNT_ID} h2, #${MOUNT_ID} h3 {
