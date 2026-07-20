@@ -111,7 +111,7 @@
       const s = document.createElement("script");
       s.src = src;
       s.onload = resolve;
-      s.onerror = reject;
+      s.onerror = () => reject(new Error(`Failed to load script: ${src}`));
       document.head.appendChild(s);
     });
   }
@@ -129,12 +129,23 @@
     const mount = document.getElementById(MOUNT_ID);
     if (!mount) return; // not on this page
 
-    injectStyles();
-    ensureFonts();
+    try {
+      injectStyles();
+      ensureFonts();
 
-    if (!window.supabase) {
-      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js");
+      if (!window.supabase) {
+        await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+      }
+      await mountApp(mount);
+    } catch (err) {
+      mount.innerHTML = `<div style="padding:40px; text-align:center; color:#a14b3f; font-family:sans-serif;">
+        Outreach Control failed to load: ${err.message || err}
+      </div>`;
+      console.error("dd-outreach init failed:", err);
     }
+  }
+
+  async function mountApp(mount) {
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     mount.innerHTML = `
