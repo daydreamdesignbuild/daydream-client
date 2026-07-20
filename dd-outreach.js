@@ -36,6 +36,7 @@
         background: var(--dd-off-white);
         display: block;
         min-height: 85vh;
+        padding-top: 120px;
         padding-bottom: 60px;
       }
       #${MOUNT_ID} * { box-sizing: border-box; }
