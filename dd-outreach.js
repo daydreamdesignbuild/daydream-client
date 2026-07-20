@@ -14,6 +14,7 @@
   const MOUNT_ID = "dd-outreach-app";
   const SUPABASE_URL = "https://wboqkfqibztjmdwrwsch.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_0Pcs1MVkQt4ILtrN_luJ6Q_9JeR2KNU";
+  const ADMIN_EMAIL = "daydreamdesignandbuild@gmail.com";
 
   function injectStyles() {
     if (document.getElementById("dd-outreach-styles")) return;
@@ -151,8 +152,7 @@
     mount.innerHTML = `
       <div id="dd-outreach-login" class="dd-outreach-login">
         <h2>Outreach Control</h2>
-        <input type="email" id="dd-login-email" placeholder="Email" autocomplete="off">
-        <input type="password" id="dd-login-password" placeholder="Password" autocomplete="new-password">
+        <input type="password" id="dd-login-password" placeholder="Password" autocomplete="off">
         <button class="dd-btn-primary" style="width:100%" id="dd-login-btn">Sign in</button>
         <div id="dd-login-error" style="color:#a14b3f; font-size:13px; margin-top:10px;"></div>
       </div>
@@ -401,17 +401,12 @@
     }
 
     $("dd-login-btn").addEventListener("click", async () => {
-      const email = $("dd-login-email").value.trim();
       const password = $("dd-login-password").value;
 
       // Temporary debug line - safe to leave in, never logs the actual password
-      console.log("[dd-outreach] attempting login with email:", JSON.stringify(email), "| password length:", password.length);
-      const dupeCheck = document.querySelectorAll("#dd-login-email").length;
-      if (dupeCheck > 1) {
-        console.warn(`[dd-outreach] WARNING: found ${dupeCheck} elements with id="dd-login-email" on this page. The Code block may be duplicated.`);
-      }
+      console.log("[dd-outreach] attempting login | password length:", password.length);
 
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await sb.auth.signInWithPassword({ email: ADMIN_EMAIL, password });
       if (error) {
         $("dd-login-error").textContent = error.message;
         console.error("[dd-outreach] login failed:", error);
