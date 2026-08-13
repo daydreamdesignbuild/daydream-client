@@ -677,9 +677,10 @@
   function updateSubtabCounts() {
     var counts = { all: 0, active_client: 0, lead: 0, no_response: 0, finished: 0, archived: 0, stone_sourcing: 0 };
     allClients.forEach(function(c) {
-      var st = c.client_status || 'lead';
-      if (counts[st] !== undefined) counts[st]++;
-      else counts['lead']++;
+      var st = c.client_status;
+      if (st === null || st === undefined || st === '') st = 'lead';
+      if (counts.hasOwnProperty(st)) counts[st]++;
+      else counts.lead++;
       if (st !== 'archived' && st !== 'no_response') counts.all++;
       if (c.service_type === 'stone_sourcing') counts.stone_sourcing++;
     });
@@ -688,6 +689,16 @@
       var el = document.getElementById('cnt-' + (keyMap[key] || key));
       if (el) el.textContent = counts[key] || '';
     });
+    // TEMP DIAGNOSTIC - open browser console (F12) and read the [DD DIAG] line.
+    // Delete this try block once your counts make sense.
+    try {
+      var breakdown = {};
+      allClients.forEach(function(c) {
+        var s = (c.client_status === null || c.client_status === undefined || c.client_status === '') ? '(blank->lead)' : c.client_status;
+        breakdown[s] = (breakdown[s] || 0) + 1;
+      });
+      console.log('[DD DIAG] loaded:', allClients.length, '| status breakdown:', breakdown, '| tab counts:', counts);
+    } catch(e) {}
   }
   document.getElementById('daSearch').addEventListener('input', function() {
     clearTimeout(searchTimeout);
@@ -701,6 +712,11 @@
       document.querySelectorAll('#dd-admin .da-client-subtab').forEach(function(t) { t.classList.remove('active'); });
       tab.classList.add('active');
       activeSubtab = tab.dataset.status;
+      // Clear search + dropdown filters when switching tabs, so a leftover
+      // filter value can never silently empty the list ("All 5 / 0 clients").
+      var srch = document.getElementById('daSearch'); if (srch) srch.value = '';
+      var pf = document.getElementById('daFilter'); if (pf) pf.value = '';
+      var cf = document.getElementById('daCategoryFilter'); if (cf) cf.value = '';
       applyFilters();
     });
   });
